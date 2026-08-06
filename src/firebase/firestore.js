@@ -9,6 +9,9 @@ import {
   getDoc,
   getDocs,
   setDoc,
+  addDoc,
+  updateDoc,
+  deleteDoc,
   query,
   where,
   orderBy,
@@ -105,6 +108,78 @@ export async function saveUserProfile(uid, data) {
   const ref = doc(db, "profiles", uid);
   await setDoc(ref, data, { merge: true });
   return data;
+}
+
+// ---- Reminders ----
+// Stored as a subcollection per user: profiles/{uid}/reminders/{id}
+
+export async function getUserReminders(uid) {
+  if (!uid) return [];
+  try {
+    const snap = await getDocs(collection(db, "profiles", uid, "reminders"));
+    const list = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+    list.sort((a, b) => new Date(a.dueDate) - new Date(b.dueDate));
+    return list;
+  } catch (e) {
+    console.warn("Could not load reminders:", e.message);
+    return [];
+  }
+}
+
+export async function addUserReminder(uid, { title, dueDate, note }) {
+  if (!uid) throw new Error("No signed-in user.");
+  const ref = await addDoc(collection(db, "profiles", uid, "reminders"), {
+    title,
+    dueDate, // stored as "YYYY-MM-DD" string
+    note: note || "",
+    createdAt: new Date().toISOString(),
+  });
+  return ref.id;
+}
+
+export async function deleteUserReminder(uid, reminderId) {
+  if (!uid) throw new Error("No signed-in user.");
+  await deleteDoc(doc(db, "profiles", uid, "reminders", reminderId));
+}
+
+// ---- Documents (Document Locker) ----
+// Stored as a subcollection per user: profiles/{uid}/documents/{id}
+// Firestore holds only metadata; the actual file bytes live in Firebase
+// Storage (see src/firebase/storage.js).
+
+export async function getUserDocuments(uid) {
+  if (!uid) return [];
+  try {
+    const snap = await getDocs(collection(db, "profiles", uid, "documents"));
+    const list = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+    list.sort((a, b) => new Date(b.uploadedAt) - new Date(a.uploadedAt));
+    return list;
+  } catch (e) {
+    console.warn("Could not load documents:", e.message);
+    return [];
+  }
+}
+
+export async function addUserDocument(uid, { name, url, storagePath, fileType }) {
+  if (!uid) throw new Error("No signed-in user.");
+  const ref = await addDoc(collection(db, "profiles", uid, "documents"), {
+    name,
+    url,
+    storagePath,
+    fileType, // "image" | "pdf"
+    uploadedAt: new Date().toISOString(),
+  });
+  return ref.id;
+}
+
+export async function renameUserDocument(uid, documentId, newName) {
+  if (!uid) throw new Error("No signed-in user.");
+  await updateDoc(doc(db, "profiles", uid, "documents", documentId), { name: newName });
+}
+
+export async function deleteUserDocument(uid, documentId) {
+  if (!uid) throw new Error("No signed-in user.");
+  await deleteDoc(doc(db, "profiles", uid, "documents", documentId));
 }
 
 // ---- Search (simple client-side keyword match; swap for Algolia/Meilisearch later) ----

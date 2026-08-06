@@ -11,20 +11,38 @@ journeys, so you can run it end-to-end immediately, then grow the catalog.
 
 ## What's included
 
-- **Home screen** with the two entry points (Journey Mode / Government
+- **Home screen** with the two entry points (Life Events / Government
   Services) plus a global search bar, per the "operating system for Indian
   citizens" design.
 - **Services**: category grid → service list → generic service detail page
   (overview, eligibility, documents, fees, processing time, online/offline
   steps, common mistakes, FAQs, official links).
-- **Journey Mode**: curated checklists that reference services by id.
+- **Life Events** (formerly "Journey Mode"): an open chat screen with
+  tappable suggestion chips for each pre-built journey. Tap a suggestion (or
+  type your own situation, e.g. "I just got married") and it either shows
+  the matching journey's checklist instantly, or asks the AI to point you to
+  the closest matching journey/service -- the AI is grounded only in the
+  journeys/services that actually exist in the app, so it routes you rather
+  than inventing a procedure it can't back up.
 - **Context-aware AI chat** (floating 💬 button) on every service page,
   scoped ONLY to that service's verified content — it won't invent
   procedures. A global, unscoped version lives on the Home screen.
-- **Firebase Auth** (email/password) + **Firestore** as the backend.
+- **Editable Profile screen**: name, age, state, occupation, senior-citizen
+  toggle, edited via a top-right ⋮ menu (Edit Profile / Sign Out), saved to
+  Firestore per user.
+- **Document Locker** (on the Profile screen): upload photos or PDFs of
+  documents you use often, give each one a custom name, rename or delete
+  them later, and reopen/download them anytime via the device browser.
+  Files live in Firebase Storage; only the signed-in owner can see their
+  own documents (once you lock down security rules -- see step 6 below).
+- **Reminders**: add/delete simple due-date reminders (e.g. passport
+  renewal), shown in a list with overdue items flagged. This is manual
+  entry for now -- local push notifications are a natural next step via
+  `expo-notifications`.
+- **Firebase Auth** (email/password) + **Firestore** + **Firebase Storage**
+  as the backend.
 - **Groq** (free tier) as the LLM — no OpenAI/Anthropic billing required to
   get started.
-- Reminders and Profile screens scaffolded as placeholders, ready to extend.
 
 ## What's intentionally NOT included yet (see the caution below)
 
@@ -59,6 +77,14 @@ Unzip this project, open the folder in VS Code, then in the terminal:
 npm install
 ```
 
+Then let Expo double-check the two new packages (`expo-image-picker`,
+`expo-document-picker`, used by the Document Locker) are on the exact
+version your Expo SDK expects:
+
+```bash
+npx expo install expo-image-picker expo-document-picker
+```
+
 ## 3. Set up Firebase
 
 1. Go to https://console.firebase.google.com → **Add project** (free Spark
@@ -70,6 +96,8 @@ npm install
    - **Authentication** → Sign-in method → **Email/Password** → Enable.
    - **Firestore Database** → Create database → start in **test mode**
      (fine for development; lock down rules before any real launch).
+   - **Storage** → Get started → start in **test mode** too (this backs the
+     Document Locker on the Profile screen).
 5. In this project, copy `.env.example` to `.env`:
 
    ```bash
@@ -77,6 +105,33 @@ npm install
    ```
 
    Paste your Firebase values into it.
+
+6. **Lock down security rules before any real users touch this.** Test mode
+   is wide open -- anyone can read/write anything. At minimum, scope
+   Firestore and Storage so users can only touch their own data:
+
+   Firestore rules (Firestore Database → Rules):
+   ```
+   match /profiles/{userId} {
+     allow read, write: if request.auth != null && request.auth.uid == userId;
+     match /{subcollection}/{docId} {
+       allow read, write: if request.auth != null && request.auth.uid == userId;
+     }
+   }
+   match /services/{serviceId} {
+     allow read: if true; // public content
+   }
+   match /journeys/{journeyId} {
+     allow read: if true;
+   }
+   ```
+
+   Storage rules (Storage → Rules):
+   ```
+   match /users/{userId}/{allPaths=**} {
+     allow read, write: if request.auth != null && request.auth.uid == userId;
+   }
+   ```
 
 ## 4. Set up Groq (free AI)
 
@@ -162,7 +217,42 @@ Do not add real-user PII storage (Aadhaar, PAN numbers, etc.) without first
 implementing proper DPDP Act–compliant consent, encryption, and data-handling
 practices — this is a legal requirement, not a nice-to-have.
 
-## 9. Suggested next milestones
+## 9. Troubleshooting notes (fixes already applied in this version)
+
+These were real issues hit during setup on Windows + Expo SDK 54. They're
+already fixed in this version of the project, documented here so you know
+why these files look the way they do if you ever touch them again:
+
+- **`Cannot find module 'babel-preset-expo'`** — it must be an explicit
+  `devDependency`, not just pulled in transitively. Already added, pinned to
+  `~54.0.10` to match Expo SDK 54 (installing the bare latest version, e.g.
+  57.x, causes a `private properties are not supported` syntax error on
+  older Expo Go clients because it compiles JS the runtime can't execute).
+  Always install Expo-related packages with `npx expo install <package>`
+  rather than plain `npm install`, so the compatible version is selected
+  automatically.
+- **`Component auth has not been registered yet`** — Firebase's package
+  doesn't declare a React Native export condition, so Metro's default
+  package-exports resolution (on since Expo SDK 52) loads the wrong build.
+  Fixed via `metro.config.js`, which disables that resolution mode.
+- **`firebase` pinned to exactly `10.7.1`** (no `^`) — newer 10.x builds
+  triggered the same auth registration error independently of the Metro fix
+  above on this setup. If you want to try bumping it later, test thoroughly
+  after any version change.
+- **`Failed to download remote update` / "Something went wrong" in Expo Go`**
+  — almost always phone-can't-reach-PC over LAN. Run `expo start --tunnel`
+  instead of the default LAN mode; if tunnel also fails, check Windows
+  Firewall isn't blocking Node.js on Private networks.
+- **`Fatal process out of memory` / `ENOMEM` during bundling** — Node's
+  default heap size is too small for a ~900+ module bundle on some Windows
+  setups. Set `NODE_OPTIONS=--max-old-space-size=4096` (or higher) in your
+  shell before running `expo start`, and close other memory-heavy apps.
+- **`Changing numColumns on the fly is not supported`** — two different
+  `FlatList`s in `ServicesScreen.js` need distinct `key` props so React
+  treats them as separate instances instead of trying to reconfigure one
+  FlatList's column count. Already fixed.
+
+## 10. Suggested next milestones
 
 1. Replace the 3 sample services with 5-10 real, fully verified ones for
    your state.

@@ -10,6 +10,7 @@ import {
 } from "react-native";
 import { searchServices } from "../firebase/firestore";
 import ChatBox from "../components/ChatBox";
+import { Ionicons } from "@expo/vector-icons";
 
 export default function HomeScreen({ navigation }) {
   const [query, setQuery] = useState("");
@@ -69,7 +70,7 @@ export default function HomeScreen({ navigation }) {
           style={[styles.card, styles.journeyCard]}
           onPress={() => navigation.navigate("Journey")}
         >
-          <Text style={styles.cardIcon}>💬</Text>
+          <Ionicons name="chatbubbles-outline" size={30} color="#0B5FFF" style={styles.cardIcon} />
           <Text style={styles.cardTitle}>Life Events</Text>
           <Text style={styles.cardDesc}>
             Tell us what's happening in your life -- starting a job, buying a
@@ -83,7 +84,7 @@ export default function HomeScreen({ navigation }) {
           style={[styles.card, styles.servicesCard]}
           onPress={() => navigation.navigate("Services")}
         >
-          <Text style={styles.cardIcon}>🏛</Text>
+          <Ionicons name="business-outline" size={30} color="#333" style={styles.cardIcon} />
           <Text style={styles.cardTitle}>Government Services</Text>
           <Text style={styles.cardDesc}>
             Browse every government service organized by department --

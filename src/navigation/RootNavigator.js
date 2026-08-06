@@ -2,7 +2,7 @@ import React from "react";
 import { NavigationContainer } from "@react-navigation/native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
-import { Text } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
 
 import HomeScreen from "../screens/HomeScreen";
 import ServicesScreen from "../screens/ServicesScreen";
@@ -62,11 +62,11 @@ function JourneyStackScreen() {
 }
 
 const ICONS = {
-  Home: "🏠",
-  Journey: "🧭",
-  Services: "🏛",
-  Reminders: "🔔",
-  Profile: "👤",
+  Home: { active: "home", inactive: "home-outline" },
+  Journey: { active: "chatbubbles", inactive: "chatbubbles-outline" },
+  Services: { active: "business", inactive: "business-outline" },
+  Reminders: { active: "notifications", inactive: "notifications-outline" },
+  Profile: { active: "person-circle", inactive: "person-circle-outline" },
 };
 
 export default function RootNavigator() {
@@ -75,8 +75,11 @@ export default function RootNavigator() {
       <Tab.Navigator
         screenOptions={({ route }) => ({
           headerShown: false,
-          tabBarIcon: () => <Text style={{ fontSize: 18 }}>{ICONS[route.name]}</Text>,
+          tabBarIcon: ({ focused, color }) => (
+            <Ionicons name={focused ? ICONS[route.name].active : ICONS[route.name].inactive} size={22} color={color} />
+          ),
           tabBarActiveTintColor: "#0B5FFF",
+          tabBarInactiveTintColor: "#8E8E93",
         })}
       >
         <Tab.Screen name="Home" component={HomeStackScreen} />

@@ -108,7 +108,6 @@ export default function LifeEventsScreen({ navigation }) {
       behavior={Platform.OS === "ios" ? "padding" : undefined}
     >
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>Life Events</Text>
         <Text style={styles.headerSubtitle}>What's happening in your life right now?</Text>
       </View>
 
@@ -123,11 +122,12 @@ export default function LifeEventsScreen({ navigation }) {
             data={journeys}
             keyExtractor={(item) => item.id}
             horizontal
+            style={styles.suggestionsList}
             showsHorizontalScrollIndicator={false}
             contentContainerStyle={styles.suggestionRow}
             renderItem={({ item }) => (
               <TouchableOpacity style={styles.suggestionChip} onPress={() => handleSend(item.title)}>
-                <Text style={styles.suggestionChipText}>
+                <Text style={styles.suggestionChipText} numberOfLines={1}>
                   {item.icon} {item.title}
                 </Text>
               </TouchableOpacity>
@@ -189,15 +189,18 @@ const styles = StyleSheet.create({
   header: { padding: 20, paddingBottom: 12, borderBottomWidth: 1, borderBottomColor: "#f0f0f0" },
   headerTitle: { fontSize: 22, fontWeight: "700" },
   headerSubtitle: { fontSize: 13, color: "#777", marginTop: 4 },
-  suggestionRow: { paddingHorizontal: 16, paddingVertical: 12, gap: 8 },
+  suggestionsList: { maxHeight: 44, flexGrow: 0 },
+  suggestionRow: { paddingHorizontal: 16, paddingVertical: 6, alignItems: "center" },
   suggestionChip: {
     backgroundColor: "#EAF1FF",
-    borderRadius: 20,
-    paddingHorizontal: 14,
+    borderRadius: 18,
+    paddingHorizontal: 12,
     paddingVertical: 8,
     marginRight: 8,
+    height: 36,
+    justifyContent: "center",
   },
-  suggestionChipText: { color: "#0B5FFF", fontWeight: "600", fontSize: 13 },
+  suggestionChipText: { color: "#0B5FFF", fontWeight: "600", fontSize: 12 },
   bubble: { padding: 12, borderRadius: 12, marginBottom: 10, maxWidth: "85%" },
   userBubble: { backgroundColor: "#0B5FFF", alignSelf: "flex-end" },
   aiBubble: { backgroundColor: "#F1F3F6", alignSelf: "flex-start" },
