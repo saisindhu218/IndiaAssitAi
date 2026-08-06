@@ -1,0 +1,25 @@
+{
+  "expo": {
+    "name": "IndiaAssist AI",
+    "slug": "indiaassist-ai",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "backgroundColor": "#0B5FFF"
+    },
+    "assetBundlePatterns": ["**/*"],
+    "android": {
+      "package": "com.yourname.indiaassistai",
+      "adaptiveIcon": {
+        "backgroundColor": "#0B5FFF"
+      }
+    },
+    "ios": {
+      "bundleIdentifier": "com.yourname.indiaassistai"
+    },
+    "extra": {
+      "eas": {}
+    }
+  }
+}
