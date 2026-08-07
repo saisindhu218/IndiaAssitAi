@@ -5,6 +5,7 @@ import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "./src/firebase/config";
 import RootNavigator from "./src/navigation/RootNavigator";
 import LoginScreen from "./src/screens/LoginScreen";
+import { StateFilterProvider } from "./src/context/StateFilterContext";
 
 export default function App() {
   const [user, setUser] = useState(undefined); // undefined = still checking
@@ -27,9 +28,9 @@ export default function App() {
   }
 
   return (
-    <>
+    <StateFilterProvider>
       <StatusBar style="dark" />
       {user ? <RootNavigator /> : <LoginScreen />}
-    </>
+    </StateFilterProvider>
   );
 }

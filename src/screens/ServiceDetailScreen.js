@@ -1,7 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { View, Text, ScrollView, StyleSheet, ActivityIndicator } from "react-native";
-import { getServiceById } from "../firebase/firestore";
+import { getServiceById, mergeServiceForState } from "../firebase/firestore";
 import ChatBox from "../components/ChatBox";
+import StateFilterBar from "../components/StateFilterBar";
+import { useStateFilter } from "../context/StateFilterContext";
 
 function Section({ title, children }) {
   return (
@@ -26,16 +28,20 @@ function BulletList({ items }) {
 
 export default function ServiceDetailScreen({ route }) {
   const { serviceId } = route.params;
-  const [service, setService] = useState(null);
+  const [rawService, setRawService] = useState(null);
   const [loading, setLoading] = useState(true);
+  const { selectedState } = useStateFilter();
 
   useEffect(() => {
     (async () => {
       const s = await getServiceById(serviceId);
-      setService(s);
+      setRawService(s);
       setLoading(false);
     })();
   }, [serviceId]);
+
+  const service = mergeServiceForState(rawService, selectedState);
+  const hasStateOverride = !!rawService?.stateOverrides?.[selectedState];
 
   if (loading) {
     return (
@@ -58,6 +64,15 @@ export default function ServiceDetailScreen({ route }) {
       <ScrollView contentContainerStyle={styles.container}>
         <Text style={styles.title}>{service.name}</Text>
         <Text style={styles.department}>{service.department}</Text>
+
+        <View style={{ marginHorizontal: -20, marginBottom: 8 }}>
+          <StateFilterBar />
+        </View>
+        {hasStateOverride && (
+          <Text style={styles.stateNote}>
+            Showing details specific to {selectedState}. Other states may use a different portal or fee.
+          </Text>
+        )}
 
         <Section title="Overview">
           <Text style={styles.text}>{service.overview}</Text>
@@ -130,6 +145,7 @@ const styles = StyleSheet.create({
   center: { flex: 1, alignItems: "center", justifyContent: "center" },
   title: { fontSize: 22, fontWeight: "700" },
   department: { fontSize: 13, color: "#0B5FFF", fontWeight: "600", marginTop: 4, marginBottom: 16 },
+  stateNote: { fontSize: 12, color: "#0B5FFF", backgroundColor: "#EAF1FF", padding: 10, borderRadius: 10, marginBottom: 16 },
   section: { marginBottom: 18 },
   sectionTitle: { fontSize: 15, fontWeight: "700", marginBottom: 6, color: "#111" },
   text: { fontSize: 14, color: "#333", lineHeight: 21 },

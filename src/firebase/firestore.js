@@ -67,6 +67,19 @@ export async function getCategories() {
   return Array.from(seen.values());
 }
 
+/**
+ * Apply a state's overrides (if any) on top of a service's generic,
+ * India-wide content. Services that vary by state can carry an optional
+ * `stateOverrides` object keyed by state name, e.g.:
+ *   stateOverrides: { "Karnataka": { fees: {...}, officialLinks: [...] } }
+ * Fields not present in the override fall back to the generic values, so
+ * a state only needs to specify what's actually different there.
+ */
+export function mergeServiceForState(service, state) {
+  if (!service || !state || !service.stateOverrides?.[state]) return service;
+  return { ...service, ...service.stateOverrides[state] };
+}
+
 // ---- Journeys ----
 
 export async function getAllJourneys() {
@@ -144,8 +157,8 @@ export async function deleteUserReminder(uid, reminderId) {
 
 // ---- Documents (Document Locker) ----
 // Stored as a subcollection per user: profiles/{uid}/documents/{id}
-// Firestore holds only metadata; the actual file bytes live in Firebase
-// Storage (see src/firebase/storage.js).
+// Firestore holds only metadata; the actual file bytes live on-device
+// (see src/storage/documentStorage.js).
 
 export async function getUserDocuments(uid) {
   if (!uid) return [];

@@ -6,6 +6,7 @@ import { Ionicons } from "@expo/vector-icons";
 
 import HomeScreen from "../screens/HomeScreen";
 import ServicesScreen from "../screens/ServicesScreen";
+import CategoryServicesScreen from "../screens/CategoryServicesScreen";
 import ServiceDetailScreen from "../screens/ServiceDetailScreen";
 import LifeEventsScreen from "../screens/LifeEventsScreen";
 import JourneyDetailScreen from "../screens/JourneyDetailScreen";
@@ -34,6 +35,11 @@ function ServicesStackScreen() {
   return (
     <ServicesStack.Navigator>
       <ServicesStack.Screen name="ServicesMain" component={ServicesScreen} options={{ title: "Services" }} />
+      <ServicesStack.Screen
+        name="CategoryServices"
+        component={CategoryServicesScreen}
+        options={({ route }) => ({ title: route.params.category })}
+      />
       <ServicesStack.Screen
         name="ServiceDetail"
         component={ServiceDetailScreen}

@@ -18,6 +18,14 @@
     "ios": {
       "bundleIdentifier": "com.yourname.indiaassistai"
     },
+    "plugins": [
+      [
+        "expo-location",
+        {
+          "locationWhenInUsePermission": "IndiaAssist AI uses your location to detect which state you're in, so it can show you the correct fees and portals for that state."
+        }
+      ]
+    ],
     "extra": {
       "eas": {}
     }
