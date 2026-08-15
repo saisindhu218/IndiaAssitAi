@@ -4,8 +4,9 @@ import { getServiceById, mergeServiceForState } from "../firebase/firestore";
 import ChatBox from "../components/ChatBox";
 import StateFilterBar from "../components/StateFilterBar";
 import { useStateFilter } from "../context/StateFilterContext";
+import { useTheme } from "../theme/ThemeContext";
 
-function Section({ title, children }) {
+function Section({ title, children, styles }) {
   return (
     <View style={styles.section}>
       <Text style={styles.sectionTitle}>{title}</Text>
@@ -14,7 +15,7 @@ function Section({ title, children }) {
   );
 }
 
-function BulletList({ items }) {
+function BulletList({ items, styles }) {
   return (
     <View>
       {(items || []).map((item, i) => (
@@ -27,6 +28,8 @@ function BulletList({ items }) {
 }
 
 export default function ServiceDetailScreen({ route }) {
+  const { colors } = useTheme();
+  const styles = getStyles(colors);
   const { serviceId } = route.params;
   const [rawService, setRawService] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -46,7 +49,7 @@ export default function ServiceDetailScreen({ route }) {
   if (loading) {
     return (
       <View style={styles.center}>
-        <ActivityIndicator size="large" />
+        <ActivityIndicator size="large" color={colors.primary} />
       </View>
     );
   }
@@ -54,13 +57,13 @@ export default function ServiceDetailScreen({ route }) {
   if (!service) {
     return (
       <View style={styles.center}>
-        <Text>Service not found.</Text>
+        <Text style={{ color: colors.text }}>Service not found.</Text>
       </View>
     );
   }
 
   return (
-    <View style={{ flex: 1, backgroundColor: "#fff" }}>
+    <View style={{ flex: 1, backgroundColor: colors.bg }}>
       <ScrollView contentContainerStyle={styles.container}>
         <Text style={styles.title}>{service.name}</Text>
         <Text style={styles.department}>{service.department}</Text>
@@ -74,19 +77,19 @@ export default function ServiceDetailScreen({ route }) {
           </Text>
         )}
 
-        <Section title="Overview">
+        <Section title="Overview" styles={styles}>
           <Text style={styles.text}>{service.overview}</Text>
         </Section>
 
-        <Section title="Eligibility">
+        <Section title="Eligibility" styles={styles}>
           <Text style={styles.text}>{service.eligibility}</Text>
         </Section>
 
-        <Section title="Required Documents">
-          <BulletList items={service.documents} />
+        <Section title="Required Documents" styles={styles}>
+          <BulletList items={service.documents} styles={styles} />
         </Section>
 
-        <Section title="Fees">
+        <Section title="Fees" styles={styles}>
           {Object.entries(service.fees || {}).map(([k, v]) => (
             <Text key={k} style={styles.text}>
               {k.charAt(0).toUpperCase() + k.slice(1)}: {v}
@@ -94,11 +97,11 @@ export default function ServiceDetailScreen({ route }) {
           ))}
         </Section>
 
-        <Section title="Processing Time">
+        <Section title="Processing Time" styles={styles}>
           <Text style={styles.text}>{service.processingTime}</Text>
         </Section>
 
-        <Section title="Online Process">
+        <Section title="Online Process" styles={styles}>
           {(service.onlineSteps || []).map((step, i) => (
             <Text key={i} style={styles.step}>
               {i + 1}. {step}
@@ -106,7 +109,7 @@ export default function ServiceDetailScreen({ route }) {
           ))}
         </Section>
 
-        <Section title="Offline Process">
+        <Section title="Offline Process" styles={styles}>
           {(service.offlineSteps || []).map((step, i) => (
             <Text key={i} style={styles.step}>
               {i + 1}. {step}
@@ -114,11 +117,11 @@ export default function ServiceDetailScreen({ route }) {
           ))}
         </Section>
 
-        <Section title="Common Mistakes to Avoid">
-          <BulletList items={service.commonMistakes} />
+        <Section title="Common Mistakes to Avoid" styles={styles}>
+          <BulletList items={service.commonMistakes} styles={styles} />
         </Section>
 
-        <Section title="FAQs">
+        <Section title="FAQs" styles={styles}>
           {(service.faqs || []).map((f, i) => (
             <View key={i} style={{ marginBottom: 10 }}>
               <Text style={styles.faqQ}>Q: {f.q}</Text>
@@ -127,8 +130,8 @@ export default function ServiceDetailScreen({ route }) {
           ))}
         </Section>
 
-        <Section title="Official Links">
-          <BulletList items={service.officialLinks} />
+        <Section title="Official Links" styles={styles}>
+          <BulletList items={service.officialLinks} styles={styles} />
         </Section>
 
         <Text style={styles.updated}>Last updated: {service.lastUpdated}</Text>
@@ -140,18 +143,27 @@ export default function ServiceDetailScreen({ route }) {
   );
 }
 
-const styles = StyleSheet.create({
-  container: { padding: 20, paddingBottom: 100 },
-  center: { flex: 1, alignItems: "center", justifyContent: "center" },
-  title: { fontSize: 22, fontWeight: "700" },
-  department: { fontSize: 13, color: "#0B5FFF", fontWeight: "600", marginTop: 4, marginBottom: 16 },
-  stateNote: { fontSize: 12, color: "#0B5FFF", backgroundColor: "#EAF1FF", padding: 10, borderRadius: 10, marginBottom: 16 },
-  section: { marginBottom: 18 },
-  sectionTitle: { fontSize: 15, fontWeight: "700", marginBottom: 6, color: "#111" },
-  text: { fontSize: 14, color: "#333", lineHeight: 21 },
-  bullet: { fontSize: 14, color: "#333", lineHeight: 22 },
-  step: { fontSize: 14, color: "#333", lineHeight: 22 },
-  faqQ: { fontSize: 14, fontWeight: "600", color: "#111" },
-  faqA: { fontSize: 14, color: "#555", marginTop: 2 },
-  updated: { fontSize: 11, color: "#999", marginTop: 10 },
-});
+function getStyles(c) {
+  return StyleSheet.create({
+    container: { padding: 20, paddingBottom: 100 },
+    center: { flex: 1, alignItems: "center", justifyContent: "center", backgroundColor: c.bg },
+    title: { fontSize: 22, fontWeight: "700", color: c.text },
+    department: { fontSize: 13, color: c.primary, fontWeight: "600", marginTop: 4, marginBottom: 16 },
+    stateNote: {
+      fontSize: 12,
+      color: c.primary,
+      backgroundColor: c.primarySoft,
+      padding: 10,
+      borderRadius: 10,
+      marginBottom: 16,
+    },
+    section: { marginBottom: 18 },
+    sectionTitle: { fontSize: 15, fontWeight: "700", marginBottom: 6, color: c.text },
+    text: { fontSize: 14, color: c.textSecondary, lineHeight: 21 },
+    bullet: { fontSize: 14, color: c.textSecondary, lineHeight: 22 },
+    step: { fontSize: 14, color: c.textSecondary, lineHeight: 22 },
+    faqQ: { fontSize: 14, fontWeight: "600", color: c.text },
+    faqA: { fontSize: 14, color: c.textSecondary, marginTop: 2 },
+    updated: { fontSize: 11, color: c.textMuted, marginTop: 10 },
+  });
+}

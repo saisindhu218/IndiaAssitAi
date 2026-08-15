@@ -14,6 +14,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { auth } from "../firebase/config";
 import { getUserReminders, addUserReminder, deleteUserReminder } from "../firebase/firestore";
+import { useTheme } from "../theme/ThemeContext";
 
 function isOverdue(dueDate) {
   if (!dueDate) return false;
@@ -21,6 +22,8 @@ function isOverdue(dueDate) {
 }
 
 export default function RemindersScreen() {
+  const { colors } = useTheme();
+  const styles = getStyles(colors);
   const user = auth.currentUser;
   const [reminders, setReminders] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -74,18 +77,18 @@ export default function RemindersScreen() {
     <SafeAreaView style={styles.safeArea} edges={["top"]}>
       <View style={styles.header}>
         <View style={styles.headerLeft}>
-          <Ionicons name="notifications-outline" size={22} color="#111" style={{ marginRight: 6 }} />
+          <Ionicons name="notifications-outline" size={22} color={colors.text} style={{ marginRight: 6 }} />
           <Text style={styles.headerTitle}>Reminders</Text>
         </View>
         <TouchableOpacity style={styles.addBtn} onPress={() => setModalVisible(true)}>
-          <Ionicons name="add" size={16} color="#fff" />
+          <Ionicons name="add" size={16} color={colors.onPrimary} />
           <Text style={styles.addBtnText}>Add</Text>
         </TouchableOpacity>
       </View>
 
       {loading ? (
         <View style={styles.center}>
-          <ActivityIndicator size="large" />
+          <ActivityIndicator size="large" color={colors.primary} />
         </View>
       ) : (
         <FlatList
@@ -103,7 +106,7 @@ export default function RemindersScreen() {
                 {!!item.note && <Text style={styles.cardNote}>{item.note}</Text>}
               </View>
               <TouchableOpacity onPress={() => handleDelete(item.id)} hitSlop={8}>
-                <Ionicons name="trash-outline" size={18} color="#D33" />
+                <Ionicons name="trash-outline" size={18} color={colors.danger} />
               </TouchableOpacity>
             </View>
           )}
@@ -124,6 +127,7 @@ export default function RemindersScreen() {
             <TextInput
               style={styles.input}
               placeholder="e.g. Passport renewal"
+              placeholderTextColor={colors.textMuted}
               value={title}
               onChangeText={setTitle}
             />
@@ -132,6 +136,7 @@ export default function RemindersScreen() {
             <TextInput
               style={styles.input}
               placeholder="2026-12-31"
+              placeholderTextColor={colors.textMuted}
               value={dueDate}
               onChangeText={setDueDate}
               keyboardType="numbers-and-punctuation"
@@ -141,6 +146,7 @@ export default function RemindersScreen() {
             <TextInput
               style={styles.input}
               placeholder="Any extra detail"
+              placeholderTextColor={colors.textMuted}
               value={note}
               onChangeText={setNote}
             />
@@ -160,57 +166,63 @@ export default function RemindersScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  safeArea: { flex: 1, backgroundColor: "#fff" },
-  center: { flex: 1, alignItems: "center", justifyContent: "center" },
-  header: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    paddingHorizontal: 20,
-    paddingVertical: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: "#f0f0f0",
-  },
-  headerLeft: { flexDirection: "row", alignItems: "center" },
-  headerTitle: { fontSize: 20, fontWeight: "700" },
-  addBtn: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "#0B5FFF",
-    borderRadius: 20,
-    paddingHorizontal: 14,
-    paddingVertical: 8,
-  },
-  addBtnText: { color: "#fff", fontWeight: "700", fontSize: 13, marginLeft: 2 },
-  card: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "#F7F8FA",
-    borderRadius: 14,
-    padding: 14,
-    marginBottom: 10,
-  },
-  cardTitle: { fontSize: 15, fontWeight: "700" },
-  cardDate: { fontSize: 12, color: "#666", marginTop: 3 },
-  overdue: { color: "#D33", fontWeight: "700" },
-  cardNote: { fontSize: 12, color: "#888", marginTop: 3 },
-  empty: { color: "#888", marginTop: 20, textAlign: "center", lineHeight: 20 },
-  modalBackdrop: { flex: 1, backgroundColor: "rgba(0,0,0,0.4)", justifyContent: "flex-end" },
-  modalCard: { backgroundColor: "#fff", borderTopLeftRadius: 20, borderTopRightRadius: 20, padding: 20 },
-  modalTitle: { fontSize: 18, fontWeight: "700", marginBottom: 16 },
-  fieldLabel: { fontSize: 12, color: "#777", fontWeight: "600", marginBottom: 4, marginTop: 10 },
-  input: {
-    borderWidth: 1,
-    borderColor: "#ddd",
-    borderRadius: 10,
-    paddingHorizontal: 12,
-    paddingVertical: 10,
-    fontSize: 15,
-  },
-  modalActions: { flexDirection: "row", justifyContent: "flex-end", marginTop: 20, gap: 10 },
-  cancelBtn: { paddingVertical: 12, paddingHorizontal: 16 },
-  cancelBtnText: { color: "#666", fontWeight: "600" },
-  saveBtn: { backgroundColor: "#0B5FFF", borderRadius: 10, paddingVertical: 12, paddingHorizontal: 20 },
-  saveBtnText: { color: "#fff", fontWeight: "700" },
-});
+function getStyles(c) {
+  return StyleSheet.create({
+    safeArea: { flex: 1, backgroundColor: c.bg },
+    center: { flex: 1, alignItems: "center", justifyContent: "center" },
+    header: {
+      flexDirection: "row",
+      justifyContent: "space-between",
+      alignItems: "center",
+      paddingHorizontal: 20,
+      paddingVertical: 16,
+      borderBottomWidth: 1,
+      borderBottomColor: c.border,
+    },
+    headerLeft: { flexDirection: "row", alignItems: "center" },
+    headerTitle: { fontSize: 20, fontWeight: "700", color: c.text },
+    addBtn: {
+      flexDirection: "row",
+      alignItems: "center",
+      backgroundColor: c.primary,
+      borderRadius: 20,
+      paddingHorizontal: 14,
+      paddingVertical: 8,
+    },
+    addBtnText: { color: c.onPrimary, fontWeight: "700", fontSize: 13, marginLeft: 2 },
+    card: {
+      flexDirection: "row",
+      alignItems: "center",
+      backgroundColor: c.surface,
+      borderWidth: 1,
+      borderColor: c.border,
+      borderRadius: 16,
+      padding: 14,
+      marginBottom: 10,
+    },
+    cardTitle: { fontSize: 15, fontWeight: "700", color: c.text },
+    cardDate: { fontSize: 12, color: c.textSecondary, marginTop: 3 },
+    overdue: { color: c.danger, fontWeight: "700" },
+    cardNote: { fontSize: 12, color: c.textMuted, marginTop: 3 },
+    empty: { color: c.textMuted, marginTop: 20, textAlign: "center", lineHeight: 20 },
+    modalBackdrop: { flex: 1, backgroundColor: c.overlay, justifyContent: "flex-end" },
+    modalCard: { backgroundColor: c.bgElevated, borderTopLeftRadius: 24, borderTopRightRadius: 24, padding: 20 },
+    modalTitle: { fontSize: 18, fontWeight: "700", marginBottom: 16, color: c.text },
+    fieldLabel: { fontSize: 12, color: c.textMuted, fontWeight: "600", marginBottom: 4, marginTop: 10 },
+    input: {
+      backgroundColor: c.surface,
+      borderWidth: 1,
+      borderColor: c.border,
+      borderRadius: 12,
+      paddingHorizontal: 12,
+      paddingVertical: 10,
+      fontSize: 15,
+      color: c.text,
+    },
+    modalActions: { flexDirection: "row", justifyContent: "flex-end", marginTop: 20, gap: 10 },
+    cancelBtn: { paddingVertical: 12, paddingHorizontal: 16 },
+    cancelBtnText: { color: c.textSecondary, fontWeight: "600" },
+    saveBtn: { backgroundColor: c.primary, borderRadius: 12, paddingVertical: 12, paddingHorizontal: 20 },
+    saveBtnText: { color: c.onPrimary, fontWeight: "700" },
+  });
+}

@@ -4013,26 +4013,38 @@ export const SAMPLE_SERVICES = [
   },
 
   {
-    id: "vayoshreshtha-yojana",
-    name: "Vayoshreshtha Yojana (Free Aids & Assistive Devices)",
+    id: "rashtriya-vayoshri-yojana",
+    name: "Rashtriya Vayoshri Yojana (Free Aids & Assistive Devices)",
     department: "Senior Citizens",
     category: "Senior Citizens",
     categoryIcon: "👵",
-    overview: "A scheme providing free assistive devices -- walking sticks, hearing aids, wheelchairs, spectacles, artificial dentures, and similar aids -- to senior citizens from economically weaker sections, distributed through camps organized by ALIMCO (Artificial Limbs Manufacturing Corporation of India).",
-    eligibility: "BPL senior citizens (aged 60+) with age-related physical impairment/disability, as assessed at a distribution camp.",
-    documents: ["Age proof", "BPL certificate or income proof", "Aadhaar card"],
+    overview:
+      "A scheme providing free assistive devices -- walking sticks, hearing aids, wheelchairs, spectacles, artificial dentures, and similar aids -- to senior citizens from economically weaker sections, distributed through camps organized by ALIMCO (Artificial Limbs Manufacturing Corporation of India). It's administered through the same ARJUN portal used for the disability aids scheme (ADIP), since both fall under the Ministry of Social Justice & Empowerment.",
+    eligibility: "Senior citizens (60+) with monthly income from all sources not exceeding a specified threshold (check the current limit on the ARJUN portal, as income ceilings are periodically revised), with an age-related physical impairment assessed at a distribution camp.",
+    documents: ["Age proof", "Income proof/certificate", "Aadhaar card"],
     fees: { devices: "Free" },
-    processingTime: "Devices are typically assessed and distributed on the same day at organized camps",
-    onlineSteps: ["Check for upcoming Vayoshreshtha Yojana camps in your area via your district Social Welfare Department or ALIMCO's website"],
+    processingTime: "Devices are typically assessed and distributed on the same day at organized camps, once your camp application is approved",
+    onlineSteps: [
+      "Check eligibility and apply/register via the ARJUN portal (adip.depwd.gov.in), which handles both the disability aids scheme (ADIP) and this senior citizens' scheme (RVY)",
+      "Look for upcoming distribution camp announcements in your district via the portal or your district Social Welfare Department",
+    ],
     offlineSteps: [
       "Attend an organized distribution camp in your district with age, income, and identity proof",
       "A medical assessment at the camp determines which assistive device(s) you're eligible for",
       "Receive the device(s) free of cost at the same camp",
     ],
-    commonMistakes: ["Missing camp announcements -- these aren't continuously available like an online application; check with your local Social Welfare Department periodically for scheduled camps"],
-    faqs: [],
-    officialLinks: ["https://www.alimco.in"],
-    lastUpdated: "2026-06-01",
+    commonMistakes: [
+      "Looking for this under an older/incorrect name ('Vayoshreshtha Yojana' is a separate national recognition award, not this aids-distribution scheme) -- the correct scheme name is Rashtriya Vayoshri Yojana (RVY)",
+      "Missing camp announcements -- these aren't continuously available like an online application; check the ARJUN portal or your local Social Welfare Department periodically for scheduled camps",
+    ],
+    faqs: [
+      {
+        q: "Is this the same as 'Vayoshreshtha Samman'?",
+        a: "No -- Vayoshreshtha Samman is a separate annual national awards scheme honoring eminent senior citizens and institutions, unrelated to this free assistive-devices program. This scheme is called Rashtriya Vayoshri Yojana (RVY).",
+      },
+    ],
+    officialLinks: ["https://adip.depwd.gov.in", "https://www.alimco.in"],
+    lastUpdated: "2026-08-11",
   },
 
   {
@@ -5269,6 +5281,732 @@ export const SAMPLE_SERVICES = [
     ],
     officialLinks: ["https://www.passportindia.gov.in"],
     lastUpdated: "2026-08-01",
+  },
+
+  // ---- Filling gaps found on review: major 2024-2025 schemes and thin categories ----
+
+  {
+    id: "pm-surya-ghar",
+    name: "PM Surya Ghar Muft Bijli Yojana (Free Rooftop Solar)",
+    department: "Government Schemes",
+    category: "Government Schemes",
+    categoryIcon: "🎯",
+    overview:
+      "India's largest residential rooftop solar programme, launched February 2024 with a target of 1 crore (10 million) households. The government pays a direct subsidy toward installing rooftop solar, and a correctly-sized system (commonly 3kW) can generate roughly 300 units/month -- enough to cover many households' entire electricity bill.",
+    eligibility: "Indian homeowner with an electricity connection in their name (or landlord's NOC for rented premises), suitable roof space, and no pre-existing rooftop solar system installed before the scheme's February 2024 launch (existing pre-scheme installations aren't eligible for this particular subsidy).",
+    documents: [
+      "Electricity bill / consumer number",
+      "Aadhaar card",
+      "Bank account details (subsidy is paid via DBT)",
+      "Roof ownership proof, or landlord's NOC if renting",
+    ],
+    fees: {
+      subsidy1kW: "₹30,000",
+      subsidy2kW: "₹60,000",
+      subsidy3kWPlus: "₹78,000 (maximum, for 3kW and above)",
+      note: "Subsidy is paid via DBT to your bank account within about 30 days of commissioning, after net metering is installed. Several states add their own top-up subsidy on top of this central amount.",
+    },
+    processingTime: "Typically 30-90 days end-to-end: application to vendor assignment (7-15 days), installation (1-2 days), then DISCOM net meter installation (15-30 days) before commissioning and subsidy release",
+    onlineSteps: [
+      "Go to pmsuryaghar.gov.in and register with your state, DISCOM, and electricity consumer number",
+      "Apply for rooftop solar -- your DISCOM will assess feasibility and issue a Feasibility Approval",
+      "Once approved, choose an empanelled vendor listed on the portal (never pay a non-empanelled installer expecting this subsidy)",
+      "After installation, apply for net metering through the same portal",
+      "Once your DISCOM inspects and commissions the net meter, submit bank details -- the subsidy is credited via DBT within about 30 days",
+    ],
+    offlineSteps: ["Empanelled vendors and many DISCOM offices can assist with the application process in person if you're not comfortable doing it online yourself"],
+    commonMistakes: [
+      "Installing an inverter that isn't on the MNRE's ALMM (Approved List of Models and Manufacturers) -- this is one of the most common reasons a subsidy claim gets rejected after installation, so verify your inverter's compliance before purchase",
+      "Assuming an existing solar installation from before February 2024 qualifies -- it doesn't; this subsidy is for new installations only",
+      "Undersizing or oversizing the system relative to actual consumption -- a correctly-sized 3kW system is what typically delivers close to the advertised 300 free units, not an arbitrary size",
+      "Paying a non-empanelled vendor expecting the subsidy to still apply -- only empanelled vendors listed on the portal qualify",
+    ],
+    faqs: [
+      {
+        q: "How is 'up to 300 free units' actually achieved?",
+        a: "It's not a flat guarantee -- a properly sized system (commonly around 3kW under average Indian sunlight) generates roughly 300 units/month via net metering, which offsets a typical household's consumption. Your actual free units depend on your system size and how much electricity you use.",
+      },
+      {
+        q: "Can I apply if I live in a rented house?",
+        a: "Yes, with the landlord's No-Objection Certificate (NOC) for installing the system, though the electricity connection ideally should be in the applicant's name.",
+      },
+    ],
+    officialLinks: ["https://pmsuryaghar.gov.in"],
+    lastUpdated: "2026-08-11",
+  },
+
+  {
+    id: "nps-vatsalya",
+    name: "NPS Vatsalya (Pension Account for Children)",
+    department: "Government Schemes",
+    category: "Government Schemes",
+    categoryIcon: "🎯",
+    overview:
+      "A pension savings account for minors, launched September 2024, letting a parent or legal guardian open and contribute to an NPS account on a child's behalf. The account automatically converts to a regular adult NPS account once the child turns 18, giving them an existing long-term retirement corpus and investment history from childhood.",
+    eligibility: "Any Indian minor (under 18), account opened and operated by a parent or legal guardian until the child comes of age.",
+    documents: ["Child's birth certificate or other age proof", "Aadhaar of the child and the parent/guardian", "Parent/guardian's PAN", "Bank account details"],
+    fees: { minimumContribution: "₹1,000 per year to keep the account active (confirm current minimum on the portal, as scheme parameters can be revised)", accountOpening: "A small nominal charge may apply, similar to standard NPS account opening" },
+    processingTime: "Account opening is typically instant to a few days via the online eNPS process",
+    onlineSteps: [
+      "Go to enps.nsdl.com or the CRA portal and select the NPS Vatsalya registration option",
+      "Complete the guardian's e-KYC and enter the child's details",
+      "Make the initial contribution to activate the account and receive the child's PRAN (Permanent Retirement Account Number)",
+      "Continue periodic contributions -- the guardian manages the account until the child turns 18",
+    ],
+    offlineSteps: ["Visit a bank or Point of Presence (POP) branch offering NPS services to open an NPS Vatsalya account in person"],
+    commonMistakes: [
+      "Not understanding what happens at age 18 -- the account converts to a regular NPS account in the (now adult) child's own name, and they take over management of it themselves",
+      "Confusing this with Sukanya Samriddhi Yojana -- SSY is specifically for a girl child's education/marriage savings with a fixed tenure, while NPS Vatsalya is a market-linked, gender-neutral, long-term retirement account continuing into adulthood",
+    ],
+    faqs: [
+      {
+        q: "What happens to the account when my child turns 18?",
+        a: "It automatically converts into a standard adult NPS account under the child's own name and PAN, and they take over contributions and management themselves -- effectively giving them a head start on retirement savings from childhood.",
+      },
+    ],
+    officialLinks: ["https://enps.nsdl.com"],
+    lastUpdated: "2026-08-11",
+  },
+
+  {
+    id: "gst-verify-gstin",
+    name: "Verify a GSTIN (GST Search)",
+    department: "Business & GST",
+    category: "Business & GST",
+    categoryIcon: "🏢",
+    overview: "A free lookup tool to verify whether a GST Identification Number (GSTIN) is genuine and active -- useful before paying an invoice, onboarding a vendor, or checking your own registration status.",
+    eligibility: "Anyone -- no login or registration required to search.",
+    documents: ["The GSTIN you want to verify (15-character alphanumeric code)"],
+    fees: { search: "Free" },
+    processingTime: "Instant",
+    onlineSteps: [
+      "Go to the GST portal (gst.gov.in) and select 'Search Taxpayer' > 'Search by GSTIN/UIN'",
+      "Enter the GSTIN and the captcha, then submit",
+      "Review the result: legal name, registration status (active/cancelled/suspended), registration date, and business type",
+    ],
+    offlineSteps: [],
+    commonMistakes: [
+      "Not checking an unfamiliar vendor's GSTIN before making a large payment -- a quick free search can catch a cancelled or fake GSTIN before it becomes a compliance problem for you",
+      "Assuming a GSTIN format looking correct means it's real -- always verify against the actual search tool, not just visual inspection of the number",
+    ],
+    faqs: [
+      {
+        q: "Why would I need to check someone else's GSTIN?",
+        a: "If you're claiming input tax credit on a vendor's invoice, their GSTIN needs to be genuinely active and correctly registered -- an invalid or cancelled GSTIN can jeopardize your own tax credit claim, so it's worth a quick free check.",
+      },
+    ],
+    officialLinks: ["https://www.gst.gov.in"],
+    lastUpdated: "2026-07-01",
+  },
+
+  {
+    id: "aadhaar-biometric-lock",
+    name: "Aadhaar Biometric Lock / Unlock",
+    department: "Identity Documents",
+    category: "Identity Documents",
+    categoryIcon: "🪪",
+    overview: "A security feature letting you lock your Aadhaar biometrics (fingerprints and iris scan) so they can't be used for authentication, protecting against unauthorized biometric-based transactions -- and unlock them temporarily whenever you actually need to use biometric verification yourself.",
+    eligibility: "Any Aadhaar holder.",
+    documents: ["Aadhaar number or Virtual ID (VID)", "Registered mobile number for OTP"],
+    fees: { locking: "Free" },
+    processingTime: "Instant",
+    onlineSteps: [
+      "Go to myaadhaar.uidai.gov.in and log in, or use the mAadhaar app",
+      "Select 'Aadhaar Lock/Unlock' under biometric services",
+      "To lock: generate/use your 16-digit Virtual ID (VID) and confirm -- your demographic details remain usable, but biometric authentication is blocked until unlocked",
+      "To unlock (temporarily, when you actually need biometric verification): unlock via OTP, complete your task, then it's worth re-locking afterward for ongoing protection",
+    ],
+    offlineSteps: ["This is an online-only self-service feature -- there's no offline/in-person process for locking or unlocking biometrics"],
+    commonMistakes: [
+      "Locking biometrics and then forgetting to unlock before an appointment that requires biometric verification (e.g. a bank e-KYC visit), causing an on-the-spot failure",
+      "Not knowing your Virtual ID (VID) is needed for the lock/unlock process if biometrics are already locked -- generate and note it down before you need it in a hurry",
+    ],
+    faqs: [
+      {
+        q: "Does locking my biometrics affect anything else about my Aadhaar?",
+        a: "No -- your demographic details (name, address, etc.) remain usable for non-biometric authentication like OTP-based verification. Locking specifically blocks fingerprint/iris-based authentication until you unlock it again.",
+      },
+    ],
+    officialLinks: ["https://myaadhaar.uidai.gov.in"],
+    lastUpdated: "2026-07-01",
+  },
+
+  {
+    id: "adip-scheme",
+    name: "ADIP Scheme (Assistive Devices for Persons with Disabilities)",
+    department: "Disability Services",
+    category: "Disability Services",
+    categoryIcon: "♿",
+    overview:
+      "A central scheme providing free or subsidized assistive devices -- wheelchairs, hearing aids, artificial limbs, Braille kits, and similar aids -- to persons with disabilities, aimed at improving independent functioning. It's implemented through ALIMCO, National Institutes, and NGOs, and shares its application system (ARJUN portal) with the parallel senior-citizens scheme, Rashtriya Vayoshri Yojana.",
+    eligibility:
+      "Persons with disabilities holding a UDID card (or enrollment number) with a Disability Certificate showing at least 40% disability, with monthly income from all sources not exceeding a specified limit (check the current threshold on the ARJUN portal). Re-issuance of the same device generally requires at least 3 years since the last one received.",
+    documents: [
+      "UDID card or enrollment number, with Disability Certificate (40%+ disability)",
+      "Income certificate/proof",
+      "Aadhaar card",
+      "Undertaking that the same aid hasn't been received from any source in the last 3 years",
+    ],
+    fees: { devices: "Free or subsidized, depending on income category" },
+    processingTime: "Assessment and distribution commonly happen at organized camps; timeline depends on when a camp is scheduled in your district after your application is registered",
+    onlineSteps: [
+      "Go to the ARJUN portal (adip.depwd.gov.in) and register, uploading your UDID/Disability Certificate and income proof",
+      "Look for scheduled distribution camps in your district through the portal",
+    ],
+    offlineSteps: [
+      "Attend an organized distribution camp with your documents",
+      "A medical assessment at the camp confirms which specific aid(s) you qualify for",
+      "Receive the device at the camp, or through the assigned implementing agency",
+    ],
+    commonMistakes: [
+      "Applying without a valid UDID card in hand -- get that first (see the UDID Card service) since it's a prerequisite here",
+      "Requesting a replacement device before the 3-year re-issuance gap has passed, which will be declined",
+    ],
+    faqs: [
+      {
+        q: "Do I need a UDID card before applying for ADIP?",
+        a: "Yes -- a UDID card (or at least its enrollment number) along with a Disability Certificate showing 40%+ disability is required. If you don't have one yet, apply for that first.",
+      },
+    ],
+    officialLinks: ["https://adip.depwd.gov.in"],
+    lastUpdated: "2026-08-11",
+  },
+
+  {
+    id: "ecourts-case-status",
+    name: "eCourts Case Status & Services",
+    department: "Police & Legal",
+    category: "Police & Legal",
+    categoryIcon: "⚖",
+    overview: "The national eCourts portal lets you check the real-time status of a court case, view orders and judgments, see cause lists (daily case listings), and access various citizen e-services for district and High Courts across India, without needing to visit the court in person just to check status.",
+    eligibility: "Anyone with a case reference, or searching by party name/advocate/FIR number.",
+    documents: ["Case Number Record (CNR) number, if known, or party name / FIR number / advocate name to search by"],
+    fees: { search: "Free" },
+    processingTime: "Instant for status/order lookups; actual case proceedings follow the court's own schedule",
+    onlineSteps: [
+      "Go to services.ecourts.gov.in and select 'Case Status'",
+      "Search using CNR number (most precise), or by party name, FIR number, advocate, or case type plus court/state details",
+      "View case status, next hearing date, and case history",
+      "Separately, use the 'Judgments' or 'Orders' section to view and download court orders/judgments once available",
+    ],
+    offlineSteps: ["Court registries can also provide case status information in person if you're unable to use the online portal"],
+    commonMistakes: [
+      "Not knowing your case's CNR (Case Number Record) number, which is the most reliable single identifier -- it's usually mentioned on your case-related documents or can be obtained from your advocate",
+      "Confusing the eCourts case-status portal with actually filing a case or appearing in court -- this is an information/tracking service, not a substitute for formal legal proceedings",
+    ],
+    faqs: [
+      {
+        q: "What's a CNR number and where do I find it?",
+        a: "CNR (Case Number Record) is a unique 16-digit identifier assigned to a case, usable to search across any court in India regardless of case number format differences between states. Ask your advocate, or check case-related court documents, for your case's CNR.",
+      },
+    ],
+    officialLinks: ["https://services.ecourts.gov.in", "https://ecourts.gov.in"],
+    lastUpdated: "2026-07-01",
+  },
+
+  // ---- Second gap-fill pass: rounding out existing departments, no new categories ----
+
+  {
+    id: "vehicle-scrappage-certificate",
+    name: "Vehicle Scrapping / Deregistration Certificate",
+    department: "Transport & RTO",
+    category: "Transport & RTO",
+    categoryIcon: "🚗",
+    overview:
+      "Scrapping an old vehicle at a Registered Vehicle Scrapping Facility (RVSF) under India's Vehicle Scrappage Policy (effective April 2022), which issues a Certificate of Deposit (CoD) -- this deregisters the vehicle and can unlock incentives (road tax rebates, registration fee waivers) when buying a replacement vehicle. It's mandatory for government vehicles older than 15 years; voluntary for private owners, though older vehicles increasingly face fitness-test and green-tax hurdles that make scrapping the practical choice.",
+    eligibility: "Any vehicle owner, particularly those with vehicles that have failed a fitness test, or are old enough that renewal costs/green tax make continued use impractical.",
+    documents: ["Original RC", "Valid identity proof", "PUC and insurance details (if still valid)", "NOC from financier, if the vehicle has an active loan"],
+    fees: { scrappingFee: "Facilities typically pay YOU a scrap value based on the vehicle's metal/parts worth, rather than charging a fee -- amounts vary by facility and vehicle condition" },
+    processingTime: "A few days once you deliver the vehicle to a Registered Vehicle Scrapping Facility (RVSF)",
+    onlineSteps: [
+      "Check vahan.parivahan.gov.in for a list of RVSFs near you, or search '[your state] registered vehicle scrapping facility'",
+      "Complete any pending hypothecation termination and clear outstanding challans before scrapping -- the Vahan portal will flag these",
+      "After scrapping, the RVSF issues a Certificate of Deposit (CoD) and updates your vehicle's status to deregistered on Vahan",
+    ],
+    offlineSteps: ["Deliver the vehicle physically to an RVSF, complete the paperwork, and collect your Certificate of Deposit (CoD)"],
+    commonMistakes: [
+      "Scrapping at an unregistered/informal scrap dealer instead of an RVSF -- only a Registered Vehicle Scrapping Facility can issue the CoD needed to claim any related incentives",
+      "Not clearing pending challans or hypothecation first, which can block the deregistration process",
+    ],
+    faqs: [
+      {
+        q: "What do I actually get for scrapping my old vehicle?",
+        a: "Beyond the scrap value paid by the RVSF itself, your Certificate of Deposit (CoD) can unlock a road tax rebate and registration fee waiver on a new vehicle purchase in many states -- check your specific state's current incentive structure, as amounts and availability vary.",
+      },
+    ],
+    officialLinks: ["https://vahan.parivahan.gov.in"],
+    lastUpdated: "2026-08-11",
+  },
+
+  {
+    id: "commercial-vehicle-permit",
+    name: "National / State Permit for Commercial Vehicles",
+    department: "Transport & RTO",
+    category: "Transport & RTO",
+    categoryIcon: "🚗",
+    overview: "A permit authorizing a commercial vehicle (goods carrier or passenger transport) to operate within a state or across multiple states, required in addition to standard registration for any vehicle used commercially.",
+    eligibility: "Owners of commercial vehicles (trucks, buses, taxis operating commercially) intending to ply within their home state (state permit) or across state lines (national permit).",
+    documents: ["Vehicle RC", "Valid insurance and PUC", "Fitness certificate", "Tax payment receipts", "Route details for the permit application"],
+    fees: { permitFee: "Varies by permit type, vehicle category, and validity period -- national permits typically involve a per-state authorization fee on top of the base permit fee" },
+    processingTime: "A few days to a couple of weeks, depending on RTO processing and the number of states covered for a national permit",
+    onlineSteps: [
+      "Go to vahan.parivahan.gov.in and select the permit service relevant to your vehicle category",
+      "Enter vehicle and route details, upload required documents",
+      "Pay the applicable fee -- for national permits, this includes authorization fees for each additional state covered",
+    ],
+    offlineSteps: ["Apply at your RTO if the online option isn't fully available for your specific permit category"],
+    commonMistakes: [
+      "Operating outside your permit's authorized routes/states, which can result in fines and vehicle seizure at check posts",
+      "Letting the permit lapse -- like registration, permits need periodic renewal and driving without a valid one is a punishable offense",
+    ],
+    faqs: [
+      {
+        q: "What's the difference between a national and state permit?",
+        a: "A state permit authorizes operation only within your home state, while a national permit allows interstate operation across India, subject to per-state authorization fees -- choose based on your actual route needs.",
+      },
+    ],
+    officialLinks: ["https://vahan.parivahan.gov.in"],
+    lastUpdated: "2026-06-01",
+  },
+
+  {
+    id: "income-tax-grievance",
+    name: "Income Tax Grievance / Rectification Request",
+    department: "Income Tax",
+    category: "Income Tax",
+    categoryIcon: "💰",
+    overview: "Filing a grievance or rectification request with the Income Tax Department when there's an error in your processed return (like a mismatch in tax credit) or an unresolved issue with a filing, refund, or notice.",
+    eligibility: "Any taxpayer with an e-filing account who has a genuine grievance or a processed return containing an apparent mistake.",
+    documents: ["PAN", "Relevant assessment year and acknowledgment/order details", "Description of the specific error or grievance"],
+    fees: { filing: "Free" },
+    processingTime: "Rectification requests (Section 154) are typically processed within a few weeks to a couple of months; grievance resolution timelines vary by complexity",
+    onlineSteps: [
+      "For a rectification (correcting an apparent mistake in your processed return): log in to incometax.gov.in, go to 'Services' > 'Rectification', select the relevant order and reason, and submit",
+      "For a broader grievance: use the 'e-Nivaran' / grievance section on the e-filing portal, describing the issue and referencing relevant order/notice numbers",
+      "Track status on the same portal using your submitted request's reference number",
+    ],
+    offlineSteps: ["Grievances can also be escalated to your jurisdictional Assessing Officer if the online route doesn't resolve the issue"],
+    commonMistakes: [
+      "Filing a rectification request for something that actually requires a revised return instead (rectification is only for apparent/obvious mistakes, not for changing your originally reported income or claims)",
+      "Not referencing the specific order/notice number, which slows down resolution",
+    ],
+    faqs: [
+      {
+        q: "What's the difference between rectification and a revised return?",
+        a: "Rectification (Section 154) corrects an apparent mistake in an already-processed order -- like a tax credit mismatch the department made. A revised return is for when you need to correct or add information you yourself omitted or got wrong in your original filing -- these have different processes and eligibility windows.",
+      },
+    ],
+    officialLinks: ["https://www.incometax.gov.in"],
+    lastUpdated: "2026-07-01",
+  },
+
+  {
+    id: "oci-card",
+    name: "OCI Card (Overseas Citizen of India)",
+    department: "Identity Documents",
+    category: "Identity Documents",
+    categoryIcon: "🪪",
+    overview: "The Overseas Citizen of India (OCI) card is a lifelong visa-like document for foreign nationals of Indian origin (and their spouses/descendants meeting eligibility), letting them live, work, and travel to India without needing a separate visa each time -- though it does not confer Indian citizenship or voting rights.",
+    eligibility: "Foreign nationals who were Indian citizens at some point, or are descended from someone who was, or are the spouse of an Indian citizen/OCI cardholder (subject to marriage duration and other conditions) -- citizens of Pakistan and Bangladesh are not eligible.",
+    documents: [
+      "Foreign passport",
+      "Proof of Indian origin (own or parent's/grandparent's Indian passport, birth certificate, or similar)",
+      "Marriage certificate, if applying on spousal grounds",
+      "Passport-size photographs meeting specification",
+    ],
+    fees: { application: "Varies by country and processing category -- typically a notable fee in the applicant's local currency, higher than a standard visa; check the current fee on the specific consulate's OCI portal for your country" },
+    processingTime: "Several weeks to a few months, depending on the processing consulate/VFS center and document verification complexity",
+    onlineSteps: [
+      "Go to ociservices.gov.in and register, selecting the Indian Mission/Consulate handling your region",
+      "Fill in the application with personal, family, and Indian-origin proof details",
+      "Upload required documents and pay the fee",
+      "Submit biometrics at the designated VFS/consulate center as instructed",
+      "Track application status on the same portal",
+    ],
+    offlineSteps: ["Applications ultimately require an in-person visit to a VFS/consulate center for biometrics, even though the form itself is submitted online"],
+    commonMistakes: [
+      "Not providing sufficient documentary proof of the Indian-origin ancestor's citizenship, which is the crux of most OCI applications",
+      "Assuming OCI is equivalent to citizenship -- it isn't; OCI holders can't vote, hold Indian public office, or buy agricultural land, among other restrictions",
+    ],
+    faqs: [
+      {
+        q: "Is an OCI card the same as Indian citizenship?",
+        a: "No -- OCI is a long-term, multiple-entry lifelong visa-equivalent status, not citizenship. OCI holders can't vote in Indian elections, hold most government positions, or purchase agricultural/farm land, among other restrictions that apply to full citizens only.",
+      },
+    ],
+    officialLinks: ["https://ociservices.gov.in"],
+    lastUpdated: "2026-06-01",
+  },
+
+  {
+    id: "legal-heir-certificate",
+    name: "Legal Heir Certificate / Succession Certificate",
+    department: "Identity Documents",
+    category: "Identity Documents",
+    categoryIcon: "🪪",
+    overview:
+      "A certificate identifying the rightful legal heirs of a deceased person, needed to claim their property, bank accounts, insurance, pension, or other assets. A Legal Heir Certificate (issued by the local Tahsildar/Revenue office) is typically sufficient for smaller matters like transferring utility connections or claiming small dues, while a Succession Certificate (issued by a civil court) is generally required for larger matters like transferring immovable property, securities, or disputed claims.",
+    eligibility: "Legal heirs (spouse, children, parents, as applicable) of a deceased person.",
+    documents: ["Death certificate of the deceased", "Identity and address proof of all legal heirs", "Family tree/relationship proof", "Address proof of the deceased at time of death"],
+    fees: { legalHeirCertificate: "A nominal fee, typically a few hundred rupees, varies by state", successionCertificate: "Court fees scaled by the value of the estate, typically a percentage of the asset value -- can be more significant for larger estates" },
+    processingTime: "Legal Heir Certificate: a few weeks via the Revenue office; Succession Certificate: several months via civil court, given the court process involved",
+    onlineSteps: [
+      "For a Legal Heir Certificate: apply via your state's e-district portal (search '[your state] e-district legal heir certificate') if available, or in person",
+      "For a Succession Certificate: this requires filing a formal petition in civil court -- typically done with a lawyer's assistance, not a simple online form",
+    ],
+    offlineSteps: [
+      "Legal Heir Certificate: visit your local Tahsildar/Revenue office with the death certificate and family details",
+      "Succession Certificate: file a petition at the civil court having jurisdiction over the deceased's last residence, typically with legal representation",
+    ],
+    commonMistakes: [
+      "Assuming a Legal Heir Certificate is sufficient for every purpose -- banks, insurers, and property registrars often specifically require a Succession Certificate for larger-value claims, so check the specific institution's requirement before starting the wrong process",
+      "Delaying this significantly after a death, which can complicate accessing time-sensitive benefits like insurance claims or pension continuation",
+    ],
+    faqs: [
+      {
+        q: "Which one do I actually need -- Legal Heir Certificate or Succession Certificate?",
+        a: "It depends on what you're claiming. Smaller matters (utility transfer, some government benefits, employment dues) often accept a Legal Heir Certificate from the Revenue office. Larger or disputed matters -- especially property, securities, and significant bank balances -- often specifically require a court-issued Succession Certificate. Check directly with the institution you're claiming from, since requirements vary.",
+      },
+    ],
+    officialLinks: [],
+    lastUpdated: "2026-08-11",
+  },
+
+  {
+    id: "home-loan",
+    name: "Home Loan",
+    department: "Banking",
+    category: "Banking",
+    categoryIcon: "🏦",
+    overview: "Applying for a home loan from a bank or housing finance company to purchase, construct, or renovate a residential property, typically the largest and longest-tenure loan most individuals take.",
+    eligibility: "Salaried or self-employed individuals meeting the lender's income, age, and credit score requirements -- specific criteria vary by lender.",
+    documents: [
+      "PAN and Aadhaar",
+      "Income proof (salary slips/IT returns)",
+      "Bank statements (typically last 6 months)",
+      "Property documents (sale agreement, title deeds, approved building plan)",
+      "Employment proof",
+    ],
+    fees: {
+      processingFee: "Typically 0.5-1% of loan amount, varies by lender",
+      interestRate: "Varies by lender, loan amount, tenure, and your credit profile -- compare across banks/HFCs before committing",
+    },
+    processingTime: "A few weeks from application to disbursal, depending on property verification, legal due diligence, and documentation completeness",
+    onlineSteps: [
+      "Apply via your chosen bank/HFC's app or website, or a loan aggregator platform",
+      "Complete e-KYC and upload income and property documents",
+      "The lender conducts a technical (property) and legal verification of the property",
+      "Review and accept the sanction letter, then complete disbursal formalities, often tied to your property registration",
+    ],
+    offlineSteps: ["Visit a bank/HFC branch to apply with physical documents if you prefer an in-person process"],
+    commonMistakes: [
+      "Not checking whether the property has clear title and necessary approvals before applying -- this is a common cause of loan rejection or delay during legal verification",
+      "Not comparing interest rates/processing fees across multiple lenders, since even small rate differences compound significantly over a 15-20 year tenure",
+      "Forgetting to claim available tax deductions on home loan principal (Section 80C) and interest (Section 24) once the loan is active",
+    ],
+    faqs: [
+      {
+        q: "What tax benefits does a home loan offer?",
+        a: "Principal repayment can be claimed under Section 80C (within the overall 80C limit), and interest paid can be claimed under Section 24, subject to specified limits -- check current limits on the Income Tax portal, and note these benefits depend on which tax regime you choose.",
+      },
+    ],
+    officialLinks: [],
+    lastUpdated: "2026-06-01",
+  },
+
+  {
+    id: "bank-locker",
+    name: "Bank Locker Facility",
+    department: "Banking",
+    category: "Banking",
+    categoryIcon: "🏦",
+    overview: "Renting a bank safe deposit locker to securely store valuables, important documents, and jewelry -- note that banks are not insurers of locker contents, so RBI rules require banks to maintain their own liability framework and offer this only alongside a documented inventory understanding.",
+    eligibility: "Existing or new bank account holders, subject to the bank's specific locker allotment availability (lockers are often in limited supply and may have a waitlist at busy branches).",
+    documents: ["Existing account KYC", "Locker agreement (bank-provided)", "Nominee details for the locker"],
+    fees: { annualRent: "Varies by locker size and branch location -- typically ranges from a few hundred to a few thousand rupees per year", termDeposit: "Some banks require a fixed deposit as security alongside locker rental, refundable when the locker is surrendered" },
+    processingTime: "Same-day allotment if a locker is available; otherwise added to a waitlist",
+    onlineSteps: ["Some banks allow you to check locker availability and register interest online, but actual allotment and the agreement signing require a branch visit"],
+    offlineSteps: [
+      "Visit your bank branch and request locker allotment",
+      "Complete the locker agreement, nominate a nominee, and pay the applicable rent (and security deposit, if required)",
+      "Access your locker during branch hours using your key/access credentials",
+    ],
+    commonMistakes: [
+      "Not nominating anyone for the locker, which complicates access for family in case something happens to you",
+      "Assuming locker contents are automatically insured by the bank -- banks are generally not liable for locker contents beyond specific limited circumstances under RBI's locker liability framework; consider separate insurance for high-value items",
+    ],
+    faqs: [
+      {
+        q: "Is everything in my locker insured by the bank?",
+        a: "Not fully -- RBI's locker rules place some limited liability on banks in specific circumstances (like fire/theft due to the bank's negligence), but this isn't blanket insurance for locker contents. For high-value items, consider separate insurance coverage.",
+      },
+    ],
+    officialLinks: ["https://www.rbi.org.in"],
+    lastUpdated: "2026-06-01",
+  },
+
+  {
+    id: "pmjjby-life-insurance",
+    name: "PM Jeevan Jyoti Bima Yojana (PMJJBY) -- Life Insurance",
+    department: "Government Schemes",
+    category: "Government Schemes",
+    categoryIcon: "🎯",
+    overview: "A government-backed term life insurance scheme offering ₹2 lakh cover for death from any cause, at an extremely low annual premium of ₹436, auto-renewed each year via your bank account.",
+    eligibility: "Bank/post office account holders aged 18-50 (new enrollment); coverage can continue via annual renewal up to age 55.",
+    documents: ["Bank/post office savings account", "Aadhaar (used as primary KYC, though not strictly mandatory for enrollment)", "Nominee details"],
+    fees: { annualPremium: "₹436 per year, auto-debited from your linked account between 1 June and 31 May each policy year" },
+    processingTime: "Enrollment is typically instant once your bank processes the consent form; coverage begins after a 30-day lien period for non-accidental death in the first year",
+    onlineSteps: [
+      "Log in to your bank's net banking or app and look for 'PMJJBY' under insurance/social security schemes",
+      "Give consent and ensure your account has sufficient balance for the annual auto-debit",
+      "Nominate a beneficiary if not already done",
+    ],
+    offlineSteps: ["Visit your bank or post office branch to enroll by filling a simple consent form"],
+    commonMistakes: [
+      "Insufficient account balance on the auto-debit date, which lapses your coverage for that year",
+      "Not understanding the 30-day lien period for new enrollees -- non-accidental death within the first 30 days of enrollment isn't covered (accidental death is covered from day one)",
+    ],
+    faqs: [
+      {
+        q: "Can I have both PMJJBY and PMSBY?",
+        a: "Yes -- they're separate, complementary schemes (PMJJBY for life cover from any cause, PMSBY for accidental death/disability specifically), and you can enroll in both if you meet each one's age criteria.",
+      },
+    ],
+    officialLinks: ["https://financialservices.gov.in/beta/en/pmjjby", "https://jansuraksha.gov.in"],
+    lastUpdated: "2026-08-11",
+  },
+
+  {
+    id: "pmsby-accident-insurance",
+    name: "PM Suraksha Bima Yojana (PMSBY) -- Accident Insurance",
+    department: "Government Schemes",
+    category: "Government Schemes",
+    categoryIcon: "🎯",
+    overview: "A government-backed accidental insurance scheme offering ₹2 lakh cover for accidental death or total disability (₹1 lakh for partial disability), at a remarkably low annual premium of just ₹20, auto-renewed via your bank account.",
+    eligibility: "Bank/post office account holders aged 18-70.",
+    documents: ["Bank/post office savings account", "Nominee details"],
+    fees: { annualPremium: "₹20 per year, auto-debited from your linked account between 1 June and 31 May each policy year" },
+    processingTime: "Enrollment is typically instant once consent is given; coverage is active immediately, with no lien period (unlike PMJJBY)",
+    onlineSteps: [
+      "Log in to your bank's net banking or app and look for 'PMSBY' under insurance/social security schemes",
+      "Give consent and ensure sufficient account balance for the annual auto-debit",
+      "Nominate a beneficiary",
+    ],
+    offlineSteps: ["Visit your bank or post office branch to enroll by filling a simple consent form"],
+    commonMistakes: [
+      "Insufficient account balance on the auto-debit date, lapsing coverage for that year",
+      "Not filing a claim promptly after a qualifying accident -- claims require timely documentation (FIR/medical records as applicable), so don't delay",
+    ],
+    faqs: [
+      {
+        q: "What exactly does PMSBY cover?",
+        a: "₹2 lakh for accidental death or total and irrecoverable loss of both eyes/hands/feet, and ₹1 lakh for partial disability (loss of one eye/hand/foot) -- it covers accidents specifically, not death from illness or natural causes, which is what PMJJBY is for instead.",
+      },
+    ],
+    officialLinks: ["https://financialservices.gov.in/beta/en/pmsby", "https://jansuraksha.gov.in"],
+    lastUpdated: "2026-08-11",
+  },
+
+  {
+    id: "pm-kisan-maandhan",
+    name: "PM Kisan Maandhan Yojana (Farmer Pension)",
+    department: "Farmers",
+    category: "Farmers",
+    categoryIcon: "🌾",
+    overview:
+      "A voluntary pension scheme specifically for small and marginal farmers, guaranteeing a minimum ₹3,000 monthly pension after age 60, funded by matching monthly contributions from the farmer and the government during their working years. This is distinct from PM Kisan Samman Nidhi (the direct income-support scheme) -- Maandhan is a pension you contribute toward, not a direct cash transfer.",
+    eligibility: "Small and marginal farmers aged 18-40, owning cultivable land up to 2 hectares as per state land records. Farmers already covered under other statutory social security schemes (like NPS, ESIC, EPFO) or who are income tax payers are generally not eligible.",
+    documents: ["Aadhaar card", "Land ownership records (khatauni/khasra or equivalent)", "Bank/Jan Dhan account details", "Age proof"],
+    fees: { monthlyContribution: "Ranges from ₹55 to ₹200 per month depending on your age at entry (lower if you join younger), matched equally by the government" },
+    processingTime: "Enrollment is typically completed same-day through a Common Service Centre",
+    onlineSteps: ["Existing PM Kisan Samman Nidhi beneficiaries can often self-enroll for Maandhan directly via pmkisan.gov.in using their existing beneficiary details, simplifying registration"],
+    offlineSteps: [
+      "Visit your nearest Common Service Centre (CSC) with your Aadhaar, land records, and bank details",
+      "The CSC operator calculates your specific monthly contribution based on your entry age and completes registration",
+      "Contributions are auto-debited monthly from your linked account",
+    ],
+    commonMistakes: [
+      "Confusing this with PM Kisan Samman Nidhi -- Samman Nidhi is a direct ₹6,000/year cash transfer with no farmer contribution required, while Maandhan is a contributory pension scheme requiring you to pay in monthly until age 60",
+      "Not realizing income tax payers and those covered by other formal pension schemes (EPFO, NPS, ESIC) aren't eligible",
+    ],
+    faqs: [
+      {
+        q: "How is this different from PM Kisan Samman Nidhi?",
+        a: "PM Kisan Samman Nidhi (PM-KISAN) is direct, no-contribution income support of ₹6,000/year. PM Kisan Maandhan Yojana is a separate, voluntary, contributory pension scheme where you pay a monthly amount (matched by the government) to receive a guaranteed ₹3,000/month pension after turning 60. You can potentially benefit from both, since they serve different purposes.",
+      },
+      {
+        q: "What happens if I die before turning 60?",
+        a: "Your spouse can choose to continue the scheme by continuing contributions, or exit and receive the accumulated corpus with interest -- check current rules on the specific provisions for your situation.",
+      },
+    ],
+    officialLinks: ["https://pmkisan.gov.in", "https://maandhan.in"],
+    lastUpdated: "2026-08-11",
+  },
+
+  {
+    id: "duplicate-marksheet-certificate",
+    name: "Duplicate Marksheet / Degree Certificate",
+    department: "Education",
+    category: "Education",
+    categoryIcon: "🎓",
+    overview: "Obtaining a duplicate copy of a lost, damaged, or misplaced marksheet or degree certificate from your school board, university, or examining body.",
+    eligibility: "Any student/alumnus of the issuing institution/board needing a replacement for a lost or damaged original.",
+    documents: ["FIR copy or police complaint acknowledgment (for a lost certificate, required by most boards/universities)", "Original certificate, if damaged rather than lost", "Roll number / enrollment number / registration number from the original", "Identity proof"],
+    fees: { duplicateIssuance: "A nominal fee, varies by board/university and sometimes scaled by how many years have passed since the original was issued" },
+    processingTime: "A few weeks to a few months, depending on the board/university's record-retrieval and verification process -- older records can take longer to trace",
+    onlineSteps: [
+      "Check if your specific board/university offers online duplicate certificate applications (increasingly common -- search '[your board/university name] duplicate marksheet online')",
+      "Upload the FIR copy, your original enrollment details, and identity proof",
+      "Pay the fee and track your application",
+      "Some boards also make certificates available via DigiLocker, which may be a faster alternative to a physical reissue",
+    ],
+    offlineSteps: [
+      "Submit a written application to your board/university's examination section with the FIR copy and supporting documents",
+      "Collect the duplicate certificate once processed, or await postal delivery",
+    ],
+    commonMistakes: [
+      "Not filing a police complaint/FIR first -- most boards and universities require this as mandatory proof for a lost-certificate application",
+      "Not checking DigiLocker first -- your certificate may already be available there instantly if your board/university has digitized older records, saving you the entire reissue process",
+    ],
+    faqs: [
+      {
+        q: "Can I get my certificate from DigiLocker instead of requesting a physical duplicate?",
+        a: "Worth checking first -- many boards and universities (especially for more recent years) have uploaded certificates to DigiLocker, which would let you access a valid digital copy instantly, without going through the FIR-and-reissue process needed for a physical duplicate.",
+      },
+    ],
+    officialLinks: [],
+    lastUpdated: "2026-06-01",
+  },
+
+  {
+    id: "health-insurance-claim",
+    name: "Filing a Health Insurance Claim (Cashless / Reimbursement)",
+    department: "Healthcare",
+    category: "Healthcare",
+    categoryIcon: "🏥",
+    overview: "Filing a claim on a private or employer-provided health insurance policy -- either cashless (the hospital bills the insurer directly) or reimbursement (you pay first, then claim back), for a hospitalization or covered treatment.",
+    eligibility: "Any policyholder or covered dependent with an active health insurance policy, for a treatment covered under their specific policy terms.",
+    documents: [
+      "Policy number and health ID card",
+      "Hospital admission/discharge summary",
+      "Original bills, prescriptions, and diagnostic reports (for reimbursement claims)",
+      "Pre-authorization form (for cashless claims, filled by the hospital's insurance desk)",
+    ],
+    fees: { claimFiling: "Free -- insurers cannot charge you to file a claim" },
+    processingTime: "Cashless pre-authorization: typically a few hours at network hospitals; reimbursement claims: commonly 15-30 days after complete document submission, per IRDAI's claim settlement timelines",
+    onlineSteps: [
+      "For cashless: inform your insurer/TPA (Third Party Administrator) as soon as hospitalization is planned or immediately in an emergency, and let the network hospital's insurance desk handle direct pre-authorization",
+      "For reimbursement: log in to your insurer's app/portal, upload bills and discharge summary, and submit the claim within the policy's specified time limit (commonly 15-30 days from discharge)",
+      "Track claim status through the same portal or your TPA's tracker",
+    ],
+    offlineSteps: ["Submit physical documents to your insurer's branch or via your employer's HR/insurance desk if it's a group policy"],
+    commonMistakes: [
+      "Not checking whether the hospital is in your insurer's network before admission -- non-network hospitals typically only allow reimbursement, not cashless",
+      "Missing the claim submission deadline (commonly 15-30 days post-discharge for reimbursement) -- submit as soon as documents are ready rather than delaying",
+      "Incomplete documentation causing repeated back-and-forth -- submit all required documents together the first time where possible",
+    ],
+    faqs: [
+      {
+        q: "What if my claim is rejected or I disagree with the settlement amount?",
+        a: "First raise it with your insurer's grievance cell. If unresolved, you can escalate to the Insurance Ombudsman (a free, IRDAI-backed dispute resolution mechanism) or file a complaint via IRDAI's Integrated Grievance Management System (igms.irdai.gov.in).",
+      },
+    ],
+    officialLinks: ["https://irdai.gov.in", "https://igms.irdai.gov.in"],
+    lastUpdated: "2026-06-01",
+  },
+
+  {
+    id: "msme-samadhaan",
+    name: "MSME Samadhaan (Delayed Payment Recovery)",
+    department: "Business & GST",
+    category: "Business & GST",
+    categoryIcon: "🏢",
+    overview:
+      "A statutory online portal letting registered micro and small enterprises file complaints against buyers -- government, PSU, or private -- who delay payment beyond the legally mandated 45 days (or 15 days if there's no written agreement). Complaints are routed to your state's Micro and Small Enterprise Facilitation Council (MSEFC), whose award carries the legal weight of a civil court decree, without needing to hire a lawyer or go through regular court proceedings. A 2026 amendment further strengthened enforcement, allowing awards to be recovered as arrears of land revenue.",
+    eligibility: "Any Micro or Small Enterprise (not Medium) with a valid Udyam Registration, owed payment by a buyer beyond the statutory payment window.",
+    documents: ["Udyam Registration certificate", "Invoice(s) and proof of delivery/acceptance of goods/services", "Correspondence with the buyer regarding the delayed payment", "Buyer's details"],
+    fees: { filing: "Free to file a complaint on the portal" },
+    processingTime: "The MSEFC is required to dispose of complaints within 90 days of reference, though actual timelines can vary with case complexity",
+    onlineSteps: [
+      "Go to samadhaan.msme.gov.in and register using your Udyam Registration number",
+      "File a complaint with invoice details, delivery/acceptance proof, and buyer information",
+      "The complaint is automatically routed to your state's MSEFC",
+      "The council attempts conciliation first; if that fails, it proceeds to a formal hearing and issues a binding award",
+      "Track status online throughout the process",
+    ],
+    offlineSteps: ["Physical applications can also be filed directly with your state's MSEFC if you prefer not to use the online portal"],
+    commonMistakes: [
+      "Not having a valid Udyam Registration before the transaction/complaint -- this is a prerequisite to access MSEFC protection",
+      "Missing or incomplete proof of delivery/acceptance of goods or services, which weakens the complaint",
+      "Not knowing that if a buyer wants to challenge an MSEFC award, they must first deposit the full awarded amount with the court -- a strong practical incentive for buyers to pay rather than contest",
+    ],
+    faqs: [
+      {
+        q: "Do I need a lawyer to use MSME Samadhaan?",
+        a: "No -- the portal is specifically designed to let MSEs file and pursue delayed-payment complaints without needing to hire a lawyer or go through regular civil court, though you're free to seek legal advice if the matter is complex.",
+      },
+      {
+        q: "What interest can I claim on the delayed amount?",
+        a: "The buyer is liable to pay compound interest at three times the bank rate notified by RBI, on top of the principal amount owed -- a strong statutory penalty specifically meant to discourage delayed payments to small enterprises.",
+      },
+    ],
+    officialLinks: ["https://samadhaan.msme.gov.in"],
+    lastUpdated: "2026-08-11",
+  },
+
+  {
+    id: "disability-pension",
+    name: "Disability Pension",
+    department: "Disability Services",
+    category: "Disability Services",
+    categoryIcon: "♿",
+    overview: "A monthly pension for persons with disabilities from economically weaker households, provided under state-specific schemes (often linked to or modeled on the National Social Assistance Programme framework) -- distinct from the ADIP scheme, which provides physical aids rather than cash support.",
+    eligibility: "Persons with a specified minimum disability percentage (commonly 40% or above, verified via UDID/Disability Certificate) from households meeting the state's income/BPL criteria -- exact eligibility and pension amounts are set by each state, so they vary considerably.",
+    documents: ["UDID card or Disability Certificate (showing disability percentage)", "Income/BPL proof", "Age proof", "Bank account details"],
+    fees: { application: "Free" },
+    processingTime: "A few weeks to a couple of months, depending on state verification processes",
+    onlineSteps: ["Check your state's social welfare/disability welfare department portal (search '[your state] disability pension online application') for the specific scheme name and application process in your state"],
+    offlineSteps: ["Visit your local Social Welfare Department office or Gram Panchayat/municipal ward office to apply with your UDID card and income proof"],
+    commonMistakes: [
+      "Not having a UDID card ready -- most state disability pension schemes now require this as the standard proof of disability percentage, replacing older state-specific certificate formats",
+      "Assuming pension amounts are uniform nationally -- they're set independently by each state and vary significantly",
+    ],
+    faqs: [
+      {
+        q: "Is this the same as the ADIP scheme?",
+        a: "No -- ADIP provides physical assistive devices (wheelchairs, hearing aids, etc.) through camps, while Disability Pension is an ongoing monthly cash payment. Many eligible individuals can access both, since they serve different needs.",
+      },
+    ],
+    officialLinks: ["https://www.disabilityaffairs.gov.in"],
+    lastUpdated: "2026-06-01",
+  },
+
+  {
+    id: "aadhaar-esign",
+    name: "Aadhaar e-Sign (Digital Signature)",
+    department: "Digital Services",
+    category: "Digital Services",
+    categoryIcon: "⚙",
+    overview: "Aadhaar e-Sign lets you digitally sign documents online using Aadhaar-based OTP or biometric authentication, without needing a physical signature or a separately purchased Digital Signature Certificate (DSC) USB token -- widely used for signing government forms, income tax returns, and various online applications referenced throughout this app.",
+    eligibility: "Any Aadhaar holder with a mobile number linked to Aadhaar (for OTP-based e-Sign).",
+    documents: ["Aadhaar number", "Registered mobile number for OTP"],
+    fees: { perDocumentSigning: "Often free when integrated within a government portal's own workflow (e.g., signing your ITR); some private-sector integrations may charge a small per-signature fee through their e-Sign service provider" },
+    processingTime: "Instant",
+    onlineSteps: [
+      "When a government portal or application offers 'Sign with Aadhaar' or 'e-Sign', select it at the relevant step",
+      "Enter your Aadhaar number and verify via OTP sent to your registered mobile",
+      "The document is digitally signed instantly, using a licensed Certifying Authority's e-Sign service in the background",
+    ],
+    offlineSteps: [],
+    commonMistakes: ["Assuming e-Sign works if your mobile number isn't linked to Aadhaar -- OTP-based e-Sign specifically requires this; update your Aadhaar mobile number first if needed (see Aadhaar Update & Correction)"],
+    faqs: [
+      {
+        q: "Is Aadhaar e-Sign legally valid, like a physical signature?",
+        a: "Yes -- Aadhaar e-Sign is a legally recognized electronic signature under India's IT Act, provided through licensed Certifying Authorities, and is widely accepted across government portals (income tax filing, various applications) as equivalent to a physical signature for those purposes.",
+      },
+    ],
+    officialLinks: ["https://uidai.gov.in"],
+    lastUpdated: "2026-06-01",
   },
 ];
 

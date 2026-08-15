@@ -5,8 +5,11 @@ import {
   createUserWithEmailAndPassword,
 } from "firebase/auth";
 import { auth } from "../firebase/config";
+import { useTheme } from "../theme/ThemeContext";
 
 export default function LoginScreen() {
+  const { colors } = useTheme();
+  const styles = getStyles(colors);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [mode, setMode] = useState("login"); // "login" | "signup"
@@ -24,7 +27,6 @@ export default function LoginScreen() {
       } else {
         await createUserWithEmailAndPassword(auth, email, password);
       }
-      // Navigation happens automatically -- App.js listens to auth state.
     } catch (e) {
       Alert.alert("Authentication error", e.message);
     } finally {
@@ -34,13 +36,16 @@ export default function LoginScreen() {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.logo}>🇮🇳</Text>
+      <View style={styles.logoWrap}>
+        <Text style={styles.logo}>🇮🇳</Text>
+      </View>
       <Text style={styles.title}>IndiaAssist AI</Text>
       <Text style={styles.subtitle}>One app for every government & public service in India.</Text>
 
       <TextInput
         style={styles.input}
         placeholder="Email"
+        placeholderTextColor={colors.textMuted}
         autoCapitalize="none"
         keyboardType="email-address"
         value={email}
@@ -49,6 +54,7 @@ export default function LoginScreen() {
       <TextInput
         style={styles.input}
         placeholder="Password"
+        placeholderTextColor={colors.textMuted}
         secureTextEntry
         value={password}
         onChangeText={setPassword}
@@ -67,27 +73,41 @@ export default function LoginScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1, justifyContent: "center", padding: 24, backgroundColor: "#fff" },
-  logo: { fontSize: 48, textAlign: "center", marginBottom: 8 },
-  title: { fontSize: 24, fontWeight: "800", textAlign: "center" },
-  subtitle: { fontSize: 13, color: "#777", textAlign: "center", marginTop: 6, marginBottom: 32 },
-  input: {
-    borderWidth: 1,
-    borderColor: "#ddd",
-    borderRadius: 12,
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    marginBottom: 12,
-    fontSize: 15,
-  },
-  button: {
-    backgroundColor: "#0B5FFF",
-    borderRadius: 12,
-    paddingVertical: 14,
-    alignItems: "center",
-    marginTop: 8,
-  },
-  buttonText: { color: "#fff", fontWeight: "700", fontSize: 15 },
-  switchText: { textAlign: "center", color: "#0B5FFF", marginTop: 18, fontWeight: "600" },
-});
+function getStyles(c) {
+  return StyleSheet.create({
+    container: { flex: 1, justifyContent: "center", padding: 24, backgroundColor: c.bg },
+    logoWrap: {
+      width: 76,
+      height: 76,
+      borderRadius: 22,
+      backgroundColor: c.primarySoft,
+      alignSelf: "center",
+      alignItems: "center",
+      justifyContent: "center",
+      marginBottom: 16,
+    },
+    logo: { fontSize: 38 },
+    title: { fontSize: 24, fontWeight: "800", textAlign: "center", color: c.text },
+    subtitle: { fontSize: 13, color: c.textSecondary, textAlign: "center", marginTop: 6, marginBottom: 32 },
+    input: {
+      backgroundColor: c.surface,
+      borderWidth: 1,
+      borderColor: c.border,
+      borderRadius: 14,
+      paddingHorizontal: 16,
+      paddingVertical: 14,
+      marginBottom: 12,
+      fontSize: 15,
+      color: c.text,
+    },
+    button: {
+      backgroundColor: c.primary,
+      borderRadius: 14,
+      paddingVertical: 15,
+      alignItems: "center",
+      marginTop: 8,
+    },
+    buttonText: { color: c.onPrimary, fontWeight: "700", fontSize: 15 },
+    switchText: { textAlign: "center", color: c.primary, marginTop: 18, fontWeight: "600" },
+  });
+}

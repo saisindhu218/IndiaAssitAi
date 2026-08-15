@@ -1,8 +1,12 @@
 import React, { useEffect, useState } from "react";
 import { View, Text, FlatList, TouchableOpacity, StyleSheet, ActivityIndicator } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
 import { getJourneyById, getServiceById } from "../firebase/firestore";
+import { useTheme } from "../theme/ThemeContext";
 
 export default function JourneyDetailScreen({ route, navigation }) {
+  const { colors } = useTheme();
+  const styles = getStyles(colors);
   const { journeyId } = route.params;
   const [journey, setJourney] = useState(null);
   const [stepServices, setStepServices] = useState([]);
@@ -28,7 +32,7 @@ export default function JourneyDetailScreen({ route, navigation }) {
   if (loading) {
     return (
       <View style={styles.center}>
-        <ActivityIndicator size="large" />
+        <ActivityIndicator size="large" color={colors.primary} />
       </View>
     );
   }
@@ -36,7 +40,7 @@ export default function JourneyDetailScreen({ route, navigation }) {
   if (!journey) {
     return (
       <View style={styles.center}>
-        <Text>Journey not found.</Text>
+        <Text style={{ color: colors.text }}>Journey not found.</Text>
       </View>
     );
   }
@@ -55,10 +59,7 @@ export default function JourneyDetailScreen({ route, navigation }) {
           <TouchableOpacity
             style={styles.stepRow}
             disabled={!item.service}
-            onPress={() =>
-              item.service &&
-              navigation.navigate("ServiceDetail", { serviceId: item.serviceId })
-            }
+            onPress={() => item.service && navigation.navigate("ServiceDetail", { serviceId: item.serviceId })}
           >
             <View style={styles.stepNumber}>
               <Text style={styles.stepNumberText}>{index + 1}</Text>
@@ -69,7 +70,7 @@ export default function JourneyDetailScreen({ route, navigation }) {
               </Text>
               {!!item.note && <Text style={styles.stepNote}>{item.note}</Text>}
             </View>
-            {item.service && <Text style={styles.arrow}>›</Text>}
+            {item.service && <Ionicons name="chevron-forward" size={20} color={colors.textMuted} />}
           </TouchableOpacity>
         )}
       />
@@ -77,30 +78,35 @@ export default function JourneyDetailScreen({ route, navigation }) {
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1, padding: 20, backgroundColor: "#fff" },
-  center: { flex: 1, alignItems: "center", justifyContent: "center" },
-  icon: { fontSize: 36 },
-  title: { fontSize: 22, fontWeight: "700", marginTop: 6 },
-  desc: { fontSize: 13, color: "#666", marginTop: 6, lineHeight: 19 },
-  stepRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    paddingVertical: 14,
-    borderBottomWidth: 1,
-    borderBottomColor: "#f0f0f0",
-  },
-  stepNumber: {
-    width: 28,
-    height: 28,
-    borderRadius: 14,
-    backgroundColor: "#EAF1FF",
-    alignItems: "center",
-    justifyContent: "center",
-    marginRight: 12,
-  },
-  stepNumberText: { color: "#0B5FFF", fontWeight: "700", fontSize: 12 },
-  stepTitle: { fontSize: 15, fontWeight: "600" },
-  stepNote: { fontSize: 12, color: "#777", marginTop: 2 },
-  arrow: { fontSize: 20, color: "#999" },
-});
+function getStyles(c) {
+  return StyleSheet.create({
+    container: { flex: 1, padding: 20, backgroundColor: c.bg },
+    center: { flex: 1, alignItems: "center", justifyContent: "center", backgroundColor: c.bg },
+    icon: { fontSize: 36 },
+    title: { fontSize: 22, fontWeight: "700", marginTop: 6, color: c.text },
+    desc: { fontSize: 13, color: c.textSecondary, marginTop: 6, lineHeight: 19 },
+    stepRow: {
+      flexDirection: "row",
+      alignItems: "center",
+      backgroundColor: c.surface,
+      borderWidth: 1,
+      borderColor: c.border,
+      borderRadius: 14,
+      paddingVertical: 14,
+      paddingHorizontal: 14,
+      marginBottom: 10,
+    },
+    stepNumber: {
+      width: 28,
+      height: 28,
+      borderRadius: 14,
+      backgroundColor: c.primarySoft,
+      alignItems: "center",
+      justifyContent: "center",
+      marginRight: 12,
+    },
+    stepNumberText: { color: c.primary, fontWeight: "700", fontSize: 12 },
+    stepTitle: { fontSize: 15, fontWeight: "600", color: c.text },
+    stepNote: { fontSize: 12, color: c.textMuted, marginTop: 2 },
+  });
+}

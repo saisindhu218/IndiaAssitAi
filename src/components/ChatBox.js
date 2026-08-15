@@ -11,7 +11,9 @@ import {
   Platform,
   ActivityIndicator,
 } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
 import { askIndiaAssist } from "../ai/groq";
+import { useTheme } from "../theme/ThemeContext";
 
 /**
  * Floating "Ask AI" button + chat modal.
@@ -19,6 +21,8 @@ import { askIndiaAssist } from "../ai/groq";
  * Pass nothing (or null) for a global, unscoped assistant.
  */
 export default function ChatBox({ service = null }) {
+  const { colors } = useTheme();
+  const styles = getStyles(colors);
   const [open, setOpen] = useState(false);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
@@ -41,7 +45,7 @@ export default function ChatBox({ service = null }) {
     setLoading(true);
     try {
       const history = nextMessages
-        .slice(-8) // keep last few turns to bound token usage
+        .slice(-8)
         .map((m) => ({ role: m.role, content: m.content }));
       const reply = await askIndiaAssist(text, service, history.slice(0, -1));
       setMessages((prev) => [...prev, { role: "assistant", content: reply }]);
@@ -65,20 +69,15 @@ export default function ChatBox({ service = null }) {
   return (
     <>
       <TouchableOpacity style={styles.fab} onPress={() => setOpen(true)}>
-        <Text style={styles.fabText}>💬</Text>
+        <Ionicons name="chatbubble-ellipses" size={24} color={colors.onPrimary} />
       </TouchableOpacity>
 
       <Modal visible={open} animationType="slide" onRequestClose={() => setOpen(false)}>
-        <KeyboardAvoidingView
-          style={styles.container}
-          behavior={Platform.OS === "ios" ? "padding" : undefined}
-        >
+        <KeyboardAvoidingView style={styles.container} behavior={Platform.OS === "ios" ? "padding" : undefined}>
           <View style={styles.header}>
-            <Text style={styles.headerTitle}>
-              {service ? `Ask about: ${service.name}` : "Ask IndiaAssist"}
-            </Text>
+            <Text style={styles.headerTitle}>{service ? `Ask about: ${service.name}` : "Ask IndiaAssist"}</Text>
             <TouchableOpacity onPress={() => setOpen(false)}>
-              <Text style={styles.close}>✕</Text>
+              <Ionicons name="close" size={22} color={colors.textSecondary} />
             </TouchableOpacity>
           </View>
 
@@ -88,15 +87,8 @@ export default function ChatBox({ service = null }) {
             keyExtractor={(_, i) => String(i)}
             contentContainerStyle={{ padding: 12 }}
             renderItem={({ item }) => (
-              <View
-                style={[
-                  styles.bubble,
-                  item.role === "user" ? styles.userBubble : styles.aiBubble,
-                ]}
-              >
-                <Text style={item.role === "user" ? styles.userText : styles.aiText}>
-                  {item.content}
-                </Text>
+              <View style={[styles.bubble, item.role === "user" ? styles.userBubble : styles.aiBubble]}>
+                <Text style={item.role === "user" ? styles.userText : styles.aiText}>{item.content}</Text>
               </View>
             )}
             onContentSizeChange={() => listRef.current?.scrollToEnd({ animated: true })}
@@ -104,7 +96,7 @@ export default function ChatBox({ service = null }) {
 
           {loading && (
             <View style={{ paddingBottom: 8 }}>
-              <ActivityIndicator />
+              <ActivityIndicator color={colors.primary} />
             </View>
           )}
 
@@ -112,13 +104,14 @@ export default function ChatBox({ service = null }) {
             <TextInput
               style={styles.input}
               placeholder="Type your question..."
+              placeholderTextColor={colors.textMuted}
               value={input}
               onChangeText={setInput}
               onSubmitEditing={handleSend}
               multiline
             />
             <TouchableOpacity style={styles.sendBtn} onPress={handleSend} disabled={loading}>
-              <Text style={styles.sendText}>Send</Text>
+              <Ionicons name="arrow-up" size={18} color={colors.onPrimary} />
             </TouchableOpacity>
           </View>
         </KeyboardAvoidingView>
@@ -127,61 +120,67 @@ export default function ChatBox({ service = null }) {
   );
 }
 
-const styles = StyleSheet.create({
-  fab: {
-    position: "absolute",
-    bottom: 24,
-    right: 20,
-    backgroundColor: "#0B5FFF",
-    width: 56,
-    height: 56,
-    borderRadius: 28,
-    alignItems: "center",
-    justifyContent: "center",
-    elevation: 4,
-    shadowColor: "#000",
-    shadowOpacity: 0.2,
-    shadowRadius: 4,
-  },
-  fabText: { fontSize: 24 },
-  container: { flex: 1, backgroundColor: "#fff" },
-  header: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    padding: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: "#eee",
-  },
-  headerTitle: { fontSize: 16, fontWeight: "600", flex: 1, paddingRight: 8 },
-  close: { fontSize: 20, color: "#666" },
-  bubble: { padding: 12, borderRadius: 12, marginBottom: 8, maxWidth: "85%" },
-  userBubble: { backgroundColor: "#0B5FFF", alignSelf: "flex-end" },
-  aiBubble: { backgroundColor: "#F1F3F6", alignSelf: "flex-start" },
-  userText: { color: "#fff" },
-  aiText: { color: "#111" },
-  inputRow: {
-    flexDirection: "row",
-    padding: 10,
-    borderTopWidth: 1,
-    borderTopColor: "#eee",
-    alignItems: "flex-end",
-  },
-  input: {
-    flex: 1,
-    borderWidth: 1,
-    borderColor: "#ddd",
-    borderRadius: 20,
-    paddingHorizontal: 14,
-    paddingVertical: 8,
-    maxHeight: 100,
-    marginRight: 8,
-  },
-  sendBtn: {
-    backgroundColor: "#0B5FFF",
-    borderRadius: 20,
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-  },
-  sendText: { color: "#fff", fontWeight: "600" },
-});
+function getStyles(c) {
+  return StyleSheet.create({
+    fab: {
+      position: "absolute",
+      bottom: 24,
+      right: 20,
+      backgroundColor: c.primary,
+      width: 56,
+      height: 56,
+      borderRadius: 28,
+      alignItems: "center",
+      justifyContent: "center",
+      elevation: 4,
+      shadowColor: "#000",
+      shadowOpacity: 0.25,
+      shadowRadius: 6,
+      shadowOffset: { width: 0, height: 3 },
+    },
+    container: { flex: 1, backgroundColor: c.bg },
+    header: {
+      flexDirection: "row",
+      justifyContent: "space-between",
+      alignItems: "center",
+      padding: 16,
+      borderBottomWidth: 1,
+      borderBottomColor: c.border,
+      backgroundColor: c.bgElevated,
+    },
+    headerTitle: { fontSize: 16, fontWeight: "600", flex: 1, paddingRight: 8, color: c.text },
+    bubble: { padding: 12, borderRadius: 16, marginBottom: 8, maxWidth: "85%" },
+    userBubble: { backgroundColor: c.primary, alignSelf: "flex-end" },
+    aiBubble: { backgroundColor: c.surface, borderWidth: 1, borderColor: c.border, alignSelf: "flex-start" },
+    userText: { color: c.onPrimary },
+    aiText: { color: c.text },
+    inputRow: {
+      flexDirection: "row",
+      padding: 10,
+      borderTopWidth: 1,
+      borderTopColor: c.border,
+      alignItems: "flex-end",
+      backgroundColor: c.bgElevated,
+    },
+    input: {
+      flex: 1,
+      backgroundColor: c.surface,
+      borderWidth: 1,
+      borderColor: c.border,
+      borderRadius: 20,
+      paddingHorizontal: 14,
+      paddingVertical: 10,
+      maxHeight: 100,
+      marginRight: 8,
+      color: c.text,
+    },
+    sendBtn: {
+      backgroundColor: c.primary,
+      borderRadius: 20,
+      width: 40,
+      height: 40,
+      alignItems: "center",
+      justifyContent: "center",
+    },
+  });
+}

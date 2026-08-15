@@ -1,8 +1,12 @@
 import React, { useEffect, useState } from "react";
 import { View, Text, FlatList, TouchableOpacity, StyleSheet, ActivityIndicator } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
 import { getServicesByCategory } from "../firebase/firestore";
+import { useTheme } from "../theme/ThemeContext";
 
 export default function CategoryServicesScreen({ route, navigation }) {
+  const { colors } = useTheme();
+  const styles = getStyles(colors);
   const { category } = route.params;
   const [services, setServices] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -17,7 +21,7 @@ export default function CategoryServicesScreen({ route, navigation }) {
   if (loading) {
     return (
       <View style={styles.center}>
-        <ActivityIndicator size="large" />
+        <ActivityIndicator size="large" color={colors.primary} />
       </View>
     );
   }
@@ -34,7 +38,7 @@ export default function CategoryServicesScreen({ route, navigation }) {
             onPress={() => navigation.navigate("ServiceDetail", { serviceId: item.id })}
           >
             <Text style={styles.serviceName}>{item.name}</Text>
-            <Text style={styles.serviceArrow}>›</Text>
+            <Ionicons name="chevron-forward" size={20} color={colors.textMuted} />
           </TouchableOpacity>
         )}
         ListEmptyComponent={<Text style={styles.empty}>No services in this category yet.</Text>}
@@ -43,18 +47,23 @@ export default function CategoryServicesScreen({ route, navigation }) {
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#fff" },
-  center: { flex: 1, alignItems: "center", justifyContent: "center" },
-  serviceRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    paddingVertical: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: "#f0f0f0",
-  },
-  serviceName: { fontSize: 16, fontWeight: "600", flex: 1 },
-  serviceArrow: { fontSize: 22, color: "#999" },
-  empty: { color: "#888", marginTop: 20, textAlign: "center" },
-});
+function getStyles(c) {
+  return StyleSheet.create({
+    container: { flex: 1, backgroundColor: c.bg },
+    center: { flex: 1, alignItems: "center", justifyContent: "center", backgroundColor: c.bg },
+    serviceRow: {
+      flexDirection: "row",
+      justifyContent: "space-between",
+      alignItems: "center",
+      backgroundColor: c.surface,
+      borderWidth: 1,
+      borderColor: c.border,
+      borderRadius: 14,
+      paddingVertical: 16,
+      paddingHorizontal: 16,
+      marginBottom: 10,
+    },
+    serviceName: { fontSize: 15, fontWeight: "600", flex: 1, color: c.text },
+    empty: { color: c.textMuted, marginTop: 20, textAlign: "center" },
+  });
+}

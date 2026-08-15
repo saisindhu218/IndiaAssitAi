@@ -10,12 +10,14 @@ import {
   Platform,
   ActivityIndicator,
 } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
 import { getAllJourneys, getAllServices } from "../firebase/firestore";
 import { askAboutLifeEvent } from "../ai/groq";
+import { useTheme } from "../theme/ThemeContext";
 
 // Renders a journey's checklist as a chat bubble, with a button to open
 // the full tracked checklist screen.
-function JourneyAnswerCard({ journey, onOpen }) {
+function JourneyAnswerCard({ journey, onOpen, styles, colors }) {
   return (
     <View style={styles.journeyCard}>
       <Text style={styles.journeyCardTitle}>
@@ -27,14 +29,17 @@ function JourneyAnswerCard({ journey, onOpen }) {
           {i + 1}. {s.note || s.serviceId}
         </Text>
       ))}
-      <TouchableOpacity style={styles.journeyCardBtn} onPress={onOpen}>
-        <Text style={styles.journeyCardBtnText}>Open full checklist →</Text>
+      <TouchableOpacity style={styles.journeyCardBtnRow} onPress={onOpen}>
+        <Text style={styles.journeyCardBtnText}>Open full checklist</Text>
+        <Ionicons name="arrow-forward" size={14} color={colors.primary} />
       </TouchableOpacity>
     </View>
   );
 }
 
 export default function LifeEventsScreen({ navigation }) {
+  const { colors } = useTheme();
+  const styles = getStyles(colors);
   const [journeys, setJourneys] = useState([]);
   const [services, setServices] = useState([]);
   const [ready, setReady] = useState(false);
@@ -72,9 +77,6 @@ export default function LifeEventsScreen({ navigation }) {
     setInput("");
     scrollToEnd();
 
-    // If the text matches a known journey title closely, answer instantly
-    // and deterministically instead of calling the AI -- faster and can't
-    // hallucinate for the cases we already have curated data for.
     const matched = journeys.find(
       (j) => text.toLowerCase().includes(j.title.toLowerCase()) || j.title.toLowerCase().includes(text.toLowerCase())
     );
@@ -85,7 +87,6 @@ export default function LifeEventsScreen({ navigation }) {
       return;
     }
 
-    // Otherwise, ask the AI -- but grounded only in what the app actually covers.
     setLoading(true);
     try {
       const history = nextMessages.slice(-8).map((m) => ({ role: m.role, content: m.content }));
@@ -104,7 +105,7 @@ export default function LifeEventsScreen({ navigation }) {
 
   return (
     <KeyboardAvoidingView
-      style={{ flex: 1, backgroundColor: "#fff" }}
+      style={{ flex: 1, backgroundColor: colors.bg }}
       behavior={Platform.OS === "ios" ? "padding" : undefined}
     >
       <View style={styles.header}>
@@ -113,7 +114,7 @@ export default function LifeEventsScreen({ navigation }) {
 
       {!ready ? (
         <View style={styles.center}>
-          <ActivityIndicator size="large" />
+          <ActivityIndicator size="large" color={colors.primary} />
         </View>
       ) : (
         <>
@@ -145,14 +146,12 @@ export default function LifeEventsScreen({ navigation }) {
                 <JourneyAnswerCard
                   journey={item.journey}
                   onOpen={() => navigation.navigate("JourneyDetail", { journeyId: item.journey.id })}
+                  styles={styles}
+                  colors={colors}
                 />
               ) : (
-                <View
-                  style={[styles.bubble, item.role === "user" ? styles.userBubble : styles.aiBubble]}
-                >
-                  <Text style={item.role === "user" ? styles.userText : styles.aiText}>
-                    {item.content}
-                  </Text>
+                <View style={[styles.bubble, item.role === "user" ? styles.userBubble : styles.aiBubble]}>
+                  <Text style={item.role === "user" ? styles.userText : styles.aiText}>{item.content}</Text>
                 </View>
               )
             }
@@ -161,7 +160,7 @@ export default function LifeEventsScreen({ navigation }) {
 
           {loading && (
             <View style={{ paddingBottom: 8 }}>
-              <ActivityIndicator />
+              <ActivityIndicator color={colors.primary} />
             </View>
           )}
 
@@ -169,13 +168,14 @@ export default function LifeEventsScreen({ navigation }) {
             <TextInput
               style={styles.input}
               placeholder="e.g. I just got married..."
+              placeholderTextColor={colors.textMuted}
               value={input}
               onChangeText={setInput}
               onSubmitEditing={() => handleSend()}
               multiline
             />
             <TouchableOpacity style={styles.sendBtn} onPress={() => handleSend()} disabled={loading}>
-              <Text style={styles.sendText}>Send</Text>
+              <Ionicons name="arrow-up" size={18} color={colors.onPrimary} />
             </TouchableOpacity>
           </View>
         </>
@@ -184,57 +184,69 @@ export default function LifeEventsScreen({ navigation }) {
   );
 }
 
-const styles = StyleSheet.create({
-  center: { flex: 1, alignItems: "center", justifyContent: "center" },
-  header: { padding: 20, paddingBottom: 12, borderBottomWidth: 1, borderBottomColor: "#f0f0f0" },
-  headerTitle: { fontSize: 22, fontWeight: "700" },
-  headerSubtitle: { fontSize: 13, color: "#777", marginTop: 4 },
-  suggestionsList: { maxHeight: 44, flexGrow: 0 },
-  suggestionRow: { paddingHorizontal: 16, paddingVertical: 6, alignItems: "center" },
-  suggestionChip: {
-    backgroundColor: "#EAF1FF",
-    borderRadius: 18,
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    marginRight: 8,
-    height: 36,
-    justifyContent: "center",
-  },
-  suggestionChipText: { color: "#0B5FFF", fontWeight: "600", fontSize: 12 },
-  bubble: { padding: 12, borderRadius: 12, marginBottom: 10, maxWidth: "85%" },
-  userBubble: { backgroundColor: "#0B5FFF", alignSelf: "flex-end" },
-  aiBubble: { backgroundColor: "#F1F3F6", alignSelf: "flex-start" },
-  userText: { color: "#fff" },
-  aiText: { color: "#111" },
-  journeyCard: {
-    backgroundColor: "#F7F8FA",
-    borderRadius: 14,
-    padding: 16,
-    marginBottom: 10,
-    maxWidth: "90%",
-  },
-  journeyCardTitle: { fontSize: 15, fontWeight: "700", marginBottom: 4 },
-  journeyCardDesc: { fontSize: 12, color: "#666", marginBottom: 8, lineHeight: 17 },
-  journeyCardStep: { fontSize: 13, color: "#333", marginBottom: 2 },
-  journeyCardBtn: { marginTop: 10 },
-  journeyCardBtnText: { color: "#0B5FFF", fontWeight: "700", fontSize: 13 },
-  inputRow: {
-    flexDirection: "row",
-    padding: 10,
-    borderTopWidth: 1,
-    borderTopColor: "#eee",
-    alignItems: "flex-end",
-  },
-  input: {
-    flex: 1,
-    borderWidth: 1,
-    borderColor: "#ddd",
-    borderRadius: 20,
-    paddingHorizontal: 14,
-    paddingVertical: 8,
-    maxHeight: 100,
-    marginRight: 8,
-  },
-  sendBtn: { backgroundColor: "#0B5FFF", borderRadius: 20, paddingHorizontal: 16, paddingVertical: 10 },
-  sendText: { color: "#fff", fontWeight: "600" },
-});
+function getStyles(c) {
+  return StyleSheet.create({
+    center: { flex: 1, alignItems: "center", justifyContent: "center", backgroundColor: c.bg },
+    header: { padding: 20, paddingBottom: 12, borderBottomWidth: 1, borderBottomColor: c.border },
+    headerSubtitle: { fontSize: 13, color: c.textSecondary, marginTop: 4 },
+    suggestionsList: { maxHeight: 44, flexGrow: 0 },
+    suggestionRow: { paddingHorizontal: 16, paddingVertical: 6, alignItems: "center" },
+    suggestionChip: {
+      backgroundColor: c.primarySoft,
+      borderRadius: 18,
+      paddingHorizontal: 12,
+      paddingVertical: 8,
+      marginRight: 8,
+      height: 36,
+      justifyContent: "center",
+    },
+    suggestionChipText: { color: c.primary, fontWeight: "600", fontSize: 12 },
+    bubble: { padding: 12, borderRadius: 16, marginBottom: 10, maxWidth: "85%" },
+    userBubble: { backgroundColor: c.primary, alignSelf: "flex-end" },
+    aiBubble: { backgroundColor: c.surface, borderWidth: 1, borderColor: c.border, alignSelf: "flex-start" },
+    userText: { color: c.onPrimary },
+    aiText: { color: c.text },
+    journeyCard: {
+      backgroundColor: c.surface,
+      borderWidth: 1,
+      borderColor: c.border,
+      borderRadius: 16,
+      padding: 16,
+      marginBottom: 10,
+      maxWidth: "90%",
+    },
+    journeyCardTitle: { fontSize: 15, fontWeight: "700", marginBottom: 4, color: c.text },
+    journeyCardDesc: { fontSize: 12, color: c.textSecondary, marginBottom: 8, lineHeight: 17 },
+    journeyCardStep: { fontSize: 13, color: c.textSecondary, marginBottom: 2 },
+    journeyCardBtnRow: { flexDirection: "row", alignItems: "center", gap: 6, marginTop: 10 },
+    journeyCardBtnText: { color: c.primary, fontWeight: "700", fontSize: 13 },
+    inputRow: {
+      flexDirection: "row",
+      padding: 10,
+      borderTopWidth: 1,
+      borderTopColor: c.border,
+      alignItems: "flex-end",
+      backgroundColor: c.bgElevated,
+    },
+    input: {
+      flex: 1,
+      backgroundColor: c.surface,
+      borderWidth: 1,
+      borderColor: c.border,
+      borderRadius: 20,
+      paddingHorizontal: 14,
+      paddingVertical: 10,
+      maxHeight: 100,
+      marginRight: 8,
+      color: c.text,
+    },
+    sendBtn: {
+      backgroundColor: c.primary,
+      borderRadius: 20,
+      width: 40,
+      height: 40,
+      alignItems: "center",
+      justifyContent: "center",
+    },
+  });
+}

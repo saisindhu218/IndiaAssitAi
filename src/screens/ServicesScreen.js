@@ -3,8 +3,11 @@ import { View, Text, FlatList, TouchableOpacity, TextInput, StyleSheet, Activity
 import { Ionicons } from "@expo/vector-icons";
 import { getCategories, searchServices } from "../firebase/firestore";
 import StateFilterBar from "../components/StateFilterBar";
+import { useTheme } from "../theme/ThemeContext";
 
 export default function ServicesScreen({ navigation }) {
+  const { colors } = useTheme();
+  const styles = getStyles(colors);
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [query, setQuery] = useState("");
@@ -35,7 +38,7 @@ export default function ServicesScreen({ navigation }) {
   if (loading) {
     return (
       <View style={styles.center}>
-        <ActivityIndicator size="large" />
+        <ActivityIndicator size="large" color={colors.primary} />
       </View>
     );
   }
@@ -43,15 +46,14 @@ export default function ServicesScreen({ navigation }) {
   return (
     <View style={styles.container}>
       <Text style={styles.header}>Government Services</Text>
-      <Text style={styles.subHeader}>
-        Browse by department, or search directly below.
-      </Text>
+      <Text style={styles.subHeader}>Browse by department, or search directly below.</Text>
 
       <View style={styles.searchBox}>
-        <Ionicons name="search-outline" size={18} color="#888" style={{ marginLeft: 12 }} />
+        <Ionicons name="search-outline" size={18} color={colors.textMuted} style={{ marginLeft: 12 }} />
         <TextInput
           style={styles.searchInput}
           placeholder="Search services, e.g. 'Voter ID'"
+          placeholderTextColor={colors.textMuted}
           value={query}
           onChangeText={handleSearch}
         />
@@ -97,41 +99,47 @@ export default function ServicesScreen({ navigation }) {
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1, padding: 20, backgroundColor: "#fff" },
-  center: { flex: 1, alignItems: "center", justifyContent: "center" },
-  header: { fontSize: 24, fontWeight: "700", marginBottom: 4 },
-  subHeader: { fontSize: 14, color: "#777", marginBottom: 14 },
-  searchBox: {
-    flexDirection: "row",
-    alignItems: "center",
-    borderWidth: 1,
-    borderColor: "#ddd",
-    borderRadius: 12,
-    marginBottom: 8,
-  },
-  searchInput: { flex: 1, paddingHorizontal: 10, paddingVertical: 12, fontSize: 15 },
-  resultsBox: {
-    borderWidth: 1,
-    borderColor: "#eee",
-    borderRadius: 12,
-    marginBottom: 8,
-    overflow: "hidden",
-  },
-  resultRow: { padding: 12, borderBottomWidth: 1, borderBottomColor: "#f0f0f0" },
-  resultText: { fontSize: 15, fontWeight: "600" },
-  resultSub: { fontSize: 12, color: "#888", marginTop: 2 },
-  categoryCard: {
-    flex: 1,
-    backgroundColor: "#F7F8FA",
-    borderRadius: 14,
-    padding: 16,
-    margin: 6,
-    alignItems: "center",
-    minHeight: 100,
-    justifyContent: "center",
-  },
-  categoryIcon: { fontSize: 28, marginBottom: 6 },
-  categoryName: { fontSize: 14, fontWeight: "600", textAlign: "center" },
-  empty: { color: "#888", marginTop: 20, textAlign: "center" },
-});
+function getStyles(c) {
+  return StyleSheet.create({
+    container: { flex: 1, padding: 20, backgroundColor: c.bg },
+    center: { flex: 1, alignItems: "center", justifyContent: "center", backgroundColor: c.bg },
+    header: { fontSize: 24, fontWeight: "700", marginBottom: 4, color: c.text },
+    subHeader: { fontSize: 14, color: c.textSecondary, marginBottom: 14 },
+    searchBox: {
+      flexDirection: "row",
+      alignItems: "center",
+      backgroundColor: c.surface,
+      borderWidth: 1,
+      borderColor: c.border,
+      borderRadius: 14,
+      marginBottom: 8,
+    },
+    searchInput: { flex: 1, paddingHorizontal: 10, paddingVertical: 12, fontSize: 15, color: c.text },
+    resultsBox: {
+      backgroundColor: c.surface,
+      borderWidth: 1,
+      borderColor: c.border,
+      borderRadius: 14,
+      marginBottom: 8,
+      overflow: "hidden",
+    },
+    resultRow: { padding: 12, borderBottomWidth: 1, borderBottomColor: c.borderSoft },
+    resultText: { fontSize: 15, fontWeight: "600", color: c.text },
+    resultSub: { fontSize: 12, color: c.textMuted, marginTop: 2 },
+    categoryCard: {
+      flex: 1,
+      backgroundColor: c.surface,
+      borderWidth: 1,
+      borderColor: c.border,
+      borderRadius: 16,
+      padding: 16,
+      margin: 6,
+      alignItems: "center",
+      minHeight: 100,
+      justifyContent: "center",
+    },
+    categoryIcon: { fontSize: 28, marginBottom: 6 },
+    categoryName: { fontSize: 14, fontWeight: "600", textAlign: "center", color: c.text },
+    empty: { color: c.textMuted, marginTop: 20, textAlign: "center" },
+  });
+}

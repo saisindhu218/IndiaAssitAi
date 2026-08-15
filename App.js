@@ -6,8 +6,10 @@ import { auth } from "./src/firebase/config";
 import RootNavigator from "./src/navigation/RootNavigator";
 import LoginScreen from "./src/screens/LoginScreen";
 import { StateFilterProvider } from "./src/context/StateFilterContext";
+import { ThemeProvider, useTheme } from "./src/theme/ThemeContext";
 
-export default function App() {
+function AppInner() {
+  const { colors } = useTheme();
   const [user, setUser] = useState(undefined); // undefined = still checking
   const [initializing, setInitializing] = useState(true);
 
@@ -21,16 +23,24 @@ export default function App() {
 
   if (initializing) {
     return (
-      <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
-        <ActivityIndicator size="large" color="#0B5FFF" />
+      <View style={{ flex: 1, alignItems: "center", justifyContent: "center", backgroundColor: colors.bg }}>
+        <ActivityIndicator size="large" color={colors.primary} />
       </View>
     );
   }
 
   return (
     <StateFilterProvider>
-      <StatusBar style="dark" />
+      <StatusBar style={colors.statusBar} />
       {user ? <RootNavigator /> : <LoginScreen />}
     </StateFilterProvider>
+  );
+}
+
+export default function App() {
+  return (
+    <ThemeProvider>
+      <AppInner />
+    </ThemeProvider>
   );
 }

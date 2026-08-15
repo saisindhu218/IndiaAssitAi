@@ -26,10 +26,11 @@ import {
   deleteUserDocument,
 } from "../firebase/firestore";
 import { uploadUserDocument, deleteUserDocumentFile, openUserDocument } from "../storage/documentStorage";
+import { useTheme } from "../theme/ThemeContext";
 
 const EMPTY_PROFILE = { name: "", age: "", state: "", occupation: "", isSeniorCitizen: false };
 
-function DetailRow({ label, value }) {
+function DetailRow({ label, value, styles }) {
   return (
     <View style={styles.detailRow}>
       <Text style={styles.detailLabel}>{label}</Text>
@@ -38,7 +39,7 @@ function DetailRow({ label, value }) {
   );
 }
 
-function IconButton({ name, onPress, color = "#555" }) {
+function IconButton({ name, onPress, color, styles }) {
   return (
     <TouchableOpacity style={styles.iconBtn} onPress={onPress} hitSlop={8}>
       <Ionicons name={name} size={18} color={color} />
@@ -47,6 +48,8 @@ function IconButton({ name, onPress, color = "#555" }) {
 }
 
 export default function ProfileScreen() {
+  const { colors, mode, toggleTheme } = useTheme();
+  const styles = getStyles(colors);
   const user = auth.currentUser;
 
   const [profile, setProfile] = useState(EMPTY_PROFILE);
@@ -68,7 +71,7 @@ export default function ProfileScreen() {
     if (!user) return;
     const p = await getUserProfile(user.uid);
     if (p) setProfile({ ...EMPTY_PROFILE, ...p });
-    if (!p) setEditVisible(true); // no profile yet -- go straight to the edit form
+    if (!p) setEditVisible(true);
     setLoading(false);
   }, [user]);
 
@@ -103,8 +106,6 @@ export default function ProfileScreen() {
       setSaving(false);
     }
   }
-
-  // ---- Document Locker ----
 
   async function pickPhoto() {
     setMenuVisible(false);
@@ -188,7 +189,7 @@ export default function ProfileScreen() {
     return (
       <SafeAreaView style={styles.safeArea} edges={["top"]}>
         <View style={styles.center}>
-          <ActivityIndicator size="large" />
+          <ActivityIndicator size="large" color={colors.primary} />
         </View>
       </SafeAreaView>
     );
@@ -198,11 +199,11 @@ export default function ProfileScreen() {
     <SafeAreaView style={styles.safeArea} edges={["top"]}>
       <View style={styles.header}>
         <View style={styles.headerLeft}>
-          <Ionicons name="person-circle-outline" size={24} color="#111" style={{ marginRight: 6 }} />
+          <Ionicons name="person-circle-outline" size={24} color={colors.text} style={{ marginRight: 6 }} />
           <Text style={styles.headerTitle}>Profile</Text>
         </View>
         <TouchableOpacity onPress={() => setMenuVisible(true)} hitSlop={10}>
-          <Ionicons name="ellipsis-vertical" size={22} color="#333" />
+          <Ionicons name="ellipsis-vertical" size={22} color={colors.text} />
         </TouchableOpacity>
       </View>
 
@@ -211,10 +212,10 @@ export default function ProfileScreen() {
 
         <View style={styles.card}>
           <Text style={styles.cardTitle}>Your details</Text>
-          <DetailRow label="Name" value={profile.name} />
-          <DetailRow label="Age" value={profile.age} />
-          <DetailRow label="State" value={profile.state} />
-          <DetailRow label="Occupation" value={profile.occupation} />
+          <DetailRow label="Name" value={profile.name} styles={styles} />
+          <DetailRow label="Age" value={profile.age} styles={styles} />
+          <DetailRow label="State" value={profile.state} styles={styles} />
+          <DetailRow label="Occupation" value={profile.occupation} styles={styles} />
           <View style={styles.detailRow}>
             <Text style={styles.detailLabel}>Senior citizen</Text>
             <Text style={styles.detailValue}>{profile.isSeniorCitizen ? "Yes" : "No"}</Text>
@@ -224,11 +225,11 @@ export default function ProfileScreen() {
         <View style={styles.card}>
           <View style={styles.cardHeaderRow}>
             <View style={styles.headerLeft}>
-              <Ionicons name="folder-open-outline" size={18} color="#111" style={{ marginRight: 6 }} />
+              <Ionicons name="folder-open-outline" size={18} color={colors.text} style={{ marginRight: 6 }} />
               <Text style={styles.cardTitle}>Document Locker</Text>
             </View>
             <TouchableOpacity style={styles.addDocBtn} onPress={() => setMenuVisible("add")}>
-              <Ionicons name="add" size={16} color="#fff" />
+              <Ionicons name="add" size={16} color={colors.onPrimary} />
               <Text style={styles.addDocBtnText}>Add</Text>
             </TouchableOpacity>
           </View>
@@ -238,7 +239,7 @@ export default function ProfileScreen() {
           </Text>
 
           {docsLoading ? (
-            <ActivityIndicator style={{ marginTop: 10 }} />
+            <ActivityIndicator style={{ marginTop: 10 }} color={colors.primary} />
           ) : documents.length === 0 ? (
             <Text style={styles.empty}>No documents saved yet.</Text>
           ) : (
@@ -247,7 +248,7 @@ export default function ProfileScreen() {
                 <Ionicons
                   name={item.fileType === "pdf" ? "document-text-outline" : "image-outline"}
                   size={18}
-                  color="#555"
+                  color={colors.textSecondary}
                   style={{ marginRight: 8 }}
                 />
                 <Text style={styles.docName} numberOfLines={1}>
@@ -255,20 +256,22 @@ export default function ProfileScreen() {
                 </Text>
                 <IconButton
                   name="create-outline"
+                  color={colors.textSecondary}
+                  styles={styles}
                   onPress={() => {
                     setRenameTarget(item);
                     setRenameValue(item.name);
                   }}
                 />
-                <IconButton name="download-outline" onPress={() => handleOpenDocument(item)} />
-                <IconButton name="trash-outline" color="#D33" onPress={() => handleDeleteDocument(item)} />
+                <IconButton name="download-outline" color={colors.textSecondary} styles={styles} onPress={() => handleOpenDocument(item)} />
+                <IconButton name="trash-outline" color={colors.danger} styles={styles} onPress={() => handleDeleteDocument(item)} />
               </View>
             ))
           )}
         </View>
 
         <View style={styles.noticeBox}>
-          <Ionicons name="information-circle-outline" size={18} color="#0B5FFF" />
+          <Ionicons name="information-circle-outline" size={18} color={colors.primary} />
           <Text style={styles.noticeText}>
             This stays private to your account. Avoid storing bare Aadhaar/PAN numbers as document
             names -- only the file itself needs to show that.
@@ -281,9 +284,20 @@ export default function ProfileScreen() {
         <TouchableOpacity style={styles.menuBackdrop} activeOpacity={1} onPress={() => setMenuVisible(false)}>
           <View style={styles.menuCard}>
             <TouchableOpacity style={styles.menuItem} onPress={openEdit}>
-              <Ionicons name="create-outline" size={18} color="#111" style={{ marginRight: 10 }} />
+              <Ionicons name="create-outline" size={18} color={colors.text} style={{ marginRight: 10 }} />
               <Text style={styles.menuItemText}>Edit Profile</Text>
             </TouchableOpacity>
+            <View style={styles.menuDivider} />
+            <View style={styles.menuItem}>
+              <Ionicons
+                name={mode === "dark" ? "moon-outline" : "sunny-outline"}
+                size={18}
+                color={colors.text}
+                style={{ marginRight: 10 }}
+              />
+              <Text style={[styles.menuItemText, { flex: 1 }]}>{mode === "dark" ? "Dark Mode" : "Light Mode"}</Text>
+              <Switch value={mode === "dark"} onValueChange={toggleTheme} trackColor={{ true: colors.primary }} />
+            </View>
             <View style={styles.menuDivider} />
             <TouchableOpacity
               style={styles.menuItem}
@@ -292,8 +306,8 @@ export default function ProfileScreen() {
                 signOut(auth);
               }}
             >
-              <Ionicons name="log-out-outline" size={18} color="#D33" style={{ marginRight: 10 }} />
-              <Text style={[styles.menuItemText, { color: "#D33" }]}>Sign Out</Text>
+              <Ionicons name="log-out-outline" size={18} color={colors.danger} style={{ marginRight: 10 }} />
+              <Text style={[styles.menuItemText, { color: colors.danger }]}>Sign Out</Text>
             </TouchableOpacity>
           </View>
         </TouchableOpacity>
@@ -304,7 +318,7 @@ export default function ProfileScreen() {
         <TouchableOpacity style={styles.menuBackdrop} activeOpacity={1} onPress={() => setMenuVisible(false)}>
           <View style={styles.menuCard}>
             <TouchableOpacity style={styles.menuItem} onPress={pickPhoto}>
-              <Ionicons name="camera-outline" size={18} color="#111" style={{ marginRight: 10 }} />
+              <Ionicons name="camera-outline" size={18} color={colors.text} style={{ marginRight: 10 }} />
               <Text style={styles.menuItemText}>Upload Photo</Text>
             </TouchableOpacity>
             <View style={styles.menuDivider} />
@@ -315,7 +329,7 @@ export default function ProfileScreen() {
                 pickDocument();
               }}
             >
-              <Ionicons name="document-outline" size={18} color="#111" style={{ marginRight: 10 }} />
+              <Ionicons name="document-outline" size={18} color={colors.text} style={{ marginRight: 10 }} />
               <Text style={styles.menuItemText}>Upload PDF / File</Text>
             </TouchableOpacity>
           </View>
@@ -329,7 +343,7 @@ export default function ProfileScreen() {
             <Text style={styles.modalTitle}>Edit Profile</Text>
 
             <Text style={styles.fieldLabel}>Name</Text>
-            <TextInput style={styles.input} value={draft.name} onChangeText={(v) => setDraft((p) => ({ ...p, name: v }))} />
+            <TextInput style={styles.input} value={draft.name} onChangeText={(v) => setDraft((p) => ({ ...p, name: v }))} placeholderTextColor={colors.textMuted} />
 
             <Text style={styles.fieldLabel}>Age</Text>
             <TextInput
@@ -337,16 +351,18 @@ export default function ProfileScreen() {
               value={draft.age}
               keyboardType="number-pad"
               onChangeText={(v) => setDraft((p) => ({ ...p, age: v.replace(/[^0-9]/g, "") }))}
+              placeholderTextColor={colors.textMuted}
             />
 
             <Text style={styles.fieldLabel}>State</Text>
-            <TextInput style={styles.input} value={draft.state} onChangeText={(v) => setDraft((p) => ({ ...p, state: v }))} />
+            <TextInput style={styles.input} value={draft.state} onChangeText={(v) => setDraft((p) => ({ ...p, state: v }))} placeholderTextColor={colors.textMuted} />
 
             <Text style={styles.fieldLabel}>Occupation</Text>
             <TextInput
               style={styles.input}
               value={draft.occupation}
               onChangeText={(v) => setDraft((p) => ({ ...p, occupation: v }))}
+              placeholderTextColor={colors.textMuted}
             />
 
             <View style={styles.switchRow}>
@@ -354,6 +370,7 @@ export default function ProfileScreen() {
               <Switch
                 value={draft.isSeniorCitizen}
                 onValueChange={(v) => setDraft((p) => ({ ...p, isSeniorCitizen: v }))}
+                trackColor={{ true: colors.primary }}
               />
             </View>
 
@@ -379,6 +396,7 @@ export default function ProfileScreen() {
               value={pendingName}
               onChangeText={setPendingName}
               placeholder="e.g. Driving Licence (front)"
+              placeholderTextColor={colors.textMuted}
               autoFocus
             />
             <View style={styles.modalActions}>
@@ -398,7 +416,7 @@ export default function ProfileScreen() {
         <View style={styles.modalBackdrop}>
           <View style={styles.modalCard}>
             <Text style={styles.modalTitle}>Rename document</Text>
-            <TextInput style={styles.input} value={renameValue} onChangeText={setRenameValue} autoFocus />
+            <TextInput style={styles.input} value={renameValue} onChangeText={setRenameValue} autoFocus placeholderTextColor={colors.textMuted} />
             <View style={styles.modalActions}>
               <TouchableOpacity style={styles.cancelBtn} onPress={() => setRenameTarget(null)}>
                 <Text style={styles.cancelBtnText}>Cancel</Text>
@@ -414,65 +432,85 @@ export default function ProfileScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  safeArea: { flex: 1, backgroundColor: "#fff" },
-  center: { flex: 1, alignItems: "center", justifyContent: "center" },
-  header: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    paddingHorizontal: 20,
-    paddingVertical: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: "#f0f0f0",
-  },
-  headerLeft: { flexDirection: "row", alignItems: "center" },
-  headerTitle: { fontSize: 20, fontWeight: "700" },
-  container: { padding: 20, paddingBottom: 60 },
-  email: { fontSize: 14, color: "#333", marginBottom: 16 },
-  card: { backgroundColor: "#F7F8FA", borderRadius: 14, padding: 16, marginBottom: 16 },
-  cardHeaderRow: { flexDirection: "row", justifyContent: "space-between", alignItems: "center" },
-  cardTitle: { fontSize: 15, fontWeight: "700", marginBottom: 8 },
-  addDocBtn: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "#0B5FFF",
-    borderRadius: 16,
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-  },
-  addDocBtnText: { color: "#fff", fontWeight: "700", fontSize: 12, marginLeft: 2 },
-  lockerHint: { fontSize: 12, color: "#777", lineHeight: 17, marginBottom: 10 },
-  detailRow: { paddingVertical: 8, borderTopWidth: 1, borderTopColor: "#eee" },
-  detailLabel: { fontSize: 12, color: "#777", fontWeight: "600", marginBottom: 2 },
-  detailValue: { fontSize: 15, color: "#111" },
-  docRow: { flexDirection: "row", alignItems: "center", paddingVertical: 10, borderTopWidth: 1, borderTopColor: "#eee" },
-  docName: { flex: 1, fontSize: 14, fontWeight: "600", color: "#111" },
-  iconBtn: { paddingHorizontal: 6 },
-  empty: { color: "#888", fontSize: 13, marginTop: 8 },
-  noticeBox: {
-    flexDirection: "row",
-    alignItems: "flex-start",
-    backgroundColor: "#EAF1FF",
-    borderRadius: 12,
-    padding: 12,
-    gap: 8,
-  },
-  noticeText: { flex: 1, fontSize: 12, color: "#334", lineHeight: 18 },
-  menuBackdrop: { flex: 1, backgroundColor: "rgba(0,0,0,0.2)", justifyContent: "flex-start", alignItems: "flex-end" },
-  menuCard: { marginTop: 60, marginRight: 16, backgroundColor: "#fff", borderRadius: 12, paddingVertical: 6, minWidth: 190, elevation: 4 },
-  menuItem: { flexDirection: "row", alignItems: "center", paddingVertical: 12, paddingHorizontal: 16 },
-  menuItemText: { fontSize: 15, fontWeight: "600", color: "#111" },
-  menuDivider: { height: 1, backgroundColor: "#eee" },
-  modalBackdrop: { flex: 1, backgroundColor: "rgba(0,0,0,0.4)", justifyContent: "flex-end" },
-  modalCard: { backgroundColor: "#fff", borderTopLeftRadius: 20, borderTopRightRadius: 20, padding: 20 },
-  modalTitle: { fontSize: 18, fontWeight: "700", marginBottom: 16 },
-  fieldLabel: { fontSize: 12, color: "#777", fontWeight: "600", marginBottom: 4, marginTop: 10 },
-  input: { borderWidth: 1, borderColor: "#ddd", borderRadius: 10, paddingHorizontal: 12, paddingVertical: 10, fontSize: 15 },
-  switchRow: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginTop: 14 },
-  modalActions: { flexDirection: "row", justifyContent: "flex-end", marginTop: 20, gap: 10 },
-  cancelBtn: { paddingVertical: 12, paddingHorizontal: 16 },
-  cancelBtnText: { color: "#666", fontWeight: "600" },
-  saveBtnSmall: { backgroundColor: "#0B5FFF", borderRadius: 10, paddingVertical: 12, paddingHorizontal: 20 },
-  saveBtnText: { color: "#fff", fontWeight: "700" },
-});
+function getStyles(c) {
+  return StyleSheet.create({
+    safeArea: { flex: 1, backgroundColor: c.bg },
+    center: { flex: 1, alignItems: "center", justifyContent: "center" },
+    header: {
+      flexDirection: "row",
+      justifyContent: "space-between",
+      alignItems: "center",
+      paddingHorizontal: 20,
+      paddingVertical: 16,
+      borderBottomWidth: 1,
+      borderBottomColor: c.border,
+    },
+    headerLeft: { flexDirection: "row", alignItems: "center" },
+    headerTitle: { fontSize: 20, fontWeight: "700", color: c.text },
+    container: { padding: 20, paddingBottom: 60 },
+    email: { fontSize: 14, color: c.textSecondary, marginBottom: 16 },
+    card: { backgroundColor: c.surface, borderWidth: 1, borderColor: c.border, borderRadius: 16, padding: 16, marginBottom: 16 },
+    cardHeaderRow: { flexDirection: "row", justifyContent: "space-between", alignItems: "center" },
+    cardTitle: { fontSize: 15, fontWeight: "700", marginBottom: 8, color: c.text },
+    addDocBtn: {
+      flexDirection: "row",
+      alignItems: "center",
+      backgroundColor: c.primary,
+      borderRadius: 16,
+      paddingHorizontal: 12,
+      paddingVertical: 6,
+    },
+    addDocBtnText: { color: c.onPrimary, fontWeight: "700", fontSize: 12, marginLeft: 2 },
+    lockerHint: { fontSize: 12, color: c.textMuted, lineHeight: 17, marginBottom: 10 },
+    detailRow: { paddingVertical: 8, borderTopWidth: 1, borderTopColor: c.borderSoft },
+    detailLabel: { fontSize: 12, color: c.textMuted, fontWeight: "600", marginBottom: 2 },
+    detailValue: { fontSize: 15, color: c.text },
+    docRow: { flexDirection: "row", alignItems: "center", paddingVertical: 10, borderTopWidth: 1, borderTopColor: c.borderSoft },
+    docName: { flex: 1, fontSize: 14, fontWeight: "600", color: c.text },
+    iconBtn: { paddingHorizontal: 6 },
+    empty: { color: c.textMuted, fontSize: 13, marginTop: 8 },
+    noticeBox: {
+      flexDirection: "row",
+      alignItems: "flex-start",
+      backgroundColor: c.primarySoft,
+      borderRadius: 14,
+      padding: 12,
+      gap: 8,
+    },
+    noticeText: { flex: 1, fontSize: 12, color: c.textSecondary, lineHeight: 18 },
+    menuBackdrop: { flex: 1, backgroundColor: c.overlay, justifyContent: "flex-start", alignItems: "flex-end" },
+    menuCard: {
+      marginTop: 60,
+      marginRight: 16,
+      backgroundColor: c.bgElevated,
+      borderWidth: 1,
+      borderColor: c.border,
+      borderRadius: 14,
+      paddingVertical: 6,
+      minWidth: 220,
+    },
+    menuItem: { flexDirection: "row", alignItems: "center", paddingVertical: 12, paddingHorizontal: 16 },
+    menuItemText: { fontSize: 15, fontWeight: "600", color: c.text },
+    menuDivider: { height: 1, backgroundColor: c.borderSoft },
+    modalBackdrop: { flex: 1, backgroundColor: c.overlay, justifyContent: "flex-end" },
+    modalCard: { backgroundColor: c.bgElevated, borderTopLeftRadius: 24, borderTopRightRadius: 24, padding: 20 },
+    modalTitle: { fontSize: 18, fontWeight: "700", marginBottom: 16, color: c.text },
+    fieldLabel: { fontSize: 12, color: c.textMuted, fontWeight: "600", marginBottom: 4, marginTop: 10 },
+    input: {
+      backgroundColor: c.surface,
+      borderWidth: 1,
+      borderColor: c.border,
+      borderRadius: 12,
+      paddingHorizontal: 12,
+      paddingVertical: 10,
+      fontSize: 15,
+      color: c.text,
+    },
+    switchRow: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginTop: 14 },
+    modalActions: { flexDirection: "row", justifyContent: "flex-end", marginTop: 20, gap: 10 },
+    cancelBtn: { paddingVertical: 12, paddingHorizontal: 16 },
+    cancelBtnText: { color: c.textSecondary, fontWeight: "600" },
+    saveBtnSmall: { backgroundColor: c.primary, borderRadius: 12, paddingVertical: 12, paddingHorizontal: 20 },
+    saveBtnText: { color: c.onPrimary, fontWeight: "700" },
+  });
+}
