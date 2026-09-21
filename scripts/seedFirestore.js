@@ -4,11 +4,13 @@
 // sample data files, or after you add your own services there.
 //
 // Requires the same Firebase env vars as the app (loaded from .env via
-// the `dotenv` package, installed as a dev dependency).
+// the `dotenv` package), PLUS a login so it satisfies the Firestore rules
+// that now require request.auth != null for writes.
 
 require("dotenv").config();
 const { initializeApp } = require("firebase/app");
 const { getFirestore, doc, setDoc } = require("firebase/firestore");
+const { getAuth, signInWithEmailAndPassword } = require("firebase/auth");
 
 const { SAMPLE_SERVICES } = require("../src/data/sampleServices");
 const { SAMPLE_JOURNEYS } = require("../src/data/sampleJourneys");
@@ -27,9 +29,18 @@ async function seed() {
     console.error("Missing Firebase env vars. Copy .env.example to .env and fill it in first.");
     process.exit(1);
   }
+  if (!process.env.SEED_ADMIN_EMAIL || !process.env.SEED_ADMIN_PASSWORD) {
+    console.error("Add SEED_ADMIN_EMAIL and SEED_ADMIN_PASSWORD to .env -- the seed script must log in now that Firestore rules require authentication.");
+    process.exit(1);
+  }
 
   const app = initializeApp(firebaseConfig);
   const db = getFirestore(app);
+  const auth = getAuth(app);
+
+  console.log("Logging in as", process.env.SEED_ADMIN_EMAIL, "...");
+  await signInWithEmailAndPassword(auth, process.env.SEED_ADMIN_EMAIL, process.env.SEED_ADMIN_PASSWORD);
+  console.log("Logged in.");
 
   console.log(`Seeding ${SAMPLE_SERVICES.length} services...`);
   for (const service of SAMPLE_SERVICES) {
@@ -45,7 +56,7 @@ async function seed() {
     console.log(`  ✓ ${id}`);
   }
 
-  console.log("Done. Set USE_LOCAL_FALLBACK = false in src/firebase/firestore.js once you trust Firestore has taken over.");
+  console.log("Done.");
   process.exit(0);
 }
 

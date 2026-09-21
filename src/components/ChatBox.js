@@ -73,7 +73,11 @@ export default function ChatBox({ service = null }) {
       </TouchableOpacity>
 
       <Modal visible={open} animationType="slide" onRequestClose={() => setOpen(false)}>
-        <KeyboardAvoidingView style={styles.container} behavior={Platform.OS === "ios" ? "padding" : undefined}>
+        <KeyboardAvoidingView
+          style={styles.container}
+          behavior={Platform.OS === "ios" ? "padding" : "height"}
+          keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 0}
+        >
           <View style={styles.header}>
             <Text style={styles.headerTitle}>{service ? `Ask about: ${service.name}` : "Ask IndiaAssist"}</Text>
             <TouchableOpacity onPress={() => setOpen(false)}>

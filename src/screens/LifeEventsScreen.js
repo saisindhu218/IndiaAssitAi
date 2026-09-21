@@ -91,7 +91,14 @@ export default function LifeEventsScreen({ navigation }) {
     try {
       const history = nextMessages.slice(-8).map((m) => ({ role: m.role, content: m.content }));
       const reply = await askAboutLifeEvent(text, journeys, services, history.slice(0, -1));
-      setMessages((prev) => [...prev, { role: "assistant", content: reply }]);
+
+      // Find which exact catalog services the AI actually named in its reply,
+      // so we can render them as real tappable links instead of leaving the
+      // person to manually search for a page the assistant only described.
+      const lowerReply = reply.toLowerCase();
+      const relatedServices = services.filter((s) => lowerReply.includes(s.name.toLowerCase())).slice(0, 4);
+
+      setMessages((prev) => [...prev, { role: "assistant", content: reply, relatedServices }]);
     } catch (e) {
       setMessages((prev) => [
         ...prev,
@@ -106,7 +113,8 @@ export default function LifeEventsScreen({ navigation }) {
   return (
     <KeyboardAvoidingView
       style={{ flex: 1, backgroundColor: colors.bg }}
-      behavior={Platform.OS === "ios" ? "padding" : undefined}
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+      keyboardVerticalOffset={Platform.OS === "ios" ? 90 : 0}
     >
       <View style={styles.header}>
         <Text style={styles.headerSubtitle}>What's happening in your life right now?</Text>
@@ -150,8 +158,32 @@ export default function LifeEventsScreen({ navigation }) {
                   colors={colors}
                 />
               ) : (
-                <View style={[styles.bubble, item.role === "user" ? styles.userBubble : styles.aiBubble]}>
-                  <Text style={item.role === "user" ? styles.userText : styles.aiText}>{item.content}</Text>
+                <View style={{ marginBottom: 10 }}>
+                  <View
+                    style={[
+                      styles.bubble,
+                      item.role === "user" ? styles.userBubble : styles.aiBubble,
+                      { marginBottom: item.relatedServices?.length ? 6 : 0 },
+                    ]}
+                  >
+                    <Text style={item.role === "user" ? styles.userText : styles.aiText}>{item.content}</Text>
+                  </View>
+                  {!!item.relatedServices?.length && (
+                    <View style={styles.relatedRow}>
+                      {item.relatedServices.map((s) => (
+                        <TouchableOpacity
+                          key={s.id}
+                          style={styles.relatedChip}
+                          onPress={() => navigation.navigate("ServiceDetail", { serviceId: s.id })}
+                        >
+                          <Text style={styles.relatedChipText} numberOfLines={1}>
+                            {s.name}
+                          </Text>
+                          <Ionicons name="arrow-forward" size={12} color={colors.primary} />
+                        </TouchableOpacity>
+                      ))}
+                    </View>
+                  )}
                 </View>
               )
             }
@@ -201,11 +233,23 @@ function getStyles(c) {
       justifyContent: "center",
     },
     suggestionChipText: { color: c.primary, fontWeight: "600", fontSize: 12 },
-    bubble: { padding: 12, borderRadius: 16, marginBottom: 10, maxWidth: "85%" },
+    bubble: { padding: 12, borderRadius: 16, maxWidth: "85%" },
     userBubble: { backgroundColor: c.primary, alignSelf: "flex-end" },
     aiBubble: { backgroundColor: c.surface, borderWidth: 1, borderColor: c.border, alignSelf: "flex-start" },
     userText: { color: c.onPrimary },
     aiText: { color: c.text },
+    relatedRow: { flexDirection: "row", flexWrap: "wrap", gap: 6 },
+    relatedChip: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 5,
+      backgroundColor: c.primarySoft,
+      borderRadius: 14,
+      paddingHorizontal: 10,
+      paddingVertical: 7,
+      maxWidth: "100%",
+    },
+    relatedChipText: { color: c.primary, fontWeight: "700", fontSize: 12, flexShrink: 1 },
     journeyCard: {
       backgroundColor: c.surface,
       borderWidth: 1,
