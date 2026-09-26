@@ -79,14 +79,21 @@ export default function ChatBox({ service = null }) {
           keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 0}
         >
           <View style={styles.header}>
-            <Text style={styles.headerTitle}>{service ? `Ask about: ${service.name}` : "Ask IndiaAssist"}</Text>
+            <Text style={styles.headerTitle} numberOfLines={1}>
+              {service ? `Ask about: ${service.name}` : "Ask IndiaAssist"}
+            </Text>
             <TouchableOpacity onPress={() => setOpen(false)}>
               <Ionicons name="close" size={22} color={colors.textSecondary} />
             </TouchableOpacity>
           </View>
 
+          {/* flex: 1 here is the actual fix -- without it, this list could
+              grow past the shrunk (post-keyboard) container height and push
+              the input row below the visible screen instead of sitting
+              neatly above the keyboard. */}
           <FlatList
             ref={listRef}
+            style={{ flex: 1 }}
             data={messages}
             keyExtractor={(_, i) => String(i)}
             contentContainerStyle={{ padding: 12 }}

@@ -143,9 +143,13 @@ export default function LifeEventsScreen({ navigation }) {
             )}
           />
 
+          {/* flex: 1 here is important -- without it this list can overflow
+              the shrunk (post-keyboard) container and push the input row
+              off-screen instead of sitting neatly above the keyboard. */}
           <FlatList
             key="chat-messages"
             ref={listRef}
+            style={{ flex: 1 }}
             data={messages}
             keyExtractor={(_, i) => String(i)}
             contentContainerStyle={{ padding: 16, paddingBottom: 8 }}

@@ -10,6 +10,7 @@ import {
   Modal,
   Alert,
   ActivityIndicator,
+  Image,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
@@ -39,14 +40,6 @@ function DetailRow({ label, value, styles }) {
   );
 }
 
-function IconButton({ name, onPress, color, styles }) {
-  return (
-    <TouchableOpacity style={styles.iconBtn} onPress={onPress} hitSlop={8}>
-      <Ionicons name={name} size={18} color={color} />
-    </TouchableOpacity>
-  );
-}
-
 export default function ProfileScreen() {
   const { colors, mode, toggleTheme } = useTheme();
   const styles = getStyles(colors);
@@ -66,6 +59,8 @@ export default function ProfileScreen() {
   const [pendingName, setPendingName] = useState("");
   const [renameTarget, setRenameTarget] = useState(null);
   const [renameValue, setRenameValue] = useState("");
+  const [actionsTarget, setActionsTarget] = useState(null); // doc whose ⋮ menu is open
+  const [previewImage, setPreviewImage] = useState(null); // doc being shown full-screen
 
   const loadProfile = useCallback(async () => {
     if (!user) return;
@@ -177,11 +172,23 @@ export default function ProfileScreen() {
     setRenameValue("");
   }
 
-  async function handleOpenDocument(item) {
+  async function handleShareDocument(item) {
     try {
       await openUserDocument(item.url);
     } catch (e) {
       Alert.alert("Couldn't open", e.message);
+    }
+  }
+
+  // Tapping a document now directly shows it -- images open full-screen in
+  // the app; PDFs still go through the share sheet since a real in-app PDF
+  // renderer would need a new native dependency (see chat for why that's
+  // deliberately not added right now).
+  function handleViewDocument(item) {
+    if (item.fileType === "image") {
+      setPreviewImage(item);
+    } else {
+      handleShareDocument(item);
     }
   }
 
@@ -233,38 +240,31 @@ export default function ProfileScreen() {
               <Text style={styles.addDocBtnText}>Add</Text>
             </TouchableOpacity>
           </View>
-          <Text style={styles.lockerHint}>
-            Store copies of documents you often need, as photos or PDFs. Rename them however makes
-            sense to you, and open or re-share them anytime.
-          </Text>
 
           {docsLoading ? (
             <ActivityIndicator style={{ marginTop: 10 }} color={colors.primary} />
           ) : documents.length === 0 ? (
-            <Text style={styles.empty}>No documents saved yet.</Text>
+            <Text style={styles.lockerHint}>
+              Store copies of documents you often need, as photos or PDFs. Rename them however
+              makes sense to you, and open or re-share them anytime.
+            </Text>
           ) : (
             documents.map((item) => (
               <View key={item.id} style={styles.docRow}>
-                <Ionicons
-                  name={item.fileType === "pdf" ? "document-text-outline" : "image-outline"}
-                  size={18}
-                  color={colors.textSecondary}
-                  style={{ marginRight: 8 }}
-                />
-                <Text style={styles.docName} numberOfLines={1}>
-                  {item.name}
-                </Text>
-                <IconButton
-                  name="create-outline"
-                  color={colors.textSecondary}
-                  styles={styles}
-                  onPress={() => {
-                    setRenameTarget(item);
-                    setRenameValue(item.name);
-                  }}
-                />
-                <IconButton name="download-outline" color={colors.textSecondary} styles={styles} onPress={() => handleOpenDocument(item)} />
-                <IconButton name="trash-outline" color={colors.danger} styles={styles} onPress={() => handleDeleteDocument(item)} />
+                <TouchableOpacity style={styles.docTapArea} onPress={() => handleViewDocument(item)}>
+                  <Ionicons
+                    name={item.fileType === "pdf" ? "document-text-outline" : "image-outline"}
+                    size={18}
+                    color={colors.textSecondary}
+                    style={{ marginRight: 8 }}
+                  />
+                  <Text style={styles.docName} numberOfLines={1}>
+                    {item.name}
+                  </Text>
+                </TouchableOpacity>
+                <TouchableOpacity onPress={() => setActionsTarget(item)} hitSlop={10} style={{ paddingLeft: 8 }}>
+                  <Ionicons name="ellipsis-vertical" size={16} color={colors.textMuted} />
+                </TouchableOpacity>
               </View>
             ))
           )}
@@ -334,6 +334,106 @@ export default function ProfileScreen() {
             </TouchableOpacity>
           </View>
         </TouchableOpacity>
+      </Modal>
+
+      {/* ⋮ per-document actions: rename / share / delete */}
+      <Modal visible={!!actionsTarget} transparent animationType="fade" onRequestClose={() => setActionsTarget(null)}>
+        <TouchableOpacity style={styles.floatingBackdrop} activeOpacity={1} onPress={() => setActionsTarget(null)}>
+          <View style={styles.floatingCard}>
+            <Text style={styles.floatingTitle} numberOfLines={2}>
+              {actionsTarget?.name}
+            </Text>
+            <View style={styles.menuDivider} />
+            <TouchableOpacity
+              style={styles.menuItem}
+              onPress={() => {
+                const target = actionsTarget;
+                setActionsTarget(null);
+                handleShareDocument(target);
+              }}
+            >
+              <Ionicons name="share-outline" size={18} color={colors.text} style={{ marginRight: 10 }} />
+              <Text style={styles.menuItemText}>Share / Open Externally</Text>
+            </TouchableOpacity>
+            <View style={styles.menuDivider} />
+            <TouchableOpacity
+              style={styles.menuItem}
+              onPress={() => {
+                setRenameTarget(actionsTarget);
+                setRenameValue(actionsTarget.name);
+                setActionsTarget(null);
+              }}
+            >
+              <Ionicons name="create-outline" size={18} color={colors.text} style={{ marginRight: 10 }} />
+              <Text style={styles.menuItemText}>Rename</Text>
+            </TouchableOpacity>
+            <View style={styles.menuDivider} />
+            <TouchableOpacity
+              style={styles.menuItem}
+              onPress={() => {
+                const target = actionsTarget;
+                setActionsTarget(null);
+                handleDeleteDocument(target);
+              }}
+            >
+              <Ionicons name="trash-outline" size={18} color={colors.danger} style={{ marginRight: 10 }} />
+              <Text style={[styles.menuItemText, { color: colors.danger }]}>Delete</Text>
+            </TouchableOpacity>
+            <View style={styles.menuDivider} />
+            <TouchableOpacity style={styles.menuItem} onPress={() => setActionsTarget(null)}>
+              <Ionicons name="close-outline" size={18} color={colors.textSecondary} style={{ marginRight: 10 }} />
+              <Text style={[styles.menuItemText, { color: colors.textSecondary }]}>Cancel</Text>
+            </TouchableOpacity>
+          </View>
+        </TouchableOpacity>
+      </Modal>
+
+      {/* Full-screen image preview -- opened by directly tapping an image document */}
+      <Modal visible={!!previewImage} animationType="fade" onRequestClose={() => setPreviewImage(null)}>
+        <View style={styles.previewContainer}>
+          <View style={styles.previewHeader}>
+            <Text style={styles.previewTitle} numberOfLines={1}>
+              {previewImage?.name}
+            </Text>
+            <TouchableOpacity onPress={() => setPreviewImage(null)} hitSlop={10}>
+              <Ionicons name="close" size={26} color="#fff" />
+            </TouchableOpacity>
+          </View>
+          {previewImage && (
+            <Image source={{ uri: previewImage.url }} style={styles.previewImage} resizeMode="contain" />
+          )}
+          <View style={styles.previewActions}>
+            <TouchableOpacity
+              style={styles.previewActionBtn}
+              onPress={() => handleShareDocument(previewImage)}
+            >
+              <Ionicons name="share-outline" size={20} color="#fff" />
+              <Text style={styles.previewActionText}>Share</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.previewActionBtn}
+              onPress={() => {
+                setRenameTarget(previewImage);
+                setRenameValue(previewImage.name);
+                setPreviewImage(null);
+              }}
+            >
+              <Ionicons name="create-outline" size={20} color="#fff" />
+              <Text style={styles.previewActionText}>Rename</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.previewActionBtn}
+              onPress={() => {
+                const target = previewImage;
+                setPreviewImage(null);
+                handleDeleteDocument(target);
+              }}
+            >
+              <Ionicons name="trash-outline" size={20} color="#F87171" />
+              <Text style={[styles.previewActionText, { color: "#F87171" }]}>Delete</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
       </Modal>
 
       {/* Edit Profile -- its own modal, not inline on the page */}
@@ -461,13 +561,20 @@ function getStyles(c) {
       paddingVertical: 6,
     },
     addDocBtnText: { color: c.onPrimary, fontWeight: "700", fontSize: 12, marginLeft: 2 },
-    lockerHint: { fontSize: 12, color: c.textMuted, lineHeight: 17, marginBottom: 10 },
+    lockerHint: { fontSize: 12, color: c.textMuted, lineHeight: 17, marginTop: 4 },
     detailRow: { paddingVertical: 8, borderTopWidth: 1, borderTopColor: c.borderSoft },
     detailLabel: { fontSize: 12, color: c.textMuted, fontWeight: "600", marginBottom: 2 },
     detailValue: { fontSize: 15, color: c.text },
-    docRow: { flexDirection: "row", alignItems: "center", paddingVertical: 10, borderTopWidth: 1, borderTopColor: c.borderSoft },
+    docRow: {
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "space-between",
+      paddingVertical: 10,
+      borderTopWidth: 1,
+      borderTopColor: c.borderSoft,
+    },
+    docTapArea: { flexDirection: "row", alignItems: "center", flex: 1 },
     docName: { flex: 1, fontSize: 14, fontWeight: "600", color: c.text },
-    iconBtn: { paddingHorizontal: 6 },
     empty: { color: c.textMuted, fontSize: 13, marginTop: 8 },
     noticeBox: {
       flexDirection: "row",
@@ -492,6 +599,38 @@ function getStyles(c) {
     menuItem: { flexDirection: "row", alignItems: "center", paddingVertical: 12, paddingHorizontal: 16 },
     menuItemText: { fontSize: 15, fontWeight: "600", color: c.text },
     menuDivider: { height: 1, backgroundColor: c.borderSoft },
+    floatingBackdrop: { flex: 1, backgroundColor: c.overlay, justifyContent: "center", alignItems: "center", padding: 24 },
+    floatingCard: {
+      width: "100%",
+      maxWidth: 320,
+      backgroundColor: c.bgElevated,
+      borderWidth: 1,
+      borderColor: c.border,
+      borderRadius: 16,
+      paddingVertical: 6,
+      overflow: "hidden",
+    },
+    floatingTitle: { fontSize: 15, fontWeight: "700", color: c.text, padding: 16, paddingBottom: 12 },
+    previewContainer: { flex: 1, backgroundColor: "#000" },
+    previewHeader: {
+      flexDirection: "row",
+      justifyContent: "space-between",
+      alignItems: "center",
+      paddingHorizontal: 16,
+      paddingVertical: 14,
+      paddingTop: 50,
+    },
+    previewTitle: { color: "#fff", fontSize: 15, fontWeight: "600", flex: 1, marginRight: 12 },
+    previewImage: { flex: 1, width: "100%" },
+    previewActions: {
+      flexDirection: "row",
+      justifyContent: "space-around",
+      paddingVertical: 18,
+      paddingBottom: 30,
+      backgroundColor: "rgba(255,255,255,0.06)",
+    },
+    previewActionBtn: { alignItems: "center", gap: 4 },
+    previewActionText: { color: "#fff", fontSize: 12, fontWeight: "600" },
     modalBackdrop: { flex: 1, backgroundColor: c.overlay, justifyContent: "flex-end" },
     modalCard: { backgroundColor: c.bgElevated, borderTopLeftRadius: 24, borderTopRightRadius: 24, padding: 20 },
     modalTitle: { fontSize: 18, fontWeight: "700", marginBottom: 16, color: c.text },

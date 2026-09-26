@@ -5,7 +5,9 @@
     "version": "1.0.0",
     "orientation": "portrait",
     "userInterfaceStyle": "light",
-    "assetBundlePatterns": ["**/*"],
+    "assetBundlePatterns": [
+      "**/*"
+    ],
     "android": {
       "package": "com.yourname.indiaassistai",
       "adaptiveIcon": {
@@ -21,7 +23,9 @@
         {
           "locationWhenInUsePermission": "IndiaAssist AI uses your location to detect which state you're in, so it can show you the correct fees and portals for that state."
         }
-      ]
+      ],
+      "expo-sharing",
+      "expo-status-bar"
     ],
     "extra": {
       "eas": {}
