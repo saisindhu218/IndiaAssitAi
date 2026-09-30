@@ -168,18 +168,6 @@ Run on Android
 npm run android
 ```
 
-Run on iOS
-
-```bash
-npm run ios
-```
-
-Run on Web
-
-```bash
-npm run web
-```
-
 
 ## Architecture
 
