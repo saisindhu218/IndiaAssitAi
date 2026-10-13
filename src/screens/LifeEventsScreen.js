@@ -6,14 +6,34 @@ import {
   TouchableOpacity,
   FlatList,
   StyleSheet,
-  KeyboardAvoidingView,
-  Platform,
   ActivityIndicator,
+  Modal,
+  Keyboard,
+  ScrollView,
 } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { getAllJourneys, getAllServices } from "../firebase/firestore";
 import { askAboutLifeEvent } from "../ai/groq";
 import { useTheme } from "../theme/ThemeContext";
+import useKeyboardOverlap from "../hooks/useKeyboardOverlap";
+
+// Extra one-tap suggestions. These are sent to the AI as a normal question
+// (the 3 checklist journeys come from Firestore and are shown first).
+const EXTRA_SUGGESTIONS = [
+  { id: "x-married", icon: "💍", title: "Getting Married", prompt: "I'm getting married. Which documents and government services do I need to take care of?" },
+  { id: "x-baby", icon: "👶", title: "Having a Baby", prompt: "We are expecting a baby. What registrations, documents and schemes should we know about?" },
+  { id: "x-lost", icon: "🆔", title: "Lost My Documents", prompt: "I lost my important documents like Aadhaar, PAN or driving licence. What should I do step by step?" },
+  { id: "x-home", icon: "🏠", title: "Buying a Home", prompt: "I'm buying a home. What documents, registrations and government services are involved?" },
+  { id: "x-business", icon: "🏢", title: "Starting a Business", prompt: "I want to start a small business. Which registrations, licences and schemes do I need?" },
+  { id: "x-college", icon: "🎓", title: "Starting College", prompt: "I'm starting college. Which documents, scholarships and services should I look at?" },
+  { id: "x-move", icon: "🚚", title: "Moving to a New City", prompt: "I'm moving to a new city. Which address updates and documents should I handle?" },
+  { id: "x-job-loss", icon: "💼", title: "Lost My Job", prompt: "I lost my job. What government support, schemes and services can help me?" },
+  { id: "x-medical", icon: "🏥", title: "Medical Emergency", prompt: "There is a medical emergency in my family. Which health schemes and services can help with costs?" },
+  { id: "x-retire", icon: "🧓", title: "Retiring", prompt: "I'm about to retire. What pensions, benefits and services should I set up?" },
+  { id: "x-death", icon: "🕊️", title: "Death in the Family", prompt: "A family member passed away. What certificates and legal steps do we need to complete?" },
+  { id: "x-farmer", icon: "🌾", title: "Farming Support", prompt: "I'm a farmer. Which government schemes, subsidies and services are available to me?" },
+];
 
 // Renders a journey's checklist as a chat bubble, with a button to open
 // the full tracked checklist screen.
@@ -39,6 +59,11 @@ function JourneyAnswerCard({ journey, onOpen, styles, colors }) {
 
 export default function LifeEventsScreen({ navigation }) {
   const { colors } = useTheme();
+
+  const insets = useSafeAreaInsets();
+  const { ref: kbRef, overlap, onLayout: onKbLayout } = useKeyboardOverlap();
+  const [composerOpen, setComposerOpen] = useState(false);
+  const [moreOpen, setMoreOpen] = useState(false);
   const styles = getStyles(colors);
   const [journeys, setJourneys] = useState([]);
   const [services, setServices] = useState([]);
@@ -111,11 +136,7 @@ export default function LifeEventsScreen({ navigation }) {
   }
 
   return (
-    <KeyboardAvoidingView
-      style={{ flex: 1, backgroundColor: colors.bg }}
-      behavior={Platform.OS === "ios" ? "padding" : "height"}
-      keyboardVerticalOffset={Platform.OS === "ios" ? 90 : 0}
-    >
+    <View style={{ flex: 1, backgroundColor: colors.bg }}>
       <View style={styles.header}>
         <Text style={styles.headerSubtitle}>What's happening in your life right now?</Text>
       </View>
@@ -128,19 +149,33 @@ export default function LifeEventsScreen({ navigation }) {
         <>
           <FlatList
             key="suggestions-row"
-            data={journeys}
+            data={[...journeys, { id: "more-chip", isMore: true }]}
             keyExtractor={(item) => item.id}
             horizontal
             style={styles.suggestionsList}
             showsHorizontalScrollIndicator={false}
             contentContainerStyle={styles.suggestionRow}
-            renderItem={({ item }) => (
-              <TouchableOpacity style={styles.suggestionChip} onPress={() => handleSend(item.title)}>
-                <Text style={styles.suggestionChipText} numberOfLines={1}>
-                  {item.icon} {item.title}
-                </Text>
-              </TouchableOpacity>
-            )}
+            renderItem={({ item }) =>
+              item.isMore ? (
+                <TouchableOpacity
+                  style={[styles.suggestionChip, { backgroundColor: colors.primary }]}
+                  onPress={() => setMoreOpen(true)}
+                >
+                  <Text style={[styles.suggestionChipText, { color: colors.onPrimary }]}>
+                    More ▾
+                  </Text>
+                </TouchableOpacity>
+              ) : (
+                <TouchableOpacity
+                  style={styles.suggestionChip}
+                  onPress={() => handleSend(item.prompt || item.title)}
+                >
+                  <Text style={styles.suggestionChipText} numberOfLines={1}>
+                    {item.icon} {item.title}
+                  </Text>
+                </TouchableOpacity>
+              )
+            }
           />
 
           {/* flex: 1 here is important -- without it this list can overflow
@@ -200,23 +235,161 @@ export default function LifeEventsScreen({ navigation }) {
             </View>
           )}
 
+          {/* "More" menu: every extra life-event suggestion in one sheet. */}
+          <Modal
+            visible={moreOpen}
+            transparent
+            animationType="slide"
+            statusBarTranslucent
+            navigationBarTranslucent
+            onRequestClose={() => setMoreOpen(false)}
+          >
+            <View style={{ flex: 1, justifyContent: "flex-end", backgroundColor: "rgba(0,0,0,0.35)" }}>
+              <TouchableOpacity
+                style={{ flex: 1 }}
+                activeOpacity={1}
+                onPress={() => setMoreOpen(false)}
+              />
+              <View
+                style={{
+                  backgroundColor: colors.bgElevated,
+                  borderTopLeftRadius: 20,
+                  borderTopRightRadius: 20,
+                  maxHeight: "70%",
+                  paddingBottom: 12 + insets.bottom,
+                }}
+              >
+                <View
+                  style={{
+                    flexDirection: "row",
+                    alignItems: "center",
+                    justifyContent: "space-between",
+                    padding: 16,
+                    paddingBottom: 8,
+                  }}
+                >
+                  <Text style={{ fontSize: 17, fontWeight: "700", color: colors.text }}>
+                    More life events
+                  </Text>
+                  <TouchableOpacity onPress={() => setMoreOpen(false)}>
+                    <Ionicons name="close" size={24} color={colors.text} />
+                  </TouchableOpacity>
+                </View>
+                <ScrollView contentContainerStyle={{ paddingHorizontal: 12 }}>
+                  {EXTRA_SUGGESTIONS.map((item) => (
+                    <TouchableOpacity
+                      key={item.id}
+                      activeOpacity={0.7}
+                      style={{
+                        flexDirection: "row",
+                        alignItems: "center",
+                        paddingVertical: 12,
+                        paddingHorizontal: 12,
+                        borderBottomWidth: 1,
+                        borderBottomColor: colors.border,
+                      }}
+                      onPress={() => {
+                        setMoreOpen(false);
+                        handleSend(item.prompt);
+                      }}
+                    >
+                      <Text style={{ fontSize: 22, marginRight: 14 }}>{item.icon}</Text>
+                      <Text style={{ flex: 1, fontSize: 15, fontWeight: "600", color: colors.text }}>
+                        {item.title}
+                      </Text>
+                      <Ionicons name="chevron-forward" size={18} color={colors.textMuted} />
+                    </TouchableOpacity>
+                  ))}
+                </ScrollView>
+              </View>
+            </View>
+          </Modal>
+
+          {/* Tapping the bar opens a full-screen composer (a Modal, same as the
+              service chat) so the keyboard can never cover what you type. */}
           <View style={styles.inputRow}>
-            <TextInput
-              style={styles.input}
-              placeholder="e.g. I just got married..."
-              placeholderTextColor={colors.textMuted}
-              value={input}
-              onChangeText={setInput}
-              onSubmitEditing={() => handleSend()}
-              multiline
-            />
-            <TouchableOpacity style={styles.sendBtn} onPress={() => handleSend()} disabled={loading}>
+            <TouchableOpacity
+              style={[styles.input, { justifyContent: "center" }]}
+              activeOpacity={0.8}
+              onPress={() => setComposerOpen(true)}
+            >
+              <Text
+                numberOfLines={1}
+                style={{ color: input ? colors.text : colors.textMuted }}
+              >
+                {input || "e.g. I just got married..."}
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.sendBtn}
+              onPress={() => (input.trim() ? handleSend() : setComposerOpen(true))}
+              disabled={loading}
+            >
               <Ionicons name="arrow-up" size={18} color={colors.onPrimary} />
             </TouchableOpacity>
           </View>
+
+          <Modal
+            visible={composerOpen}
+            transparent
+            animationType="fade"
+            statusBarTranslucent
+            navigationBarTranslucent
+            onRequestClose={() => setComposerOpen(false)}
+          >
+            <View
+              ref={kbRef}
+              onLayout={onKbLayout}
+              collapsable={false}
+              style={{
+                flex: 1,
+                justifyContent: "flex-end",
+                backgroundColor: "rgba(0,0,0,0.35)",
+                paddingBottom: overlap,
+              }}
+            >
+              <TouchableOpacity
+                style={{ flex: 1 }}
+                activeOpacity={1}
+                onPress={() => {
+                  Keyboard.dismiss();
+                  setComposerOpen(false);
+                }}
+              />
+              <View
+                style={[
+                  styles.inputRow,
+                  { paddingBottom: 10 + (overlap > 0 ? 0 : insets.bottom) },
+                ]}
+              >
+                <TextInput
+                  style={styles.input}
+                  placeholder="e.g. I just got married..."
+                  placeholderTextColor={colors.textMuted}
+                  value={input}
+                  onChangeText={setInput}
+                  autoFocus
+                  multiline
+                />
+                <TouchableOpacity
+                  style={styles.sendBtn}
+                  disabled={loading || !input.trim()}
+                  onPress={() => {
+                    const text = input.trim();
+                    if (!text) return;
+                    Keyboard.dismiss();
+                    setComposerOpen(false);
+                    handleSend(text);
+                  }}
+                >
+                  <Ionicons name="arrow-up" size={18} color={colors.onPrimary} />
+                </TouchableOpacity>
+              </View>
+            </View>
+          </Modal>
         </>
       )}
-    </KeyboardAvoidingView>
+    </View>
   );
 }
 

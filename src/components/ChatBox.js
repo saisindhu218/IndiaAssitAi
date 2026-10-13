@@ -7,13 +7,13 @@ import {
   Modal,
   FlatList,
   StyleSheet,
-  KeyboardAvoidingView,
-  Platform,
   ActivityIndicator,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { askIndiaAssist } from "../ai/groq";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useTheme } from "../theme/ThemeContext";
+import useKeyboardOverlap from "../hooks/useKeyboardOverlap";
 
 /**
  * Floating "Ask AI" button + chat modal.
@@ -23,6 +23,8 @@ import { useTheme } from "../theme/ThemeContext";
 export default function ChatBox({ service = null }) {
   const { colors } = useTheme();
   const styles = getStyles(colors);
+  const insets = useSafeAreaInsets();
+  const { ref: kbRef, overlap } = useKeyboardOverlap();
   const [open, setOpen] = useState(false);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
@@ -72,13 +74,22 @@ export default function ChatBox({ service = null }) {
         <Ionicons name="chatbubble-ellipses" size={24} color={colors.onPrimary} />
       </TouchableOpacity>
 
-      <Modal visible={open} animationType="slide" onRequestClose={() => setOpen(false)}>
-        <KeyboardAvoidingView
-          style={styles.container}
-          behavior={Platform.OS === "ios" ? "padding" : "height"}
-          keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 0}
+      <Modal
+        visible={open}
+        animationType="slide"
+        onRequestClose={() => setOpen(false)}
+        statusBarTranslucent
+        navigationBarTranslucent
+      >
+        <View
+          ref={kbRef}
+          collapsable={false}
+          style={[
+            styles.container,
+            { paddingBottom: overlap > 0 ? overlap : insets.bottom },
+          ]}
         >
-          <View style={styles.header}>
+          <View style={[styles.header, { paddingTop: 16 + insets.top }]}>
             <Text style={styles.headerTitle} numberOfLines={1}>
               {service ? `Ask about: ${service.name}` : "Ask IndiaAssist"}
             </Text>
@@ -125,7 +136,7 @@ export default function ChatBox({ service = null }) {
               <Ionicons name="arrow-up" size={18} color={colors.onPrimary} />
             </TouchableOpacity>
           </View>
-        </KeyboardAvoidingView>
+        </View>
       </Modal>
     </>
   );
