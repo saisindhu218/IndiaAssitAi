@@ -16,7 +16,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import * as ImagePicker from "expo-image-picker";
 import * as DocumentPicker from "expo-document-picker";
-import { signOut } from "firebase/auth";
+import { signOut, deleteUser, reauthenticateWithCredential, EmailAuthProvider } from "firebase/auth";
 import { auth } from "../firebase/config";
 import {
   getUserProfile,
@@ -25,9 +25,15 @@ import {
   addUserDocument,
   renameUserDocument,
   deleteUserDocument,
+  deleteAllUserData,
 } from "../firebase/firestore";
 import { uploadUserDocument, deleteUserDocumentFile, openUserDocument } from "../storage/documentStorage";
 import { useTheme } from "../theme/ThemeContext";
+import useKeyboardOverlap from "../hooks/useKeyboardOverlap";
+import { cancelAllReminderNotifications } from "../notifications";
+
+// Change this to the address people can write to for help or data requests.
+const SUPPORT_EMAIL = "rssindhu48@gmail.com";
 
 const EMPTY_PROFILE = { name: "", age: "", state: "", occupation: "", isSeniorCitizen: false };
 
@@ -60,6 +66,11 @@ export default function ProfileScreen() {
   const [renameTarget, setRenameTarget] = useState(null);
   const [renameValue, setRenameValue] = useState("");
   const [actionsTarget, setActionsTarget] = useState(null); // doc whose ⋮ menu is open
+  const [aboutVisible, setAboutVisible] = useState(false);
+  const [deleteVisible, setDeleteVisible] = useState(false);
+  const [deletePassword, setDeletePassword] = useState("");
+  const [deleting, setDeleting] = useState(false);
+  const { ref: kbRef, overlap, onLayout: onKbLayout } = useKeyboardOverlap();
   const [previewImage, setPreviewImage] = useState(null); // doc being shown full-screen
 
   const loadProfile = useCallback(async () => {
@@ -144,6 +155,34 @@ export default function ProfileScreen() {
       Alert.alert("Upload failed", e.message);
     } finally {
       setUploading(false);
+    }
+  }
+
+  async function handleDeleteAccount() {
+    if (!user) return;
+    if (!deletePassword) {
+      Alert.alert("Password needed", "Please enter your password to confirm.");
+      return;
+    }
+    setDeleting(true);
+    try {
+      // Firebase requires a recent sign-in before an account can be deleted.
+      await reauthenticateWithCredential(user, EmailAuthProvider.credential(user.email, deletePassword));
+      const docs = await getUserDocuments(user.uid);
+      await Promise.all(docs.map((d) => deleteUserDocumentFile(d.storagePath)));
+      await cancelAllReminderNotifications();
+      await deleteAllUserData(user.uid);
+      await deleteUser(user); // the app returns to the login screen automatically
+      setDeleteVisible(false);
+      setDeletePassword("");
+    } catch (e) {
+      const wrongPassword = e.code === "auth/wrong-password" || e.code === "auth/invalid-credential";
+      Alert.alert(
+        "Couldn't delete account",
+        wrongPassword ? "That password isn't correct." : e.message
+      );
+    } finally {
+      setDeleting(false);
     }
   }
 
@@ -303,14 +342,135 @@ export default function ProfileScreen() {
               style={styles.menuItem}
               onPress={() => {
                 setMenuVisible(false);
+                setAboutVisible(true);
+              }}
+            >
+              <Ionicons name="shield-checkmark-outline" size={18} color={colors.text} style={{ marginRight: 10 }} />
+              <Text style={styles.menuItemText}>About & Privacy</Text>
+            </TouchableOpacity>
+            <View style={styles.menuDivider} />
+            <TouchableOpacity
+              style={styles.menuItem}
+              onPress={() => {
+                setMenuVisible(false);
                 signOut(auth);
               }}
             >
               <Ionicons name="log-out-outline" size={18} color={colors.danger} style={{ marginRight: 10 }} />
               <Text style={[styles.menuItemText, { color: colors.danger }]}>Sign Out</Text>
             </TouchableOpacity>
+            <View style={styles.menuDivider} />
+            <TouchableOpacity
+              style={styles.menuItem}
+              onPress={() => {
+                setMenuVisible(false);
+                setDeleteVisible(true);
+              }}
+            >
+              <Ionicons name="trash-outline" size={18} color={colors.danger} style={{ marginRight: 10 }} />
+              <Text style={[styles.menuItemText, { color: colors.danger }]}>Delete Account</Text>
+            </TouchableOpacity>
           </View>
         </TouchableOpacity>
+      </Modal>
+
+      {/* About & Privacy */}
+      <Modal visible={aboutVisible} transparent animationType="slide" onRequestClose={() => setAboutVisible(false)}>
+        <View style={styles.modalBackdrop}>
+          <View style={[styles.modalCard, { maxHeight: "80%" }]}>
+            <Text style={styles.modalTitle}>About & Privacy</Text>
+            <ScrollView>
+              <Text style={styles.aboutHeading}>Not an official government app</Text>
+              <Text style={styles.aboutText}>
+                IndiaAssist AI helps you understand government services. It is not run by or
+                affiliated with any government body. Fees, rules and portals change, so always
+                confirm on the official website (.gov.in / .nic.in) before you pay or apply.
+              </Text>
+
+              <Text style={styles.aboutHeading}>What we store</Text>
+              <Text style={styles.aboutText}>
+                Your email (for login), the profile details you enter (name, age, state,
+                occupation), your reminders, and the names of documents you add. Document files
+                themselves stay only on this phone and are never uploaded.
+              </Text>
+
+              <Text style={styles.aboutHeading}>AI chat</Text>
+              <Text style={styles.aboutText}>
+                Questions you type in the assistant are sent to an AI service (Groq) to generate
+                answers. Do not type Aadhaar/PAN numbers, OTPs, passwords or bank details in chats.
+              </Text>
+
+              <Text style={styles.aboutHeading}>Stay safe</Text>
+              <Text style={styles.aboutText}>
+                No government office will ask for your OTP over phone, SMS or chat. Only trust
+                websites ending in .gov.in or .nic.in.
+              </Text>
+
+              <Text style={styles.aboutHeading}>Your data, your control</Text>
+              <Text style={styles.aboutText}>
+                You can delete your account and all your data any time from the ⋮ menu (Delete
+                Account). Questions or requests: {SUPPORT_EMAIL}
+              </Text>
+            </ScrollView>
+            <View style={styles.modalActions}>
+              <TouchableOpacity style={styles.saveBtnSmall} onPress={() => setAboutVisible(false)}>
+                <Text style={styles.saveBtnText}>Close</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
+
+      {/* Delete account */}
+      <Modal
+        visible={deleteVisible}
+        transparent
+        animationType="slide"
+        statusBarTranslucent
+        navigationBarTranslucent
+        onRequestClose={() => setDeleteVisible(false)}
+      >
+        <View
+          ref={kbRef}
+          onLayout={onKbLayout}
+          collapsable={false}
+          style={[styles.modalBackdrop, { paddingBottom: overlap }]}
+        >
+          <View style={styles.modalCard}>
+            <Text style={styles.modalTitle}>Delete account?</Text>
+            <Text style={styles.aboutText}>
+              This permanently deletes your profile, reminders and saved document files from this
+              phone. It cannot be undone. Enter your password to confirm.
+            </Text>
+            <TextInput
+              style={[styles.input, { marginTop: 14 }]}
+              placeholder="Password"
+              placeholderTextColor={colors.textMuted}
+              secureTextEntry
+              autoCapitalize="none"
+              value={deletePassword}
+              onChangeText={setDeletePassword}
+            />
+            <View style={styles.modalActions}>
+              <TouchableOpacity
+                style={styles.cancelBtn}
+                onPress={() => {
+                  setDeleteVisible(false);
+                  setDeletePassword("");
+                }}
+              >
+                <Text style={styles.cancelBtnText}>Cancel</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.saveBtnSmall, { backgroundColor: colors.danger }]}
+                onPress={handleDeleteAccount}
+                disabled={deleting}
+              >
+                <Text style={styles.saveBtnText}>{deleting ? "Deleting..." : "Delete everything"}</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
       </Modal>
 
       {/* + Add document: choose source */}
@@ -651,5 +811,7 @@ function getStyles(c) {
     cancelBtnText: { color: c.textSecondary, fontWeight: "600" },
     saveBtnSmall: { backgroundColor: c.primary, borderRadius: 12, paddingVertical: 12, paddingHorizontal: 20 },
     saveBtnText: { color: c.onPrimary, fontWeight: "700" },
+    aboutHeading: { fontSize: 14, fontWeight: "700", color: c.text, marginTop: 12, marginBottom: 4 },
+    aboutText: { fontSize: 13, color: c.textSecondary, lineHeight: 19 },
   });
 }

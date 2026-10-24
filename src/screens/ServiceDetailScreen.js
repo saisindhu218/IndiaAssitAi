@@ -1,5 +1,16 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, ScrollView, StyleSheet, ActivityIndicator } from "react-native";
+import {
+  View,
+  Text,
+  ScrollView,
+  StyleSheet,
+  ActivityIndicator,
+  TouchableOpacity,
+  Linking,
+  Share,
+  Alert,
+} from "react-native";
+import { Ionicons } from "@expo/vector-icons";
 import { getServiceById, mergeServiceForState } from "../firebase/firestore";
 import ChatBox from "../components/ChatBox";
 import StateFilterBar from "../components/StateFilterBar";
@@ -27,6 +38,48 @@ function BulletList({ items, styles }) {
   );
 }
 
+function LinkList({ items, styles }) {
+  async function open(url) {
+    try {
+      await Linking.openURL(url);
+    } catch (e) {
+      Alert.alert("Couldn't open link", url);
+    }
+  }
+  return (
+    <View>
+      {(items || []).map((url, i) => (
+        <TouchableOpacity key={i} onPress={() => open(url)} style={styles.linkRow} activeOpacity={0.7}>
+          <Ionicons name="open-outline" size={16} color={styles.linkText.color} style={{ marginRight: 8 }} />
+          <Text style={styles.linkText} numberOfLines={1}>
+            {String(url).replace(/^https?:\/\//, "")}
+          </Text>
+        </TouchableOpacity>
+      ))}
+    </View>
+  );
+}
+
+// "YYYY-MM-DD" or any parseable date -> whole days since then (null if unknown)
+function daysSince(dateStr) {
+  const t = new Date(dateStr).getTime();
+  if (!dateStr || Number.isNaN(t)) return null;
+  return Math.floor((Date.now() - t) / (24 * 60 * 60 * 1000));
+}
+
+function buildShareText(service) {
+  const lines = [
+    `${service.name} (${service.department})`,
+    "",
+    service.overview,
+    "",
+    `Documents: ${(service.documents || []).slice(0, 6).join(", ")}`,
+  ];
+  if (service.officialLinks?.[0]) lines.push("", `Official site: ${service.officialLinks[0]}`);
+  lines.push("", "Shared from IndiaAssist AI. Always verify on the official website.");
+  return lines.join("\n");
+}
+
 export default function ServiceDetailScreen({ route }) {
   const { colors } = useTheme();
   const styles = getStyles(colors);
@@ -44,6 +97,16 @@ export default function ServiceDetailScreen({ route }) {
   }, [serviceId]);
 
   const service = mergeServiceForState(rawService, selectedState);
+
+  async function handleShare() {
+    try {
+      await Share.share({ message: buildShareText(service) });
+    } catch (e) {
+      // user dismissed the share sheet -- nothing to do
+    }
+  }
+  const ageDays = daysSince(service?.lastUpdated);
+  const maybeOutdated = ageDays !== null && ageDays > 180;
   const hasStateOverride = !!rawService?.stateOverrides?.[selectedState];
 
   if (loading) {
@@ -65,7 +128,12 @@ export default function ServiceDetailScreen({ route }) {
   return (
     <View style={{ flex: 1, backgroundColor: colors.bg }}>
       <ScrollView contentContainerStyle={styles.container}>
-        <Text style={styles.title}>{service.name}</Text>
+        <View style={styles.titleRow}>
+          <Text style={[styles.title, { flex: 1 }]}>{service.name}</Text>
+          <TouchableOpacity onPress={handleShare} hitSlop={10} style={styles.shareBtn}>
+            <Ionicons name="share-social-outline" size={22} color={colors.primary} />
+          </TouchableOpacity>
+        </View>
         <Text style={styles.department}>{service.department}</Text>
 
         <View style={{ marginHorizontal: -20, marginBottom: 8 }}>
@@ -131,10 +199,24 @@ export default function ServiceDetailScreen({ route }) {
         </Section>
 
         <Section title="Official Links" styles={styles}>
-          <BulletList items={service.officialLinks} styles={styles} />
+          <LinkList items={service.officialLinks} styles={styles} />
         </Section>
 
         <Text style={styles.updated}>Last updated: {service.lastUpdated}</Text>
+        {maybeOutdated && (
+          <Text style={styles.outdated}>
+            This information was last checked over {Math.floor(ageDays / 30)} months ago. Fees and
+            rules can change -- please confirm on the official website above.
+          </Text>
+        )}
+        <View style={styles.disclaimer}>
+          <Ionicons name="shield-checkmark-outline" size={16} color={colors.textMuted} style={{ marginRight: 8, marginTop: 2 }} />
+          <Text style={styles.disclaimerText}>
+            IndiaAssist AI is not an official government app. Information is gathered from official
+            sources to help you prepare, but always verify fees and rules on the official website.
+            Never share OTPs or passwords with anyone.
+          </Text>
+        </View>
       </ScrollView>
 
       {/* Context-aware assistant, scoped to this exact service */}
@@ -165,5 +247,27 @@ function getStyles(c) {
     faqQ: { fontSize: 14, fontWeight: "600", color: c.text },
     faqA: { fontSize: 14, color: c.textSecondary, marginTop: 2 },
     updated: { fontSize: 11, color: c.textMuted, marginTop: 10 },
+    titleRow: { flexDirection: "row", alignItems: "flex-start" },
+    shareBtn: { paddingLeft: 12, paddingTop: 2 },
+    linkRow: { flexDirection: "row", alignItems: "center", paddingVertical: 8 },
+    linkText: { fontSize: 14, color: c.primary, textDecorationLine: "underline", flexShrink: 1 },
+    outdated: {
+      fontSize: 12,
+      color: c.danger,
+      backgroundColor: c.primarySoft,
+      padding: 10,
+      borderRadius: 10,
+      marginTop: 10,
+      lineHeight: 18,
+    },
+    disclaimer: {
+      flexDirection: "row",
+      marginTop: 14,
+      padding: 12,
+      borderRadius: 10,
+      borderWidth: 1,
+      borderColor: c.border,
+    },
+    disclaimerText: { flex: 1, fontSize: 11, color: c.textMuted, lineHeight: 16 },
   });
 }

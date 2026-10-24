@@ -13,6 +13,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { askIndiaAssist } from "../ai/groq";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useTheme } from "../theme/ThemeContext";
+import FormattedText from "./FormattedText";
 import useKeyboardOverlap from "../hooks/useKeyboardOverlap";
 
 /**
@@ -110,7 +111,11 @@ export default function ChatBox({ service = null }) {
             contentContainerStyle={{ padding: 12 }}
             renderItem={({ item }) => (
               <View style={[styles.bubble, item.role === "user" ? styles.userBubble : styles.aiBubble]}>
-                <Text style={item.role === "user" ? styles.userText : styles.aiText}>{item.content}</Text>
+                {item.role === "user" ? (
+                  <Text style={styles.userText}>{item.content}</Text>
+                ) : (
+                  <FormattedText style={styles.aiText} text={item.content} linkColor={colors.primary} />
+                )}
               </View>
             )}
             onContentSizeChange={() => listRef.current?.scrollToEnd({ animated: true })}

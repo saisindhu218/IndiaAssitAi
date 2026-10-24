@@ -16,6 +16,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { getAllJourneys, getAllServices } from "../firebase/firestore";
 import { askAboutLifeEvent } from "../ai/groq";
 import { useTheme } from "../theme/ThemeContext";
+import FormattedText from "../components/FormattedText";
 import useKeyboardOverlap from "../hooks/useKeyboardOverlap";
 
 // Extra one-tap suggestions. These are sent to the AI as a normal question
@@ -205,7 +206,11 @@ export default function LifeEventsScreen({ navigation }) {
                       { marginBottom: item.relatedServices?.length ? 6 : 0 },
                     ]}
                   >
-                    <Text style={item.role === "user" ? styles.userText : styles.aiText}>{item.content}</Text>
+                    {item.role === "user" ? (
+                      <Text style={styles.userText}>{item.content}</Text>
+                    ) : (
+                      <FormattedText style={styles.aiText} text={item.content} linkColor={colors.primary} />
+                    )}
                   </View>
                   {!!item.relatedServices?.length && (
                     <View style={styles.relatedRow}>

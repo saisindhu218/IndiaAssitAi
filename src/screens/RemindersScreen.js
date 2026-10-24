@@ -10,16 +10,33 @@ import {
   ActivityIndicator,
   Alert,
 } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { auth } from "../firebase/config";
 import { getUserReminders, addUserReminder, deleteUserReminder } from "../firebase/firestore";
 import { useTheme } from "../theme/ThemeContext";
+import useKeyboardOverlap from "../hooks/useKeyboardOverlap";
+import { scheduleReminderNotifications, cancelReminderNotifications } from "../notifications";
 
 function isOverdue(dueDate) {
   if (!dueDate) return false;
   return new Date(dueDate) < new Date(new Date().toDateString());
 }
+
+// Local date as YYYY-MM-DD, `days` from today
+function dateFromToday(days) {
+  const d = new Date();
+  d.setDate(d.getDate() + days);
+  const pad = (n) => String(n).padStart(2, "0");
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+}
+
+const QUICK_DATES = [
+  { label: "Tomorrow", days: 1 },
+  { label: "1 week", days: 7 },
+  { label: "1 month", days: 30 },
+  { label: "1 year", days: 365 },
+];
 
 export default function RemindersScreen() {
   const { colors } = useTheme();
@@ -32,6 +49,8 @@ export default function RemindersScreen() {
   const [dueDate, setDueDate] = useState("");
   const [note, setNote] = useState("");
   const [saving, setSaving] = useState(false);
+  const insets = useSafeAreaInsets();
+  const { ref: kbRef, overlap, onLayout: onKbLayout } = useKeyboardOverlap();
 
   const load = useCallback(async () => {
     if (!user) return;
@@ -55,12 +74,25 @@ export default function RemindersScreen() {
     }
     setSaving(true);
     try {
-      await addUserReminder(user.uid, { title: title.trim(), dueDate: dueDate.trim(), note: note.trim() });
+      const reminder = { title: title.trim(), dueDate: dueDate.trim(), note: note.trim() };
+      const newId = await addUserReminder(user.uid, reminder);
+      const result = await scheduleReminderNotifications(newId, reminder);
       setTitle("");
       setDueDate("");
       setNote("");
       setModalVisible(false);
       await load();
+      if (result.unsupported) {
+        Alert.alert(
+          "Reminder saved",
+          "Phone alerts don't work inside Expo Go. They will work in the installed app."
+        );
+      } else if (result.permissionDenied) {
+        Alert.alert(
+          "Notifications are off",
+          "Your reminder was saved, but you won't get an alert. Turn on notifications for IndiaAssist AI in your phone settings."
+        );
+      }
     } catch (e) {
       Alert.alert("Couldn't save reminder", e.message);
     } finally {
@@ -69,6 +101,7 @@ export default function RemindersScreen() {
   }
 
   async function handleDelete(id) {
+    await cancelReminderNotifications(id);
     await deleteUserReminder(user.uid, id);
     setReminders((prev) => prev.filter((r) => r.id !== id));
   }
@@ -112,15 +145,27 @@ export default function RemindersScreen() {
           )}
           ListEmptyComponent={
             <Text style={styles.empty}>
-              No reminders yet. Tap "+ Add" to track things like passport, DL, or insurance expiry.
+              No reminders yet. Tap "+ Add" to track things like passport, DL, or insurance expiry. You'll get a phone alert the day before and on the due date.
             </Text>
           }
         />
       )}
 
-      <Modal visible={modalVisible} animationType="slide" transparent onRequestClose={() => setModalVisible(false)}>
-        <View style={styles.modalBackdrop}>
-          <View style={styles.modalCard}>
+      <Modal
+        visible={modalVisible}
+        animationType="slide"
+        transparent
+        statusBarTranslucent
+        navigationBarTranslucent
+        onRequestClose={() => setModalVisible(false)}
+      >
+        <View
+          ref={kbRef}
+          onLayout={onKbLayout}
+          collapsable={false}
+          style={[styles.modalBackdrop, { paddingBottom: overlap }]}
+        >
+          <View style={[styles.modalCard, { paddingBottom: 20 + (overlap > 0 ? 0 : insets.bottom) }]}>
             <Text style={styles.modalTitle}>New Reminder</Text>
 
             <Text style={styles.fieldLabel}>Title</Text>
@@ -141,6 +186,17 @@ export default function RemindersScreen() {
               onChangeText={setDueDate}
               keyboardType="numbers-and-punctuation"
             />
+            <View style={styles.quickRow}>
+              {QUICK_DATES.map((q) => (
+                <TouchableOpacity
+                  key={q.label}
+                  style={styles.quickChip}
+                  onPress={() => setDueDate(dateFromToday(q.days))}
+                >
+                  <Text style={styles.quickChipText}>{q.label}</Text>
+                </TouchableOpacity>
+              ))}
+            </View>
 
             <Text style={styles.fieldLabel}>Note (optional)</Text>
             <TextInput
@@ -224,5 +280,15 @@ function getStyles(c) {
     cancelBtnText: { color: c.textSecondary, fontWeight: "600" },
     saveBtn: { backgroundColor: c.primary, borderRadius: 12, paddingVertical: 12, paddingHorizontal: 20 },
     saveBtnText: { color: c.onPrimary, fontWeight: "700" },
+    quickRow: { flexDirection: "row", flexWrap: "wrap", marginTop: 8 },
+    quickChip: {
+      backgroundColor: c.primarySoft,
+      borderRadius: 16,
+      paddingHorizontal: 12,
+      paddingVertical: 6,
+      marginRight: 8,
+      marginBottom: 4,
+    },
+    quickChipText: { color: c.primary, fontSize: 12, fontWeight: "600" },
   });
 }

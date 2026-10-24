@@ -26,7 +26,13 @@
       ],
       "expo-sharing",
       "expo-status-bar",
-      "expo-font"
+      "expo-font",
+      [
+        "expo-notifications",
+        {
+          "color": "#0891B2"
+        }
+      ]
     ],
     "extra": {
       "eas": {}
