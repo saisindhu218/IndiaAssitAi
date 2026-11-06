@@ -8,12 +8,18 @@ import {
   FlatList,
   StyleSheet,
   ActivityIndicator,
+  Alert,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { askIndiaAssist } from "../ai/groq";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useTheme } from "../theme/ThemeContext";
 import FormattedText from "./FormattedText";
+import ReportSheet from "./ReportSheet";
+import { addReport } from "../firebase/firestore";
+import { auth } from "../firebase/config";
+
+const AI_REPORT_REASONS = ["Wrong or outdated information", "Offensive or unsafe", "Not helpful / other problem"];
 import useKeyboardOverlap from "../hooks/useKeyboardOverlap";
 
 /**
@@ -29,6 +35,7 @@ export default function ChatBox({ service = null }) {
   const [open, setOpen] = useState(false);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
+  const [reportTarget, setReportTarget] = useState(null);
   const [messages, setMessages] = useState([
     {
       role: "assistant",
@@ -38,6 +45,24 @@ export default function ChatBox({ service = null }) {
     },
   ]);
   const listRef = useRef(null);
+
+  async function submitReport(reason) {
+    const target = reportTarget;
+    setReportTarget(null);
+    try {
+      await addReport(auth.currentUser?.uid, {
+        type: "ai_answer",
+        reason,
+        question: target?.question,
+        answer: target?.answer,
+        serviceId: service?.id,
+        serviceName: service?.name,
+      });
+      Alert.alert("Thank you", "Your report was sent. It helps us improve the assistant.");
+    } catch (e) {
+      Alert.alert("Couldn't send report", "Please check your internet connection and try again.");
+    }
+  }
 
   async function handleSend() {
     const text = input.trim();
@@ -57,6 +82,7 @@ export default function ChatBox({ service = null }) {
         ...prev,
         {
           role: "assistant",
+          isError: true,
           content:
             "Sorry, I couldn't reach the AI assistant right now (" +
             e.message +
@@ -109,12 +135,23 @@ export default function ChatBox({ service = null }) {
             data={messages}
             keyExtractor={(_, i) => String(i)}
             contentContainerStyle={{ padding: 12 }}
-            renderItem={({ item }) => (
+            renderItem={({ item, index }) => (
               <View style={[styles.bubble, item.role === "user" ? styles.userBubble : styles.aiBubble]}>
                 {item.role === "user" ? (
                   <Text style={styles.userText}>{item.content}</Text>
                 ) : (
                   <FormattedText style={styles.aiText} text={item.content} linkColor={colors.primary} />
+                )}
+                {item.role !== "user" && index > 0 && !item.isError && (
+                  <TouchableOpacity
+                    style={{ marginTop: 8, alignSelf: "flex-start" }}
+                    hitSlop={8}
+                    onPress={() => setReportTarget({ question: messages[index - 1]?.content, answer: item.content })}
+                    accessibilityRole="button"
+                    accessibilityLabel="Report this answer"
+                  >
+                    <Text style={{ fontSize: 11, color: colors.textMuted }}>⚑ Report this answer</Text>
+                  </TouchableOpacity>
                 )}
               </View>
             )}
@@ -141,6 +178,15 @@ export default function ChatBox({ service = null }) {
               <Ionicons name="arrow-up" size={18} color={colors.onPrimary} />
             </TouchableOpacity>
           </View>
+          <ReportSheet
+            asOverlay
+            visible={!!reportTarget}
+            title="Report this answer"
+            subtitle="What is wrong with it?"
+            reasons={AI_REPORT_REASONS}
+            onSelect={submitReport}
+            onClose={() => setReportTarget(null)}
+          />
         </View>
       </Modal>
     </>

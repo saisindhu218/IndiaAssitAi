@@ -11,11 +11,21 @@ import {
   Alert,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { getServiceById, mergeServiceForState } from "../firebase/firestore";
+import { getServiceById, mergeServiceForState, addReport } from "../firebase/firestore";
+import { auth } from "../firebase/config";
+import ReportSheet from "../components/ReportSheet";
 import ChatBox from "../components/ChatBox";
 import StateFilterBar from "../components/StateFilterBar";
 import { useStateFilter } from "../context/StateFilterContext";
 import { useTheme } from "../theme/ThemeContext";
+
+const SERVICE_REPORT_REASONS = [
+  "Fees or amounts are wrong",
+  "Steps or documents are wrong",
+  "A link is broken or wrong",
+  "Information is outdated",
+  "Something else",
+];
 
 function Section({ title, children, styles }) {
   return (
@@ -86,6 +96,7 @@ export default function ServiceDetailScreen({ route }) {
   const { serviceId } = route.params;
   const [rawService, setRawService] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [reportOpen, setReportOpen] = useState(false);
   const { selectedState } = useStateFilter();
 
   useEffect(() => {
@@ -97,6 +108,21 @@ export default function ServiceDetailScreen({ route }) {
   }, [serviceId]);
 
   const service = mergeServiceForState(rawService, selectedState);
+
+  async function submitReport(reason) {
+    setReportOpen(false);
+    try {
+      await addReport(auth.currentUser?.uid, {
+        type: "service",
+        reason,
+        serviceId: service?.id,
+        serviceName: service?.name,
+      });
+      Alert.alert("Thank you", "Your report was sent. We'll review this service.");
+    } catch (e) {
+      Alert.alert("Couldn't send report", "Please check your internet connection and try again.");
+    }
+  }
 
   async function handleShare() {
     try {
@@ -217,9 +243,26 @@ export default function ServiceDetailScreen({ route }) {
             Never share OTPs or passwords with anyone.
           </Text>
         </View>
+        <TouchableOpacity
+          style={styles.reportLink}
+          onPress={() => setReportOpen(true)}
+          accessibilityRole="button"
+          accessibilityLabel="Report incorrect information"
+        >
+          <Ionicons name="flag-outline" size={14} color={styles.disclaimerText.color} style={{ marginRight: 6 }} />
+          <Text style={styles.reportLinkText}>Report incorrect information</Text>
+        </TouchableOpacity>
       </ScrollView>
 
       {/* Context-aware assistant, scoped to this exact service */}
+      <ReportSheet
+        visible={reportOpen}
+        title="Report incorrect information"
+        subtitle={`What is wrong on "${service.name}"?`}
+        reasons={SERVICE_REPORT_REASONS}
+        onSelect={submitReport}
+        onClose={() => setReportOpen(false)}
+      />
       <ChatBox service={service} />
     </View>
   );
@@ -269,5 +312,7 @@ function getStyles(c) {
       borderColor: c.border,
     },
     disclaimerText: { flex: 1, fontSize: 11, color: c.textMuted, lineHeight: 16 },
+    reportLink: { flexDirection: "row", alignItems: "center", justifyContent: "center", marginTop: 16, paddingVertical: 8 },
+    reportLinkText: { fontSize: 12, color: c.textMuted, textDecorationLine: "underline" },
   });
 }

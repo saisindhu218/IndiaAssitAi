@@ -4,15 +4,22 @@
     "slug": "indiaassist-ai",
     "version": "1.0.0",
     "orientation": "portrait",
+    "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
     "assetBundlePatterns": [
       "**/*"
     ],
     "android": {
       "package": "com.yourname.indiaassistai",
+      "versionCode": 1,
       "adaptiveIcon": {
-        "backgroundColor": "#0B5FFF"
-      }
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#0E7490"
+      },
+      "blockedPermissions": [
+        "android.permission.RECORD_AUDIO",
+        "android.permission.SYSTEM_ALERT_WINDOW"
+      ]
     },
     "ios": {
       "bundleIdentifier": "com.yourname.indiaassistai"
@@ -31,6 +38,20 @@
         "expo-notifications",
         {
           "color": "#0891B2"
+        }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "IndiaAssist AI needs access to your photos so you can save document images in your private Document Locker.",
+          "cameraPermission": false,
+          "microphonePermission": false
+        }
+      ],
+      [
+        "expo-local-authentication",
+        {
+          "faceIDPermission": "IndiaAssist AI uses Face ID to unlock your private Document Locker."
         }
       ]
     ],

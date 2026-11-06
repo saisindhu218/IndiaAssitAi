@@ -7,6 +7,7 @@ import {
   FlatList,
   StyleSheet,
   ActivityIndicator,
+  Alert,
   Modal,
   Keyboard,
   ScrollView,
@@ -17,6 +18,11 @@ import { getAllJourneys, getAllServices } from "../firebase/firestore";
 import { askAboutLifeEvent } from "../ai/groq";
 import { useTheme } from "../theme/ThemeContext";
 import FormattedText from "../components/FormattedText";
+import ReportSheet from "../components/ReportSheet";
+import { addReport } from "../firebase/firestore";
+import { auth } from "../firebase/config";
+
+const AI_REPORT_REASONS = ["Wrong or outdated information", "Offensive or unsafe", "Not helpful / other problem"];
 import useKeyboardOverlap from "../hooks/useKeyboardOverlap";
 
 // Extra one-tap suggestions. These are sent to the AI as a normal question
@@ -65,6 +71,7 @@ export default function LifeEventsScreen({ navigation }) {
   const { ref: kbRef, overlap, onLayout: onKbLayout } = useKeyboardOverlap();
   const [composerOpen, setComposerOpen] = useState(false);
   const [moreOpen, setMoreOpen] = useState(false);
+  const [reportTarget, setReportTarget] = useState(null);
   const styles = getStyles(colors);
   const [journeys, setJourneys] = useState([]);
   const [services, setServices] = useState([]);
@@ -79,6 +86,23 @@ export default function LifeEventsScreen({ navigation }) {
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const listRef = useRef(null);
+
+  async function submitReport(reason) {
+    const target = reportTarget;
+    setReportTarget(null);
+    try {
+      await addReport(auth.currentUser?.uid, {
+        type: "ai_answer",
+        reason,
+        question: target?.question,
+        answer: target?.answer,
+        serviceId: "life-events",
+      });
+      Alert.alert("Thank you", "Your report was sent. It helps us improve the assistant.");
+    } catch (e) {
+      Alert.alert("Couldn't send report", "Please check your internet connection and try again.");
+    }
+  }
 
   useEffect(() => {
     (async () => {
@@ -128,7 +152,7 @@ export default function LifeEventsScreen({ navigation }) {
     } catch (e) {
       setMessages((prev) => [
         ...prev,
-        { role: "assistant", content: `Sorry, I couldn't reach the assistant (${e.message}).` },
+        { role: "assistant", isError: true, content: `Sorry, I couldn't reach the assistant (${e.message}).` },
       ]);
     } finally {
       setLoading(false);
@@ -189,7 +213,7 @@ export default function LifeEventsScreen({ navigation }) {
             data={messages}
             keyExtractor={(_, i) => String(i)}
             contentContainerStyle={{ padding: 16, paddingBottom: 8 }}
-            renderItem={({ item }) =>
+            renderItem={({ item, index }) =>
               item.journey ? (
                 <JourneyAnswerCard
                   journey={item.journey}
@@ -210,6 +234,17 @@ export default function LifeEventsScreen({ navigation }) {
                       <Text style={styles.userText}>{item.content}</Text>
                     ) : (
                       <FormattedText style={styles.aiText} text={item.content} linkColor={colors.primary} />
+                    )}
+                    {item.role !== "user" && index > 0 && !item.isError && (
+                      <TouchableOpacity
+                        style={{ marginTop: 8, alignSelf: "flex-start" }}
+                        hitSlop={8}
+                        onPress={() => setReportTarget({ question: messages[index - 1]?.content, answer: item.content })}
+                        accessibilityRole="button"
+                        accessibilityLabel="Report this answer"
+                      >
+                        <Text style={{ fontSize: 11, color: colors.textMuted }}>⚑ Report this answer</Text>
+                      </TouchableOpacity>
                     )}
                   </View>
                   {!!item.relatedServices?.length && (
@@ -239,6 +274,15 @@ export default function LifeEventsScreen({ navigation }) {
               <ActivityIndicator color={colors.primary} />
             </View>
           )}
+
+          <ReportSheet
+            visible={!!reportTarget}
+            title="Report this answer"
+            subtitle="What is wrong with it?"
+            reasons={AI_REPORT_REASONS}
+            onSelect={submitReport}
+            onClose={() => setReportTarget(null)}
+          />
 
           {/* "More" menu: every extra life-event suggestion in one sheet. */}
           <Modal

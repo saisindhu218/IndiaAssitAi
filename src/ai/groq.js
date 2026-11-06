@@ -4,6 +4,7 @@
 // government procedures. Replies follow the language the user writes in.
 
 import { findRelevantServices } from "../firebase/firestore";
+import { auth } from "../firebase/config";
 
 const GROQ_URL = "https://api.groq.com/openai/v1/chat/completions";
 
@@ -41,14 +42,32 @@ function isModelProblem(status, bodyText) {
   return status === 400 && /model|decommission/i.test(bodyText || "");
 }
 
-async function callGroq(messages, { temperature = 0.2, max_tokens = 500 } = {}) {
+// How requests reach Groq:
+//  - PRODUCTION: set EXPO_PUBLIC_AI_PROXY_URL to your deployed worker (see the
+//    /worker folder). The Groq key then lives only on the server, and each
+//    request is checked against the signed-in user's Firebase login.
+//  - DEVELOPMENT: leave the proxy URL empty and the app calls Groq directly
+//    with EXPO_PUBLIC_GROQ_API_KEY (that key would be visible inside the app,
+//    so don't ship a public build this way).
+async function getRequestTarget() {
+  const proxyUrl = (process.env.EXPO_PUBLIC_AI_PROXY_URL || "").trim();
+  if (proxyUrl) {
+    const user = auth.currentUser;
+    if (!user) throw new Error("Please log in again to use the assistant.");
+    const token = await user.getIdToken();
+    return { url: proxyUrl, token, viaProxy: true };
+  }
   const apiKey = process.env.EXPO_PUBLIC_GROQ_API_KEY;
-
   if (!apiKey) {
     throw new Error(
-      "Missing EXPO_PUBLIC_GROQ_API_KEY. Add it to your .env file (see .env.example)."
+      "AI is not configured. Set EXPO_PUBLIC_AI_PROXY_URL (recommended) or EXPO_PUBLIC_GROQ_API_KEY in your .env file."
     );
   }
+  return { url: GROQ_URL, token: apiKey, viaProxy: false };
+}
+
+async function callGroq(messages, { temperature = 0.2, max_tokens = 500 } = {}) {
+  const target = await getRequestTarget();
 
   let lastError = null;
 
@@ -69,11 +88,11 @@ async function callGroq(messages, { temperature = 0.2, max_tokens = 500 } = {}) 
 
     let response;
     try {
-      response = await fetch(GROQ_URL, {
+      response = await fetch(target.url, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${apiKey}`,
+          Authorization: `Bearer ${target.token}`,
         },
         body: JSON.stringify(body),
       });
@@ -83,6 +102,9 @@ async function callGroq(messages, { temperature = 0.2, max_tokens = 500 } = {}) 
 
     if (response.status === 429) {
       throw new Error("The assistant is very busy right now. Please try again in a minute.");
+    }
+    if (target.viaProxy && (response.status === 401 || response.status === 403)) {
+      throw new Error("Your session has expired. Please log out and log in again.");
     }
 
     if (!response.ok) {

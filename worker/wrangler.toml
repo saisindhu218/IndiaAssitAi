@@ -1,0 +1,10 @@
+name = "indiaassist-ai-proxy"
+main = "index.js"
+compatibility_date = "2025-06-01"
+
+[vars]
+# Your Firebase project id (same as EXPO_PUBLIC_FIREBASE_PROJECT_ID in .env)
+FIREBASE_PROJECT_ID = "your-firebase-project-id"
+
+# The Groq key is NOT stored here. Add it as a secret with:
+#   npx wrangler secret put GROQ_API_KEY

@@ -225,15 +225,16 @@ export const SAMPLE_SERVICES = [
       "Access to your Aadhaar-registered mobile number for OTP (for online updates)",
     ],
     fees: {
-      onlineDemographicUpdate: "Free (UIDAI has periodically waived this fee for online updates -- confirm current status on myaadhaar.uidai.gov.in before paying anything)",
-      centreUpdate: "₹50 (approximate, for updates done at an Aadhaar Seva Kendra)",
-      biometricUpdate: "Must be done in person at a centre (mobile number update also requires an in-person visit)",
+      demographicUpdate: "₹75 per update request for name, address, date of birth, gender, mobile number or email -- the same whether done online or at a centre. No separate demographic fee if you update it together with a biometric update at a centre.",
+      documentUpdate: "Uploading identity/address proof documents online on the myAadhaar portal is FREE until 14 June 2027. The same document update done at an Aadhaar centre costs ₹75.",
+      biometricUpdate: "₹125 for fingerprints, iris or photo (in person at a centre). Free for the mandatory biometric updates at ages 5-7 and 15-17. A temporary free window for ages 7-15 was scheduled to end on 30 September 2026 -- confirm with UIDAI whether it has been extended.",
     },
     processingTime: "Online demographic updates: a few days once submitted; centre-based updates: similar, tracked via Update Request Number (URN)",
     onlineSteps: [
-      "Go to myaadhaar.uidai.gov.in and log in with your Aadhaar number and OTP",
+      "Go to myaadhaar.uidai.gov.in (or use the new Aadhaar app) and log in with your Aadhaar number and OTP",
       "Select 'Address Update' or 'Document Update' depending on what needs changing",
       "Upload clear scans of your supporting proof document",
+      "Pay the fee if one applies (₹75 for a demographic change; document updates online are free until 14 June 2027)",
       "Submit and note your Update Request Number (URN) to track status",
       "Check status anytime under 'Check Aadhaar Update Status' using your URN or EID",
     ],
@@ -246,9 +247,14 @@ export const SAMPLE_SERVICES = [
     commonMistakes: [
       "Uploading a proof document that doesn't clearly show the new detail being updated",
       "Trying to update mobile number online -- this specifically requires an in-person visit",
-      "Not checking the current fee before paying, since UIDAI has changed free-update windows more than once",
+      "Paying ₹75 at a centre just to update proof documents, when the same document update is free online on myAadhaar until 14 June 2027",
+      "Assuming all Aadhaar updates are free -- name, address, date of birth and gender changes cost ₹75 per request, and biometric updates cost ₹125 (free for ages 5-7 and 15-17)",
     ],
     faqs: [
+      {
+        q: "Is updating Aadhaar free?",
+        a: "Only in some cases. Uploading identity/address proof documents online on the myAadhaar portal is free until 14 June 2027. Changing name, address, date of birth, gender, mobile number or email costs ₹75 per request. Biometric updates cost ₹125 (free at ages 5-7 and 15-17). If you do a demographic update together with a biometric update at a centre, the demographic fee is waived.",
+      },
       {
         q: "Can I update my mobile number online?",
         a: "No -- mobile number updates require biometric verification and must be done in person at an Aadhaar Seva Kendra.",
@@ -258,8 +264,11 @@ export const SAMPLE_SERVICES = [
         a: "On myaadhaar.uidai.gov.in, use 'Check Aadhaar Update Status' with your Update Request Number (URN) or Enrolment ID (EID).",
       },
     ],
-    officialLinks: ["https://myaadhaar.uidai.gov.in"],
-    lastUpdated: "2026-07-01",
+    officialLinks: [
+      "https://myaadhaar.uidai.gov.in",
+      "https://uidai.gov.in",
+    ],
+    lastUpdated: "2026-11-06",
   },
 
   {
@@ -483,7 +492,7 @@ export const SAMPLE_SERVICES = [
         a: "The Hindu Marriage Act generally applies when both parties are Hindu, Buddhist, Jain, or Sikh and have already had a religious ceremony. The Special Marriage Act is used for inter-religious marriages or when a civil registration is preferred without a religious ceremony, and involves a notice period before registration.",
       },
     ],
-    officialLinks: [],
+    officialLinks: ["https://services.india.gov.in"],
     lastUpdated: "2026-06-01",
   },
 
@@ -523,7 +532,7 @@ export const SAMPLE_SERVICES = [
         a: "This varies by state -- some require continuous residence of several years, others link it to owning property or completing schooling there. Check your specific state's e-district portal for the exact rule.",
       },
     ],
-    officialLinks: [],
+    officialLinks: ["https://services.india.gov.in"],
     lastUpdated: "2026-06-01",
     stateOverrides: {
       Karnataka: {
@@ -576,7 +585,7 @@ export const SAMPLE_SERVICES = [
         a: "Most states treat it as valid for about a year for scheme/scholarship purposes, but always check the specific requirement of whatever you're applying for -- some ask for a certificate issued within the last 6 months.",
       },
     ],
-    officialLinks: [],
+    officialLinks: ["https://services.india.gov.in"],
     lastUpdated: "2026-07-05",
     stateOverrides: {
       Karnataka: {
@@ -632,7 +641,7 @@ export const SAMPLE_SERVICES = [
         a: "It's more complex, since caste certificate validity and recognized categories can vary by state. Migration caste certificate rules exist in most states for this situation -- check your state's specific process, as it usually requires additional documentation.",
       },
     ],
-    officialLinks: [],
+    officialLinks: ["https://services.india.gov.in"],
     lastUpdated: "2026-06-01",
     stateOverrides: {
       Karnataka: {
@@ -686,7 +695,7 @@ export const SAMPLE_SERVICES = [
         a: "Most application processes (exams, admissions) require an EWS certificate issued within the current financial year, so plan to get a fresh one annually rather than reusing an old one.",
       },
     ],
-    officialLinks: [],
+    officialLinks: ["https://services.india.gov.in"],
     lastUpdated: "2026-06-01",
   },
 
@@ -730,7 +739,7 @@ export const SAMPLE_SERVICES = [
         a: "Many banks now offer this via Aadhaar e-KYC plus a video KYC call, though some account types (or if your Aadhaar isn't linked to your current mobile number) may still require a branch visit.",
       },
     ],
-    officialLinks: [],
+    officialLinks: ["https://pmjdy.gov.in", "https://www.rbi.org.in"],
     lastUpdated: "2026-07-01",
   },
 
@@ -770,7 +779,7 @@ export const SAMPLE_SERVICES = [
         a: "Banks can restrict or freeze the account (typically for debits/withdrawals first) until KYC is completed, per RBI's periodic KYC update requirements. It's worth doing promptly once your bank notifies you.",
       },
     ],
-    officialLinks: [],
+    officialLinks: ["https://www.ckycindia.in", "https://www.rbi.org.in"],
     lastUpdated: "2026-07-01",
   },
 
@@ -838,8 +847,29 @@ export const SAMPLE_SERVICES = [
       "Request an update or reissue at the counter or kiosk",
     ],
     commonMistakes: ["Assuming passbook update is available fully online -- most banks still require a branch visit or in-branch kiosk for the physical book"],
-    faqs: [],
-    officialLinks: [],
+    faqs: [
+      {
+        q: "Who can use this service?",
+        a: "Any account holder.",
+      },
+      {
+        q: "What documents do I need?",
+        a: "Account number; Existing passbook (if requesting an update, not a replacement); Identity proof, if requesting a duplicate for a lost passbook.",
+      },
+      {
+        q: "How much does it cost?",
+        a: "Update: Free | Duplicate: A small charge may apply for a lost passbook, varies by bank -- confirm the current amount on the official website.",
+      },
+      {
+        q: "How long does it take?",
+        a: "Same-day at most branches",
+      },
+      {
+        q: "What mistakes should I avoid?",
+        a: "Assuming passbook update is available fully online -- most banks still require a branch visit or in-branch kiosk for the physical book.",
+      },
+    ],
+    officialLinks: ["https://cms.rbi.org.in"],
     lastUpdated: "2026-06-01",
   },
 
@@ -864,8 +894,29 @@ export const SAMPLE_SERVICES = [
       "Or request at the branch counter directly",
     ],
     commonMistakes: ["Requesting delivery to an outdated address without updating it first"],
-    faqs: [],
-    officialLinks: [],
+    faqs: [
+      {
+        q: "Who can use this service?",
+        a: "Any account holder whose account type includes cheque-book facility.",
+      },
+      {
+        q: "What documents do I need?",
+        a: "Account number; Existing chequebook requisition slip, if using the physical process.",
+      },
+      {
+        q: "How much does it cost?",
+        a: "Chequebook: Often free for a limited number per year, then a small per-book charge -- varies by bank and account type",
+      },
+      {
+        q: "How long does it take?",
+        a: "3-7 working days for delivery by post; some banks offer instant printing at select branches",
+      },
+      {
+        q: "What mistakes should I avoid?",
+        a: "Requesting delivery to an outdated address without updating it first.",
+      },
+    ],
+    officialLinks: ["https://cms.rbi.org.in"],
     lastUpdated: "2026-06-01",
   },
 
@@ -899,7 +950,7 @@ export const SAMPLE_SERVICES = [
         a: "Yes, FD interest is added to your taxable income and TDS is deducted by the bank if it crosses the threshold in a financial year, unless you submit Form 15G/15H declaring your income is below the taxable limit.",
       },
     ],
-    officialLinks: [],
+    officialLinks: ["https://www.rbi.org.in", "https://www.indiapost.gov.in"],
     lastUpdated: "2026-06-01",
   },
 
@@ -939,7 +990,7 @@ export const SAMPLE_SERVICES = [
         a: "This varies by lender, but a CIBIL score of 700+ generally improves approval odds and interest rate offers. Lenders with more flexible criteria exist for lower scores, often at higher interest rates.",
       },
     ],
-    officialLinks: [],
+    officialLinks: ["https://www.rbi.org.in", "https://cms.rbi.org.in"],
     lastUpdated: "2026-06-01",
   },
 
@@ -970,7 +1021,7 @@ export const SAMPLE_SERVICES = [
         a: "Yes, many banks offer secured credit cards backed by a fixed deposit, which is a common way to build credit history if you're new to credit.",
       },
     ],
-    officialLinks: [],
+    officialLinks: ["https://www.rbi.org.in", "https://cms.rbi.org.in"],
     lastUpdated: "2026-06-01",
   },
 
@@ -1120,8 +1171,7 @@ export const SAMPLE_SERVICES = [
     department: "Income Tax",
     category: "Income Tax",
     categoryIcon: "💰",
-    overview:
-      "Filing your annual income tax return. For the current filing season (Assessment Year 2026-27, covering income earned in FY 2025-26, i.e. before 1 April 2026), filing continues entirely under the earlier Income Tax Act, 1961 rules and forms, even though the new Income Tax Act, 2025 has come into force for income earned afterward.",
+    overview: "Filing your annual income tax return. For Assessment Year 2026-27 (income earned in FY 2025-26, i.e. before 1 April 2026), filing is under the earlier Income Tax Act, 1961 rules and forms; the new Income Tax Act, 2025 applies to income earned from April 2026 onward. The regular due dates for AY 2026-27 have passed (31 July for most individuals, 31 August for non-audit ITR-3/4, 31 October for audit cases), but you can still file a belated return until 31 December 2026.",
     eligibility: "Mandatory if your income exceeds the basic exemption limit, or in several other specified situations (e.g. foreign asset holders, certain high-value transactions) -- optional but often beneficial otherwise (for refunds, loan/visa applications, carrying forward losses).",
     documents: [
       "PAN and Aadhaar (linked)",
@@ -1130,7 +1180,10 @@ export const SAMPLE_SERVICES = [
       "Form 26AS / Annual Information Statement (AIS) for a summary of your income and TDS",
       "Investment proofs for deductions claimed (80C, 80D, etc.)",
     ],
-    fees: { filing: "Free to file yourself on the e-filing portal", lateFilingFee: "Up to ₹5,000 under Section 234F if filed after the due date (as a belated return)" },
+    fees: {
+      filing: "Free to file yourself on the e-filing portal",
+      lateFilingFee: "Up to ₹5,000 under Section 234F if filed after the due date as a belated return (lower if your income is small), plus interest on any unpaid tax",
+    },
     processingTime: "Filing itself takes minutes to a couple of hours depending on complexity; processing/refund by the department typically takes a few weeks to a few months after filing",
     onlineSteps: [
       "Log in to the e-filing portal (incometax.gov.in) with your PAN",
@@ -1143,22 +1196,26 @@ export const SAMPLE_SERVICES = [
       "For those without easy internet access, filing assistance is available at Income Tax Department help centers or via a tax professional, though the return itself is ultimately submitted through the same online portal",
     ],
     commonMistakes: [
-      "Missing the due date -- for salaried/ITR-1/2 filers this is typically 31 July, and 31 August for non-audit ITR-3/4 filers, for the current AY 2026-27 season; missing it means a belated return with a late fee",
+      "Missing the due date -- for AY 2026-27 the regular dates (31 July for ITR-1/2, 31 August for non-audit ITR-3/4, 31 October for audit cases) have passed. You can still file a belated return until 31 December 2026, with a late fee and interest, and with limits on carrying forward some losses",
       "Forgetting to e-verify after submitting -- an unverified return is treated as not filed",
       "Not cross-checking pre-filled data against your own Form 16/AIS, since pre-filled figures can occasionally be incomplete or wrong",
     ],
     faqs: [
       {
         q: "Which Income Tax Act applies to my return this year?",
-        a: "For Assessment Year 2026-27 (income earned in FY 2025-26, before April 2026), your return is filed entirely under the earlier Income Tax Act, 1961 -- the new Income Tax Act, 2025 only applies to income earned from April 2026 onward (Tax Year 2026-27), which won't be due for filing until 2027.",
+        a: "For Assessment Year 2026-27 (income earned in FY 2025-26, before April 2026), your return is filed under the earlier Income Tax Act, 1961 -- the new Income Tax Act, 2025 applies to income earned from April 2026 onward (Tax Year 2026-27), which won't be due for filing until 2027.",
       },
       {
-        q: "What if I miss the due date?",
-        a: "You can still file a belated return, typically until 31 December of the assessment year, but you'll pay a late fee under Section 234F (up to ₹5,000) plus interest on any unpaid tax, and lose the option to switch to the old tax regime for that year.",
+        q: "I missed the due date. Can I still file?",
+        a: "Yes. For AY 2026-27 you can file a belated return until 31 December 2026. You'll pay a late fee under Section 234F (up to ₹5,000) plus interest on any unpaid tax, and lose the option to switch to the old tax regime for that year and to carry forward certain losses.",
+      },
+      {
+        q: "I already filed but made a mistake. What can I do?",
+        a: "File a revised return -- for AY 2026-27 the last date is 31 March 2027 (extended from 31 December in Budget 2026). If both the belated and revised windows are over, an updated return (ITR-U) can be filed until 31 March 2031 with additional tax.",
       },
     ],
     officialLinks: ["https://www.incometax.gov.in"],
-    lastUpdated: "2026-08-01",
+    lastUpdated: "2026-11-06",
   },
 
   {
@@ -1217,7 +1274,7 @@ export const SAMPLE_SERVICES = [
         a: "You can still file your ITR using your payslips, Form 26AS, and AIS to reconstruct your income and TDS details, though Form 16 makes the process considerably easier -- follow up with your employer's HR/finance team, as they're required to issue it.",
       },
     ],
-    officialLinks: [],
+    officialLinks: ["https://www.incometax.gov.in", "https://www.tdscpc.gov.in"],
     lastUpdated: "2026-06-01",
   },
 
@@ -1460,7 +1517,7 @@ export const SAMPLE_SERVICES = [
       },
     ],
     officialLinks: ["https://www.indiapost.gov.in"],
-    lastUpdated: "2026-07-25",
+    lastUpdated: "2026-11-06",
   },
 
   {
@@ -2175,7 +2232,28 @@ export const SAMPLE_SERVICES = [
     ],
     offlineSteps: ["Visit your RTO with the existing DL and supporting proof if online update isn't available in your state"],
     commonMistakes: ["Not updating the DL after moving states -- while not always immediately mandatory, it matters for verification, challans, and renewal notices reaching you correctly"],
-    faqs: [],
+    faqs: [
+      {
+        q: "Who can use this service?",
+        a: "Any DL holder needing to correct or update their record.",
+      },
+      {
+        q: "What documents do I need?",
+        a: "Existing DL; Proof of the new address or the corrected detail; Aadhaar card.",
+      },
+      {
+        q: "How much does it cost?",
+        a: "Update: A nominal fee applies, varies by state -- confirm the current amount on the official website.",
+      },
+      {
+        q: "How long does it take?",
+        a: "A few days to a couple of weeks",
+      },
+      {
+        q: "What mistakes should I avoid?",
+        a: "Not updating the DL after moving states -- while not always immediately mandatory, it matters for verification, challans, and renewal notices reaching you correctly.",
+      },
+    ],
     officialLinks: ["https://sarathi.parivahan.gov.in"],
     lastUpdated: "2026-06-01",
   },
@@ -2392,7 +2470,28 @@ export const SAMPLE_SERVICES = [
     ],
     offlineSteps: ["Visit a local Employment Exchange / Model Career Centre for in-person assistance with registration and job search"],
     commonMistakes: ["Leaving the profile incomplete -- employers search using specific skill/qualification filters, so a sparse profile reduces visibility"],
-    faqs: [],
+    faqs: [
+      {
+        q: "Who can use this service?",
+        a: "Any job seeker; employers can also register to post vacancies.",
+      },
+      {
+        q: "What documents do I need?",
+        a: "Aadhaar card; Educational certificates and resume/work history for your profile; Photograph.",
+      },
+      {
+        q: "How much does it cost?",
+        a: "Registration: Free",
+      },
+      {
+        q: "How long does it take?",
+        a: "Instant registration; job matching is ongoing based on your profile",
+      },
+      {
+        q: "What mistakes should I avoid?",
+        a: "Leaving the profile incomplete -- employers search using specific skill/qualification filters, so a sparse profile reduces visibility.",
+      },
+    ],
     officialLinks: ["https://www.ncs.gov.in"],
     lastUpdated: "2026-06-01",
   },
@@ -2613,7 +2712,7 @@ export const SAMPLE_SERVICES = [
         a: "Not automatically -- if eligible applications exceed available RTE-quota seats at a school, allocation is typically done via a computerized lottery, so eligibility gets you into the draw, not a guaranteed seat.",
       },
     ],
-    officialLinks: [],
+    officialLinks: ["https://dsel.education.gov.in"],
     lastUpdated: "2026-06-01",
   },
 
@@ -2635,8 +2734,29 @@ export const SAMPLE_SERVICES = [
       "Collect the TC and submit it to your new school as part of admission formalities",
     ],
     commonMistakes: ["Not clearing pending dues before applying, which can delay TC issuance", "Losing the physical TC -- keep a scanned/digital copy immediately after receiving it"],
-    faqs: [],
-    officialLinks: [],
+    faqs: [
+      {
+        q: "Who can use this service?",
+        a: "Any student moving from one school to another.",
+      },
+      {
+        q: "What documents do I need?",
+        a: "Student's admission/enrollment number at the current school; Fee clearance from the current school (dues must typically be cleared first).",
+      },
+      {
+        q: "How much does it cost?",
+        a: "Issuance: Usually free or a nominal administrative fee, varies by school",
+      },
+      {
+        q: "How long does it take?",
+        a: "A few days to about a week at most schools, once dues are cleared",
+      },
+      {
+        q: "What mistakes should I avoid?",
+        a: "Not clearing pending dues before applying, which can delay TC issuance. Losing the physical TC -- keep a scanned/digital copy immediately after receiving it.",
+      },
+    ],
+    officialLinks: ["https://www.cbse.gov.in"],
     lastUpdated: "2026-06-01",
   },
 
@@ -2663,8 +2783,29 @@ export const SAMPLE_SERVICES = [
       "Applying too close to your new institution's admission deadline -- processing can take a few weeks, so apply as soon as your final results are out",
       "Requesting only one copy -- if you might need it for multiple purposes later, some universities charge extra or take longer for duplicate requests, so consider requesting more than one at the outset",
     ],
-    faqs: [],
-    officialLinks: [],
+    faqs: [
+      {
+        q: "Who can use this service?",
+        a: "Students who have completed a course (or are transferring) and need to enroll at a different university/board.",
+      },
+      {
+        q: "What documents do I need?",
+        a: "Final mark sheet/degree certificate from the issuing university; Provisional certificate, if the final degree hasn't been conferred yet; Identity proof.",
+      },
+      {
+        q: "How much does it cost?",
+        a: "Application: A nominal fee, typically a few hundred rupees, varies by university -- confirm the current amount on the official website.",
+      },
+      {
+        q: "How long does it take?",
+        a: "A few days to a few weeks, depending on the university's administrative processing time",
+      },
+      {
+        q: "What mistakes should I avoid?",
+        a: "Applying too close to your new institution's admission deadline -- processing can take a few weeks, so apply as soon as your final results are out. Requesting only one copy -- if you might need it for multiple purposes later, some universities charge extra or take longer for duplicate requests, so consider requesting more than one at the outset.",
+      },
+    ],
+    officialLinks: ["https://www.ugc.gov.in"],
     lastUpdated: "2026-06-01",
   },
 
@@ -2791,7 +2932,28 @@ export const SAMPLE_SERVICES = [
     commonMistakes: [
       "Relying only on the online stock figure in a true emergency without also calling the blood bank directly to confirm, since stock can change quickly",
     ],
-    faqs: [],
+    faqs: [
+      {
+        q: "Who can use this service?",
+        a: "Anyone searching for blood availability; donors must generally be aged 18-65, in good health, and meet standard eligibility criteria (weight, hemoglobin level, gap since last donation, etc.) checked at the donation point.",
+      },
+      {
+        q: "What documents do I need?",
+        a: "Identity proof, for donor registration at a blood bank/camp.",
+      },
+      {
+        q: "How much does it cost?",
+        a: "Searching: Free",
+      },
+      {
+        q: "How long does it take?",
+        a: "Instant search results; actual blood availability depends on real-time stock reported by each blood bank",
+      },
+      {
+        q: "What mistakes should I avoid?",
+        a: "Relying only on the online stock figure in a true emergency without also calling the blood bank directly to confirm, since stock can change quickly.",
+      },
+    ],
     officialLinks: ["https://eraktkosh.mohfw.gov.in"],
     lastUpdated: "2026-06-01",
   },
@@ -2845,7 +3007,28 @@ export const SAMPLE_SERVICES = [
     ],
     offlineSteps: ["Standard walk-in OPD registration remains available at the hospital if you haven't booked online, though it typically involves a longer queue"],
     commonMistakes: ["Not checking whether your specific hospital/department is actually listed on ORS -- not all government hospitals or every department within a hospital are covered yet"],
-    faqs: [],
+    faqs: [
+      {
+        q: "Who can use this service?",
+        a: "Any patient wanting to visit a participating government hospital's OPD.",
+      },
+      {
+        q: "What documents do I need?",
+        a: "Aadhaar card or mobile number for registration; Previous case papers/records, if it's a follow-up visit.",
+      },
+      {
+        q: "How much does it cost?",
+        a: "Booking: Free -- standard OPD consultation charges (if any) at that specific government hospital still apply as usual",
+      },
+      {
+        q: "How long does it take?",
+        a: "Instant booking; actual wait time at the hospital depends on that day's OPD load",
+      },
+      {
+        q: "What mistakes should I avoid?",
+        a: "Not checking whether your specific hospital/department is actually listed on ORS -- not all government hospitals or every department within a hospital are covered yet.",
+      },
+    ],
     officialLinks: ["https://ors.gov.in"],
     lastUpdated: "2026-06-01",
   },
@@ -2893,7 +3076,28 @@ export const SAMPLE_SERVICES = [
     ],
     offlineSteps: [],
     commonMistakes: ["Trying to log in with a different mobile number than the one originally used for registration -- the OTP will only work with the number tied to that vaccination record"],
-    faqs: [],
+    faqs: [
+      {
+        q: "Who can use this service?",
+        a: "Anyone vaccinated in India whose vaccination was recorded on CoWIN.",
+      },
+      {
+        q: "What documents do I need?",
+        a: "Mobile number used during vaccination registration.",
+      },
+      {
+        q: "How much does it cost?",
+        a: "Download: Free",
+      },
+      {
+        q: "How long does it take?",
+        a: "Instant",
+      },
+      {
+        q: "What mistakes should I avoid?",
+        a: "Trying to log in with a different mobile number than the one originally used for registration -- the OTP will only work with the number tied to that vaccination record.",
+      },
+    ],
     officialLinks: ["https://www.cowin.gov.in"],
     lastUpdated: "2026-06-01",
   },
@@ -2940,7 +3144,7 @@ export const SAMPLE_SERVICES = [
         a: "No -- for most property transactions, registering the sale deed at the Sub-Registrar Office is what legally transfers ownership. A notarized-only agreement does not substitute for registration.",
       },
     ],
-    officialLinks: [],
+    officialLinks: ["https://dolr.gov.in", "https://services.india.gov.in"],
     lastUpdated: "2026-07-01",
     stateOverrides: {
       Karnataka: {
@@ -2984,7 +3188,7 @@ export const SAMPLE_SERVICES = [
         a: "This depends on the purpose -- a home loan lender may want 13-30 years of history. Ask your bank/lawyer for the specific requirement for your situation rather than assuming a shorter period is sufficient.",
       },
     ],
-    officialLinks: [],
+    officialLinks: ["https://dolr.gov.in", "https://services.india.gov.in"],
     lastUpdated: "2026-06-01",
     stateOverrides: {
       Karnataka: {
@@ -3026,7 +3230,7 @@ export const SAMPLE_SERVICES = [
         a: "Many municipal corporations offer a rebate (commonly around 5-10%) for paying the full year's property tax within an early window at the start of the financial year -- check your specific city's property tax portal for the current rebate window and rate.",
       },
     ],
-    officialLinks: [],
+    officialLinks: ["https://services.india.gov.in"],
     lastUpdated: "2026-06-01",
   },
 
@@ -3058,7 +3262,7 @@ export const SAMPLE_SERVICES = [
         a: "Yes -- registration transfers legal title, but mutation is a separate step that updates the municipal/revenue record (used for property tax billing and often required for future transactions) to reflect you as the current owner.",
       },
     ],
-    officialLinks: [],
+    officialLinks: ["https://dolr.gov.in"],
     lastUpdated: "2026-06-01",
   },
 
@@ -3116,7 +3320,28 @@ export const SAMPLE_SERVICES = [
     ],
     offlineSteps: ["Authorized Collection Centres (ACCs) in your city can issue e-stamp certificates in person for a service charge"],
     commonMistakes: ["Using an unauthorized/unverified vendor for physical stamp paper instead of official e-stamping channels -- counterfeit stamp paper remains a real fraud risk"],
-    faqs: [],
+    faqs: [
+      {
+        q: "Who can use this service?",
+        a: "Anyone needing to pay stamp duty for a property transaction or other stampable legal document.",
+      },
+      {
+        q: "What documents do I need?",
+        a: "Document details (type of transaction, parties involved, property/transaction value).",
+      },
+      {
+        q: "How much does it cost?",
+        a: "Stamp Duty: Calculated based on the transaction type and value, per your state's stamp duty schedule -- confirm the current amount on the official website.",
+      },
+      {
+        q: "How long does it take?",
+        a: "Instant e-stamp certificate generation once payment is made",
+      },
+      {
+        q: "What mistakes should I avoid?",
+        a: "Using an unauthorized/unverified vendor for physical stamp paper instead of official e-stamping channels -- counterfeit stamp paper remains a real fraud risk.",
+      },
+    ],
     officialLinks: ["https://www.shcilestamp.com"],
     lastUpdated: "2026-06-01",
   },
@@ -3174,8 +3399,29 @@ export const SAMPLE_SERVICES = [
     ],
     offlineSteps: ["Visit your local discom's sub-division office to apply in person if online application isn't available in your area"],
     commonMistakes: ["Underestimating the load requirement, which can require a costly upgrade application later if consumption regularly exceeds the sanctioned load"],
-    faqs: [],
-    officialLinks: [],
+    faqs: [
+      {
+        q: "Who can use this service?",
+        a: "Property owner or authorized occupant at the connection address.",
+      },
+      {
+        q: "What documents do I need?",
+        a: "Address/ownership proof or rental agreement; Identity proof; Property tax receipt or building completion certificate, in some cases; Load requirement details (for larger/commercial connections).",
+      },
+      {
+        q: "How much does it cost?",
+        a: "Connection Charge: Varies by discom, load requirement, and connection type (domestic/commercial) | Security Deposit: Refundable deposit based on estimated consumption, varies by discom -- confirm the current amount on the official website.",
+      },
+      {
+        q: "How long does it take?",
+        a: "A few days to a few weeks depending on site inspection and infrastructure availability",
+      },
+      {
+        q: "What mistakes should I avoid?",
+        a: "Underestimating the load requirement, which can require a costly upgrade application later if consumption regularly exceeds the sanctioned load.",
+      },
+    ],
+    officialLinks: ["https://powermin.gov.in", "https://services.india.gov.in"],
     lastUpdated: "2026-06-01",
   },
 
@@ -3198,8 +3444,29 @@ export const SAMPLE_SERVICES = [
     ],
     offlineSteps: ["Pay at discom collection centers, authorized banks, or via CSC/CSP agents; register complaints in person at your local sub-division office"],
     commonMistakes: ["Not saving the payment receipt/transaction ID, which is needed if a payment doesn't reflect promptly", "Ignoring an unusually high bill without raising a query -- meter reading errors do happen and are correctable if flagged promptly"],
-    faqs: [],
-    officialLinks: [],
+    faqs: [
+      {
+        q: "Who can use this service?",
+        a: "Any electricity connection holder.",
+      },
+      {
+        q: "What documents do I need?",
+        a: "Consumer/account number (printed on your bill).",
+      },
+      {
+        q: "How much does it cost?",
+        a: "Bill Amount: As per your metered consumption and your discom's tariff structure | Late Payment Surcharge: Applies if paid after the due date, varies by discom -- confirm the current amount on the official website.",
+      },
+      {
+        q: "How long does it take?",
+        a: "Bill payment is instant; complaint resolution timelines vary by discom and issue type",
+      },
+      {
+        q: "What mistakes should I avoid?",
+        a: "Not saving the payment receipt/transaction ID, which is needed if a payment doesn't reflect promptly. Ignoring an unusually high bill without raising a query -- meter reading errors do happen and are correctable if flagged promptly.",
+      },
+    ],
+    officialLinks: ["https://powermin.gov.in"],
     lastUpdated: "2026-06-01",
   },
 
@@ -3249,8 +3516,29 @@ export const SAMPLE_SERVICES = [
     ],
     offlineSteps: ["Visit your city's water board office to apply in person if online application isn't available"],
     commonMistakes: ["Not checking whether a water pipeline already runs near your property -- if not, additional infrastructure charges or delays may apply"],
-    faqs: [],
-    officialLinks: [],
+    faqs: [
+      {
+        q: "Who can use this service?",
+        a: "Property owner or authorized occupant.",
+      },
+      {
+        q: "What documents do I need?",
+        a: "Property ownership/rental proof; Identity proof; Property tax receipt or building plan approval, in some cases.",
+      },
+      {
+        q: "How much does it cost?",
+        a: "Connection Charge: Varies significantly by city and connection size/type | Security Deposit: May apply, varies by city -- confirm the current amount on the official website.",
+      },
+      {
+        q: "How long does it take?",
+        a: "A few weeks, depending on site inspection and pipeline availability in your area",
+      },
+      {
+        q: "What mistakes should I avoid?",
+        a: "Not checking whether a water pipeline already runs near your property -- if not, additional infrastructure charges or delays may apply.",
+      },
+    ],
+    officialLinks: ["https://services.india.gov.in"],
     lastUpdated: "2026-06-01",
   },
 
@@ -3272,7 +3560,28 @@ export const SAMPLE_SERVICES = [
     ],
     offlineSteps: ["Visit your provider's local customer service center to register or escalate a complaint in person"],
     commonMistakes: ["Escalating to TRAI/DoT before giving the provider's own grievance/appellate process a chance to resolve it -- most complaints are expected to go through the provider first"],
-    faqs: [],
+    faqs: [
+      {
+        q: "Who can use this service?",
+        a: "Any telecom/broadband service subscriber.",
+      },
+      {
+        q: "What documents do I need?",
+        a: "Account/customer ID; Details of the complaint and any prior complaint reference numbers with the provider.",
+      },
+      {
+        q: "How much does it cost?",
+        a: "Complaint: Free",
+      },
+      {
+        q: "How long does it take?",
+        a: "Providers are generally expected to resolve complaints within a defined window (commonly a few days to a few weeks depending on issue type); escalation to TRAI is a further step if unresolved",
+      },
+      {
+        q: "What mistakes should I avoid?",
+        a: "Escalating to TRAI/DoT before giving the provider's own grievance/appellate process a chance to resolve it -- most complaints are expected to go through the provider first.",
+      },
+    ],
     officialLinks: ["https://www.trai.gov.in"],
     lastUpdated: "2026-06-01",
   },
@@ -3301,7 +3610,7 @@ export const SAMPLE_SERVICES = [
         a: "No -- that's the entire point of MNP; you keep your existing mobile number while switching to a new operator/plan.",
       },
     ],
-    officialLinks: [],
+    officialLinks: ["https://www.trai.gov.in"],
     lastUpdated: "2026-06-01",
   },
 
@@ -3344,7 +3653,7 @@ export const SAMPLE_SERVICES = [
         a: "It's an FIR that can be registered at any police station regardless of where the crime occurred, which is then transferred to the police station with actual jurisdiction -- useful when you need to report urgently but aren't near the relevant station.",
       },
     ],
-    officialLinks: [],
+    officialLinks: ["https://digitalpolice.gov.in", "https://cybercrime.gov.in"],
     lastUpdated: "2026-06-01",
   },
 
@@ -3501,8 +3810,29 @@ export const SAMPLE_SERVICES = [
     ],
     offlineSteps: ["Visit your local police station with the tenant's/domestic help's details and identity proof to submit a verification request in person"],
     commonMistakes: ["Skipping this step entirely -- in several states it's a legal requirement for landlords, and even where it isn't mandatory, it's a reasonable safety precaution"],
-    faqs: [],
-    officialLinks: [],
+    faqs: [
+      {
+        q: "Who can use this service?",
+        a: "Landlords verifying tenants, or households/employers verifying domestic help.",
+      },
+      {
+        q: "What documents do I need?",
+        a: "Tenant's/domestic help's identity proof (Aadhaar, etc.); Photograph; Landlord's/employer's identity proof; Rental agreement, if applicable.",
+      },
+      {
+        q: "How much does it cost?",
+        a: "Verification: Free in most states, though a small fee applies in some",
+      },
+      {
+        q: "How long does it take?",
+        a: "A few days to a few weeks, depending on the local police station's workload",
+      },
+      {
+        q: "What mistakes should I avoid?",
+        a: "Skipping this step entirely -- in several states it's a legal requirement for landlords, and even where it isn't mandatory, it's a reasonable safety precaution.",
+      },
+    ],
+    officialLinks: ["https://digitalpolice.gov.in"],
     lastUpdated: "2026-06-01",
   },
 
@@ -3669,8 +3999,29 @@ export const SAMPLE_SERVICES = [
     ],
     offlineSteps: ["Visit your local labour department/municipal office if online registration isn't available in your state"],
     commonMistakes: ["Assuming this is optional for small shops -- most states require registration regardless of business size, though specific exemption thresholds do exist in some states"],
-    faqs: [],
-    officialLinks: [],
+    faqs: [
+      {
+        q: "Who can use this service?",
+        a: "Any shop, commercial establishment, or business premises, as defined under the relevant state's Act (specific thresholds and exemptions vary by state).",
+      },
+      {
+        q: "What documents do I need?",
+        a: "Identity and address proof of the proprietor; Proof of business premises (rental agreement/ownership document); PAN card; Details of employees, if any.",
+      },
+      {
+        q: "How much does it cost?",
+        a: "Registration: A nominal fee applies, varies by state and often scales with number of employees -- confirm the current amount on the official website.",
+      },
+      {
+        q: "How long does it take?",
+        a: "A few days to a couple of weeks, depending on the state's process",
+      },
+      {
+        q: "What mistakes should I avoid?",
+        a: "Assuming this is optional for small shops -- most states require registration regardless of business size, though specific exemption thresholds do exist in some states.",
+      },
+    ],
+    officialLinks: ["https://shramsuvidha.gov.in", "https://services.india.gov.in"],
     lastUpdated: "2026-06-01",
   },
 
@@ -3843,7 +4194,28 @@ export const SAMPLE_SERVICES = [
       "Collect your card from the local agriculture office, or download it online once available",
     ],
     commonMistakes: ["Not following the recommended fertilizer guidance on the card -- the whole point is to correct over/under-use of specific nutrients based on your actual soil test results, not just to have the document"],
-    faqs: [],
+    faqs: [
+      {
+        q: "Who can use this service?",
+        a: "Any farmer with agricultural land.",
+      },
+      {
+        q: "What documents do I need?",
+        a: "Land details (survey number/khata); Aadhaar card.",
+      },
+      {
+        q: "How much does it cost?",
+        a: "Testing: Free",
+      },
+      {
+        q: "How long does it take?",
+        a: "Soil sample collection to card issuance typically takes a few weeks, as it involves lab testing",
+      },
+      {
+        q: "What mistakes should I avoid?",
+        a: "Not following the recommended fertilizer guidance on the card -- the whole point is to correct over/under-use of specific nutrients based on your actual soil test results, not just to have the document.",
+      },
+    ],
     officialLinks: ["https://soilhealth.dac.gov.in"],
     lastUpdated: "2026-06-01",
   },
@@ -3866,7 +4238,28 @@ export const SAMPLE_SERVICES = [
     ],
     offlineSteps: ["Visit your local participating mandi's e-NAM help desk to register and get assistance with online trading"],
     commonMistakes: ["Not comparing prices across multiple participating mandis before committing to sell at your nearest one, missing out on the platform's core benefit of wider price discovery"],
-    faqs: [],
+    faqs: [
+      {
+        q: "Who can use this service?",
+        a: "Any farmer, trader, or buyer registered with a participating e-NAM mandi.",
+      },
+      {
+        q: "What documents do I need?",
+        a: "Aadhaar card; Bank account details; Land/farmer proof, for farmer registration.",
+      },
+      {
+        q: "How much does it cost?",
+        a: "Registration: Free",
+      },
+      {
+        q: "How long does it take?",
+        a: "Registration is typically quick; actual trading depends on market activity at your local participating mandi",
+      },
+      {
+        q: "What mistakes should I avoid?",
+        a: "Not comparing prices across multiple participating mandis before committing to sell at your nearest one, missing out on the platform's core benefit of wider price discovery.",
+      },
+    ],
     officialLinks: ["https://www.enam.gov.in"],
     lastUpdated: "2026-06-01",
   },
@@ -3889,7 +4282,28 @@ export const SAMPLE_SERVICES = [
     ],
     offlineSteps: ["Contact your state's renewable energy development agency or local agriculture department office for application assistance"],
     commonMistakes: ["Not checking your state's specific subsidy share and application window -- implementation details and funding availability vary by state and by year"],
-    faqs: [],
+    faqs: [
+      {
+        q: "Who can use this service?",
+        a: "Individual farmers, farmer groups, cooperatives, or panchayats -- specific components (standalone solar pumps vs. grid-connected solar plants) have different eligibility details.",
+      },
+      {
+        q: "What documents do I need?",
+        a: "Land ownership/lease documents; Aadhaar card; Bank account details; Existing electricity connection details, if replacing a grid-based pump.",
+      },
+      {
+        q: "How much does it cost?",
+        a: "Subsidy: Central and state governments together typically subsidize a significant portion of the cost (commonly 60%+ combined, varying by component and state), with the farmer contributing the balance, sometimes partly through a bank loan -- confirm the current amount on the official website.",
+      },
+      {
+        q: "How long does it take?",
+        a: "Application review and installation can take a few months, subject to state-level implementation agency processing and site approval",
+      },
+      {
+        q: "What mistakes should I avoid?",
+        a: "Not checking your state's specific subsidy share and application window -- implementation details and funding availability vary by state and by year.",
+      },
+    ],
     officialLinks: ["https://pmkusum.mnre.gov.in"],
     lastUpdated: "2026-06-01",
   },
@@ -3908,8 +4322,25 @@ export const SAMPLE_SERVICES = [
     onlineSteps: ["Call the toll-free Kisan Call Centre number 1800-180-1551 from anywhere in India"],
     offlineSteps: [],
     commonMistakes: ["Not using this free resource when facing an urgent crop/pest issue -- experts can often give same-call guidance rather than needing to wait for an in-person visit"],
-    faqs: [],
-    officialLinks: [],
+    faqs: [
+      {
+        q: "Who can use this service?",
+        a: "Any farmer.",
+      },
+      {
+        q: "How much does it cost?",
+        a: "Call: Free (toll-free)",
+      },
+      {
+        q: "How long does it take?",
+        a: "Immediate -- live call center support",
+      },
+      {
+        q: "What mistakes should I avoid?",
+        a: "Not using this free resource when facing an urgent crop/pest issue -- experts can often give same-call guidance rather than needing to wait for an in-person visit.",
+      },
+    ],
+    officialLinks: ["https://mkisan.gov.in"],
     lastUpdated: "2026-06-01",
   },
 
@@ -4061,8 +4492,25 @@ export const SAMPLE_SERVICES = [
     onlineSteps: ["Call the toll-free number 14567 from anywhere in India"],
     offlineSteps: [],
     commonMistakes: ["Not using this resource for elder abuse concerns -- the helpline can arrange field-level intervention, not just provide information over the phone"],
-    faqs: [],
-    officialLinks: [],
+    faqs: [
+      {
+        q: "Who can use this service?",
+        a: "Any senior citizen (or someone calling on behalf of one) needing information, guidance, or help with elder abuse/distress situations.",
+      },
+      {
+        q: "How much does it cost?",
+        a: "Call: Free (toll-free)",
+      },
+      {
+        q: "How long does it take?",
+        a: "Immediate -- live helpline support, with field visits arranged for distress cases as needed",
+      },
+      {
+        q: "What mistakes should I avoid?",
+        a: "Not using this resource for elder abuse concerns -- the helpline can arrange field-level intervention, not just provide information over the phone.",
+      },
+    ],
+    officialLinks: ["https://socialjustice.gov.in"],
     lastUpdated: "2026-06-01",
   },
 
@@ -4090,7 +4538,7 @@ export const SAMPLE_SERVICES = [
         a: "Yes -- in relevant cases, where a child fails to maintain a parent and is residing in property owned by that parent, the Maintenance Tribunal can order eviction as part of enforcing the parent's right to maintenance, though this depends on specific case facts.",
       },
     ],
-    officialLinks: [],
+    officialLinks: ["https://socialjustice.gov.in", "https://nalsa.gov.in"],
     lastUpdated: "2026-06-01",
   },
 
@@ -4122,7 +4570,7 @@ export const SAMPLE_SERVICES = [
         a: "Automatic priority for lower berth allocation remains in place, along with station assistance for those needing it -- the fare discount specifically is what's suspended, not all senior-related provisions.",
       },
     ],
-    officialLinks: [],
+    officialLinks: ["https://socialjustice.gov.in"],
     lastUpdated: "2026-08-01",
   },
 
@@ -4176,8 +4624,25 @@ export const SAMPLE_SERVICES = [
     onlineSteps: ["Call 181 from anywhere in India, 24x7"],
     offlineSteps: ["In an immediate emergency, also call 100/112 for police response alongside or instead of 181"],
     commonMistakes: ["Hesitating to call due to fear or stigma -- the helpline is confidential and designed specifically to connect you with the support you need, including safe shelter referrals if required"],
-    faqs: [],
-    officialLinks: [],
+    faqs: [
+      {
+        q: "Who can use this service?",
+        a: "Any woman in distress, or someone calling on her behalf.",
+      },
+      {
+        q: "How much does it cost?",
+        a: "Call: Free (toll-free)",
+      },
+      {
+        q: "How long does it take?",
+        a: "Immediate -- 24x7 live helpline, with emergency response coordination as needed",
+      },
+      {
+        q: "What mistakes should I avoid?",
+        a: "Hesitating to call due to fear or stigma -- the helpline is confidential and designed specifically to connect you with the support you need, including safe shelter referrals if required.",
+      },
+    ],
+    officialLinks: ["https://wcd.gov.in", "https://ncw.gov.in"],
     lastUpdated: "2026-06-01",
   },
 
@@ -4195,8 +4660,29 @@ export const SAMPLE_SERVICES = [
     onlineSteps: ["Locate your nearest One Stop Centre via your state Women & Child Development Department's website, or call 181 for guidance to the nearest centre"],
     offlineSteps: ["Walk in directly to your district's One Stop Centre (most districts have one, often located at or near the district hospital) for immediate support"],
     commonMistakes: ["Not knowing this integrated option exists and instead trying to separately coordinate police, medical, and legal help on your own during a crisis"],
-    faqs: [],
-    officialLinks: [],
+    faqs: [
+      {
+        q: "Who can use this service?",
+        a: "Any woman affected by violence (domestic, sexual, or any form of abuse), regardless of caste, class, religion, or marital status.",
+      },
+      {
+        q: "What documents do I need?",
+        a: "None required to access initial support -- documentation may follow depending on what legal/medical process is pursued.",
+      },
+      {
+        q: "How much does it cost?",
+        a: "Services: Free",
+      },
+      {
+        q: "How long does it take?",
+        a: "Immediate walk-in support; ongoing case support continues as needed",
+      },
+      {
+        q: "What mistakes should I avoid?",
+        a: "Not knowing this integrated option exists and instead trying to separately coordinate police, medical, and legal help on your own during a crisis.",
+      },
+    ],
+    officialLinks: ["https://wcd.gov.in"],
     lastUpdated: "2026-06-01",
   },
 
@@ -4217,8 +4703,29 @@ export const SAMPLE_SERVICES = [
       "Access daily supplementary nutrition, regular health/growth monitoring, and pre-school activities for children",
     ],
     commonMistakes: ["Not utilizing the centre regularly -- growth monitoring and nutrition support work best with consistent attendance, not just one-time registration"],
-    faqs: [],
-    officialLinks: [],
+    faqs: [
+      {
+        q: "Who can use this service?",
+        a: "Children under 6 years, and pregnant/lactating women in the Anganwadi's coverage area.",
+      },
+      {
+        q: "What documents do I need?",
+        a: "Aadhaar card of mother/child; Address proof.",
+      },
+      {
+        q: "How much does it cost?",
+        a: "Services: Free",
+      },
+      {
+        q: "How long does it take?",
+        a: "Registration at your local Anganwadi is typically immediate",
+      },
+      {
+        q: "What mistakes should I avoid?",
+        a: "Not utilizing the centre regularly -- growth monitoring and nutrition support work best with consistent attendance, not just one-time registration.",
+      },
+    ],
+    officialLinks: ["https://poshantracker.in", "https://wcd.gov.in"],
     lastUpdated: "2026-06-01",
   },
 
@@ -4248,7 +4755,7 @@ export const SAMPLE_SERVICES = [
         a: "Every workplace with 10 or more employees is legally required to have one under the POSH Act. If yours doesn't, you can file your complaint with the Local Complaints Committee (LCC) constituted at the district level instead.",
       },
     ],
-    officialLinks: [],
+    officialLinks: ["https://shebox.wcd.gov.in"],
     lastUpdated: "2026-06-01",
   },
 
@@ -4266,7 +4773,28 @@ export const SAMPLE_SERVICES = [
     onlineSteps: ["Check your state's social welfare/NSAP portal (search '[your state] widow pension online application')"],
     offlineSteps: ["Visit your local Gram Panchayat, municipal ward office, or Social Welfare Department office with your husband's death certificate and BPL proof"],
     commonMistakes: ["Not transitioning correctly to the old-age pension scheme upon reaching the relevant age threshold in states where the widow pension scheme has an upper age limit"],
-    faqs: [],
+    faqs: [
+      {
+        q: "Who can use this service?",
+        a: "Widows aged 40-79 from BPL households (widows 80+ typically transition to the old age pension scheme instead, check your state's specific rule).",
+      },
+      {
+        q: "What documents do I need?",
+        a: "Husband's death certificate; Age proof; BPL certificate/ration card; Bank account details.",
+      },
+      {
+        q: "How much does it cost?",
+        a: "Application: Free",
+      },
+      {
+        q: "How long does it take?",
+        a: "A few weeks to a couple of months, depending on state verification",
+      },
+      {
+        q: "What mistakes should I avoid?",
+        a: "Not transitioning correctly to the old-age pension scheme upon reaching the relevant age threshold in states where the widow pension scheme has an upper age limit.",
+      },
+    ],
     officialLinks: ["https://nsap.nic.in"],
     lastUpdated: "2026-06-01",
   },
@@ -4285,8 +4813,25 @@ export const SAMPLE_SERVICES = [
     onlineSteps: ["Call 1098 from anywhere in India, 24x7"],
     offlineSteps: [],
     commonMistakes: ["Hesitating to report suspected child abuse/exploitation out of uncertainty -- the helpline is set up to assess and respond appropriately, so reporting a genuine concern is always worthwhile even if you're unsure of all the details"],
-    faqs: [],
-    officialLinks: [],
+    faqs: [
+      {
+        q: "Who can use this service?",
+        a: "Any child in distress, or anyone reporting on behalf of a child.",
+      },
+      {
+        q: "How much does it cost?",
+        a: "Call: Free (toll-free)",
+      },
+      {
+        q: "How long does it take?",
+        a: "Immediate -- 24x7 live helpline with field-level intervention as needed",
+      },
+      {
+        q: "What mistakes should I avoid?",
+        a: "Hesitating to report suspected child abuse/exploitation out of uncertainty -- the helpline is set up to assess and respond appropriately, so reporting a genuine concern is always worthwhile even if you're unsure of all the details.",
+      },
+    ],
+    officialLinks: ["https://www.childlineindia.org", "https://ncpcr.gov.in"],
     lastUpdated: "2026-06-01",
   },
 
@@ -4309,7 +4854,28 @@ export const SAMPLE_SERVICES = [
     ],
     offlineSteps: ["Visit your local post office to book Speed Post or registered mail with the item and recipient details"],
     commonMistakes: ["Losing the tracking receipt/number -- keep it until delivery is confirmed, since it's needed for any tracking or complaint"],
-    faqs: [],
+    faqs: [
+      {
+        q: "Who can use this service?",
+        a: "Anyone sending or receiving mail/parcels via India Post.",
+      },
+      {
+        q: "What documents do I need?",
+        a: "Recipient's complete address; Content details (for parcels, per customs/content declaration rules where applicable).",
+      },
+      {
+        q: "How much does it cost?",
+        a: "Speed Post: Based on weight and distance/zone -- check current rates on the India Post website -- confirm the current amount on the official website.",
+      },
+      {
+        q: "How long does it take?",
+        a: "Delivery timelines vary by distance and destination -- domestic Speed Post commonly delivers within 1-3 days for major routes",
+      },
+      {
+        q: "What mistakes should I avoid?",
+        a: "Losing the tracking receipt/number -- keep it until delivery is confirmed, since it's needed for any tracking or complaint.",
+      },
+    ],
     officialLinks: ["https://www.indiapost.gov.in"],
     lastUpdated: "2026-06-01",
   },
@@ -4359,7 +4925,28 @@ export const SAMPLE_SERVICES = [
       "Alternatively, visit any post office offering IPPB services",
     ],
     commonMistakes: ["Not taking advantage of doorstep banking (cash deposit/withdrawal, bill payments) -- this is one of IPPB's core differentiators, especially useful for elderly or rural customers who'd otherwise need to travel to a branch"],
-    faqs: [],
+    faqs: [
+      {
+        q: "Who can use this service?",
+        a: "Any Indian resident aged 18 or above (accounts for minors also available with a guardian).",
+      },
+      {
+        q: "What documents do I need?",
+        a: "Aadhaar card (used for e-KYC); PAN card or Form 60.",
+      },
+      {
+        q: "How much does it cost?",
+        a: "Account Opening: Free, zero minimum balance for the basic savings account",
+      },
+      {
+        q: "How long does it take?",
+        a: "Instant to same-day, especially via doorstep opening with a postal staff visit",
+      },
+      {
+        q: "What mistakes should I avoid?",
+        a: "Not taking advantage of doorstep banking (cash deposit/withdrawal, bill payments) -- this is one of IPPB's core differentiators, especially useful for elderly or rural customers who'd otherwise need to travel to a branch.",
+      },
+    ],
     officialLinks: ["https://www.ippbonline.com"],
     lastUpdated: "2026-06-01",
   },
@@ -4380,7 +4967,28 @@ export const SAMPLE_SERVICES = [
     ],
     offlineSteps: ["Attend your booked appointment at the designated POPSK with your documents, same as you would at a regular PSK"],
     commonMistakes: ["Assuming every post office offers this service -- only specifically designated POPSKs do; check availability when booking your appointment"],
-    faqs: [],
+    faqs: [
+      {
+        q: "Who can use this service?",
+        a: "Any passport applicant whose nearest designated POPSK covers their area -- not every post office offers this; only specifically designated ones do.",
+      },
+      {
+        q: "What documents do I need?",
+        a: "Same as standard passport application -- see the Passport Renewal / New Passport Application services for the full document list.",
+      },
+      {
+        q: "How much does it cost?",
+        a: "Same As Passport: Same fee structure as standard passport applications through passportindia.gov.in -- POPSK doesn't add extra cost, it's simply an alternate physical location for the same process -- confirm the current amount on the official website.",
+      },
+      {
+        q: "How long does it take?",
+        a: "Same as standard PSK processing timelines once your appointment is completed",
+      },
+      {
+        q: "What mistakes should I avoid?",
+        a: "Assuming every post office offers this service -- only specifically designated POPSKs do; check availability when booking your appointment.",
+      },
+    ],
     officialLinks: ["https://www.passportindia.gov.in"],
     lastUpdated: "2026-06-01",
   },
@@ -4402,7 +5010,28 @@ export const SAMPLE_SERVICES = [
       "Pay the applicable fee for the redirection period you need",
     ],
     commonMistakes: ["Forgetting to update your address directly with important senders (banks, government departments) as well -- mail redirection is a helpful stopgap, not a permanent substitute for updating your address on file everywhere"],
-    faqs: [],
+    faqs: [
+      {
+        q: "Who can use this service?",
+        a: "Any postal customer who has moved or is temporarily relocating.",
+      },
+      {
+        q: "What documents do I need?",
+        a: "Old and new address proof; Identity proof.",
+      },
+      {
+        q: "How much does it cost?",
+        a: "Redirection: A nominal fee applies, based on the redirection period requested -- confirm the current amount on the official website.",
+      },
+      {
+        q: "How long does it take?",
+        a: "Setup typically takes a few days to become effective",
+      },
+      {
+        q: "What mistakes should I avoid?",
+        a: "Forgetting to update your address directly with important senders (banks, government departments) as well -- mail redirection is a helpful stopgap, not a permanent substitute for updating your address on file everywhere.",
+      },
+    ],
     officialLinks: ["https://www.indiapost.gov.in"],
     lastUpdated: "2026-06-01",
   },
@@ -4459,8 +5088,29 @@ export const SAMPLE_SERVICES = [
     ],
     offlineSteps: ["Call your municipal corporation's helpline or visit your local ward office to report the issue in person"],
     commonMistakes: ["Not including a photo/precise location, which can delay the responsible team's ability to act on the complaint"],
-    faqs: [],
-    officialLinks: [],
+    faqs: [
+      {
+        q: "Who can use this service?",
+        a: "Any resident.",
+      },
+      {
+        q: "What documents do I need?",
+        a: "Location details/photo of the issue (helps speed up resolution).",
+      },
+      {
+        q: "How much does it cost?",
+        a: "Complaint: Free",
+      },
+      {
+        q: "How long does it take?",
+        a: "Varies by municipal corporation and issue severity -- commonly a few days for routine issues",
+      },
+      {
+        q: "What mistakes should I avoid?",
+        a: "Not including a photo/precise location, which can delay the responsible team's ability to act on the complaint.",
+      },
+    ],
+    officialLinks: ["https://swachhbharatmission.gov.in", "https://swachh.city"],
     lastUpdated: "2026-06-01",
   },
 
@@ -4488,7 +5138,7 @@ export const SAMPLE_SERVICES = [
         a: "No -- they're separate requirements from different authorities. Trade License is issued by your municipal corporation focused on health/safety/zoning compliance; Shop & Establishment registration is a labour department requirement governing working conditions. Most commercial premises need both.",
       },
     ],
-    officialLinks: [],
+    officialLinks: ["https://services.india.gov.in"],
     lastUpdated: "2026-06-01",
   },
 
@@ -4510,8 +5160,29 @@ export const SAMPLE_SERVICES = [
     ],
     offlineSteps: ["Call your municipal corporation's helpline or visit your local ward office to report in person"],
     commonMistakes: ["Reporting to the wrong civic body -- some infrastructure (like state highways vs municipal roads) falls under different authorities, so double-check jurisdiction if your complaint isn't getting action"],
-    faqs: [],
-    officialLinks: [],
+    faqs: [
+      {
+        q: "Who can use this service?",
+        a: "Any resident.",
+      },
+      {
+        q: "What documents do I need?",
+        a: "Location details/photo of the issue.",
+      },
+      {
+        q: "How much does it cost?",
+        a: "Complaint: Free",
+      },
+      {
+        q: "How long does it take?",
+        a: "Varies significantly by municipal corporation and issue type/severity",
+      },
+      {
+        q: "What mistakes should I avoid?",
+        a: "Reporting to the wrong civic body -- some infrastructure (like state highways vs municipal roads) falls under different authorities, so double-check jurisdiction if your complaint isn't getting action.",
+      },
+    ],
+    officialLinks: ["https://pgportal.gov.in", "https://services.india.gov.in"],
     lastUpdated: "2026-06-01",
   },
 
@@ -4662,7 +5333,7 @@ export const SAMPLE_SERVICES = [
         a: "NCMC (National Common Mobility Card) is designed to work across multiple transit systems -- metro, select buses, and in some cities even parking/toll -- under one card, rather than needing a separate card for each city/system. Availability of NCMC vs a city-specific card depends on your metro operator.",
       },
     ],
-    officialLinks: [],
+    officialLinks: ["https://www.npci.org.in", "https://mohua.gov.in"],
     lastUpdated: "2026-06-01",
   },
 
@@ -4684,8 +5355,29 @@ export const SAMPLE_SERVICES = [
     ],
     offlineSteps: ["Purchase tickets directly at the bus stand counter or from the conductor on board (where standing/available seats permit)"],
     commonMistakes: ["Not double-checking whether your route is operated by the state corporation directly or by a private operator listed on the same booking platform, which can affect refund/rescheduling policies"],
-    faqs: [],
-    officialLinks: [],
+    faqs: [
+      {
+        q: "Who can use this service?",
+        a: "Any traveler.",
+      },
+      {
+        q: "What documents do I need?",
+        a: "None required for booking itself; carry a valid photo ID for verification on some routes/services.",
+      },
+      {
+        q: "How much does it cost?",
+        a: "Fare: Varies by route, distance, and bus category (ordinary, express, AC/Volvo, sleeper, etc.) -- confirm the current amount on the official website.",
+      },
+      {
+        q: "How long does it take?",
+        a: "Instant online booking and confirmation",
+      },
+      {
+        q: "What mistakes should I avoid?",
+        a: "Not double-checking whether your route is operated by the state corporation directly or by a private operator listed on the same booking platform, which can affect refund/rescheduling policies.",
+      },
+    ],
+    officialLinks: ["https://services.india.gov.in"],
     lastUpdated: "2026-06-01",
   },
 
@@ -4711,7 +5403,28 @@ export const SAMPLE_SERVICES = [
     ],
     offlineSteps: [],
     commonMistakes: ["Not realizing how broad UMANG's coverage is -- many people default to separate apps/websites for each service without checking whether UMANG already aggregates it in one place"],
-    faqs: [],
+    faqs: [
+      {
+        q: "Who can use this service?",
+        a: "Any citizen with a smartphone.",
+      },
+      {
+        q: "What documents do I need?",
+        a: "Aadhaar card, for services requiring identity verification within the app.",
+      },
+      {
+        q: "How much does it cost?",
+        a: "App: Free",
+      },
+      {
+        q: "How long does it take?",
+        a: "Instant app access; individual service processing times follow that specific service's own timeline",
+      },
+      {
+        q: "What mistakes should I avoid?",
+        a: "Not realizing how broad UMANG's coverage is -- many people default to separate apps/websites for each service without checking whether UMANG already aggregates it in one place.",
+      },
+    ],
     officialLinks: ["https://web.umang.gov.in"],
     lastUpdated: "2026-06-01",
   },
@@ -4761,7 +5474,28 @@ export const SAMPLE_SERVICES = [
     ],
     offlineSteps: [],
     commonMistakes: ["Not realizing this exists and continuing to maintain separate logins/passwords for each government portal individually"],
-    faqs: [],
+    faqs: [
+      {
+        q: "Who can use this service?",
+        a: "Any citizen wanting a unified login across participating government portals.",
+      },
+      {
+        q: "What documents do I need?",
+        a: "Mobile number or Aadhaar, for account creation.",
+      },
+      {
+        q: "How much does it cost?",
+        a: "Account: Free",
+      },
+      {
+        q: "How long does it take?",
+        a: "Instant account creation",
+      },
+      {
+        q: "What mistakes should I avoid?",
+        a: "Not realizing this exists and continuing to maintain separate logins/passwords for each government portal individually.",
+      },
+    ],
     officialLinks: ["https://meripehchaan.gov.in"],
     lastUpdated: "2026-06-01",
   },
@@ -4772,26 +5506,34 @@ export const SAMPLE_SERVICES = [
     department: "Digital Services",
     category: "Digital Services",
     categoryIcon: "⚙",
-    overview: "UIDAI's official mobile app letting you carry a digital version of your Aadhaar on your phone, generate time-bound QR codes for verification without revealing your full Aadhaar number, and access basic Aadhaar services on the go.",
+    overview: "UIDAI's official mobile app for carrying a digital version of your Aadhaar on your phone, sharing it through QR codes without revealing your full Aadhaar number, and accessing basic Aadhaar services. UIDAI has launched a NEW 'Aadhaar' app (Android and iOS) with face authentication, QR-based sharing and tighter privacy controls, and is phasing out the older mAadhaar app -- so install the new Aadhaar app rather than mAadhaar.",
     eligibility: "Any Aadhaar holder.",
     documents: ["Aadhaar number and registered mobile number"],
     fees: { app: "Free" },
     processingTime: "Instant setup",
     onlineSteps: [
-      "Download the mAadhaar app (Android/iOS) from an official app store listing published by UIDAI",
-      "Register your Aadhaar using your registered mobile number and OTP",
-      "Access your digital Aadhaar profile, generate a masked QR code for sharing (which hides your full Aadhaar number while still allowing verification), and check basic service status",
+      "Download the new 'Aadhaar' app (published by UIDAI) from the Google Play Store or Apple App Store -- check that the publisher is UIDAI before installing",
+      "If you used the older mAadhaar app, move to the new app, since mAadhaar is being retired",
+      "Register your Aadhaar using your registered mobile number and OTP, and set up face authentication / app lock when asked",
+      "Use the app to view your digital Aadhaar and share it with a QR code that shares only the details a verifier needs",
     ],
     offlineSteps: [],
-    commonMistakes: ["Downloading a lookalike unofficial app instead of the genuine UIDAI-published mAadhaar app -- always verify the publisher before installing"],
+    commonMistakes: [
+      "Downloading a lookalike unofficial app instead of the genuine UIDAI-published Aadhaar app -- always verify the publisher before installing",
+      "Continuing to rely on the old mAadhaar app, which UIDAI is phasing out",
+    ],
     faqs: [
       {
-        q: "Can I use mAadhaar instead of carrying a physical Aadhaar card?",
-        a: "Yes, the digital Aadhaar shown in the app (or downloaded as e-Aadhaar/via DigiLocker) is treated as valid for most purposes where a physical card would be accepted, though carrying a backup is still sensible for situations where digital verification isn't set up.",
+        q: "What happened to the mAadhaar app?",
+        a: "UIDAI announced in May 2026 that the mAadhaar app is being replaced by a new Aadhaar app with face authentication and QR-based sharing, and asked users to switch. Install the new app from the official app store.",
+      },
+      {
+        q: "Can I use the Aadhaar app instead of carrying a physical Aadhaar card?",
+        a: "Yes, the digital Aadhaar shown in the app (or downloaded as e-Aadhaar / via DigiLocker) is treated as valid for most purposes where a physical card would be accepted, though carrying a backup is still sensible where digital verification isn't set up.",
       },
     ],
     officialLinks: ["https://uidai.gov.in"],
-    lastUpdated: "2026-06-01",
+    lastUpdated: "2026-11-06",
   },
 
   // ---- Filling gaps: Ration Card (Identity Documents) ----
@@ -5239,7 +5981,28 @@ export const SAMPLE_SERVICES = [
     ],
     offlineSteps: ["Report directly to your institution's Anti-Ragging Committee or local police if the situation is urgent"],
     commonMistakes: ["Not reporting due to fear of retaliation -- anonymous reporting is available specifically to address this concern"],
-    faqs: [],
+    faqs: [
+      {
+        q: "Who can use this service?",
+        a: "Any student or parent facing or witnessing ragging at a college/university.",
+      },
+      {
+        q: "What documents do I need?",
+        a: "Details of the incident, institution, and those involved, if available.",
+      },
+      {
+        q: "How much does it cost?",
+        a: "Helpline: Free (toll-free)",
+      },
+      {
+        q: "How long does it take?",
+        a: "Immediate helpline response; formal complaint follow-up depends on the institution and UGC's process",
+      },
+      {
+        q: "What mistakes should I avoid?",
+        a: "Not reporting due to fear of retaliation -- anonymous reporting is available specifically to address this concern.",
+      },
+    ],
     officialLinks: ["https://www.antiragging.in"],
     lastUpdated: "2026-06-01",
   },
@@ -5668,7 +6431,7 @@ export const SAMPLE_SERVICES = [
         a: "It depends on what you're claiming. Smaller matters (utility transfer, some government benefits, employment dues) often accept a Legal Heir Certificate from the Revenue office. Larger or disputed matters -- especially property, securities, and significant bank balances -- often specifically require a court-issued Succession Certificate. Check directly with the institution you're claiming from, since requirements vary.",
       },
     ],
-    officialLinks: [],
+    officialLinks: ["https://services.india.gov.in"],
     lastUpdated: "2026-08-11",
   },
 
@@ -5710,7 +6473,7 @@ export const SAMPLE_SERVICES = [
         a: "Principal repayment can be claimed under Section 80C (within the overall 80C limit), and interest paid can be claimed under Section 24, subject to specified limits -- check current limits on the Income Tax portal, and note these benefits depend on which tax regime you choose.",
       },
     ],
-    officialLinks: [],
+    officialLinks: ["https://pmaymis.gov.in", "https://www.rbi.org.in"],
     lastUpdated: "2026-06-01",
   },
 
@@ -5874,7 +6637,7 @@ export const SAMPLE_SERVICES = [
         a: "Worth checking first -- many boards and universities (especially for more recent years) have uploaded certificates to DigiLocker, which would let you access a valid digital copy instantly, without going through the FIR-and-reissue process needed for a physical duplicate.",
       },
     ],
-    officialLinks: [],
+    officialLinks: ["https://www.digilocker.gov.in", "https://www.cbse.gov.in"],
     lastUpdated: "2026-06-01",
   },
 
@@ -6086,7 +6849,28 @@ export const SAMPLE_SERVICES = [
       "Not photographing the FSSAI license number/batch details before discarding packaging -- this speeds up identifying the responsible business",
       "Not realizing delivery-app food safety complaints (wrong/spoiled food from an order) are also handled through this same FSSAI channel, not just the app's own customer support",
     ],
-    faqs: [],
+    faqs: [
+      {
+        q: "Who can use this service?",
+        a: "Anyone with a food safety concern involving a packaged product, food premises, or online food delivery/aggregator platform.",
+      },
+      {
+        q: "What documents do I need?",
+        a: "Photos of the product/premises/issue; Purchase receipt or order details, if applicable; FSSAI license number of the seller, if visible on packaging.",
+      },
+      {
+        q: "How much does it cost?",
+        a: "Complaint: Free",
+      },
+      {
+        q: "How long does it take?",
+        a: "Varies by severity and the responsible State Food Safety Commissioner's processing time",
+      },
+      {
+        q: "What mistakes should I avoid?",
+        a: "Not photographing the FSSAI license number/batch details before discarding packaging -- this speeds up identifying the responsible business. Not realizing delivery-app food safety complaints (wrong/spoiled food from an order) are also handled through this same FSSAI channel, not just the app's own customer support.",
+      },
+    ],
     officialLinks: ["https://foscos.fssai.gov.in/consumergrievance", "https://fssai.gov.in"],
     lastUpdated: "2026-08-15",
   },
@@ -6115,7 +6899,7 @@ export const SAMPLE_SERVICES = [
     faqs: [
       { q: "Is charging above MRP always illegal?", a: "Yes -- selling above the printed MRP on a packaged commodity is a violation under Section 36 of the Legal Metrology Act, 2009, regardless of the seller's justification (like claimed 'convenience' or delivery charges added silently into the product price)." },
     ],
-    officialLinks: [],
+    officialLinks: ["https://consumerhelpline.gov.in", "https://consumeraffairs.nic.in"],
     lastUpdated: "2026-08-15",
   },
 
@@ -6165,7 +6949,28 @@ export const SAMPLE_SERVICES = [
     ],
     offlineSteps: ["Contact your nearest BIS regional office directly with the same evidence"],
     commonMistakes: ["Not checking the certification/license number against BIS's public database before assuming a mark is genuine -- fake ISI/BIS marks on unsafe products are a real and reportable problem"],
-    faqs: [],
+    faqs: [
+      {
+        q: "Who can use this service?",
+        a: "Anyone who suspects a product is falsely certified or unsafe despite carrying a BIS/ISI mark.",
+      },
+      {
+        q: "What documents do I need?",
+        a: "Photos of the product and its certification mark; Purchase details; Description of the safety concern or suspected fraud.",
+      },
+      {
+        q: "How much does it cost?",
+        a: "Complaint: Free",
+      },
+      {
+        q: "How long does it take?",
+        a: "Varies by case complexity and BIS's investigation process",
+      },
+      {
+        q: "What mistakes should I avoid?",
+        a: "Not checking the certification/license number against BIS's public database before assuming a mark is genuine -- fake ISI/BIS marks on unsafe products are a real and reportable problem.",
+      },
+    ],
     officialLinks: ["https://www.bis.gov.in"],
     lastUpdated: "2026-06-01",
   },

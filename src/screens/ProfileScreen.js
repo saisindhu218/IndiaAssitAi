@@ -11,8 +11,9 @@ import {
   Alert,
   ActivityIndicator,
   Image,
+  AppState,
 } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import * as ImagePicker from "expo-image-picker";
 import * as DocumentPicker from "expo-document-picker";
@@ -31,6 +32,7 @@ import { uploadUserDocument, deleteUserDocumentFile, openUserDocument } from "..
 import { useTheme } from "../theme/ThemeContext";
 import useKeyboardOverlap from "../hooks/useKeyboardOverlap";
 import { cancelAllReminderNotifications } from "../notifications";
+import { isLockEnabled, setLockEnabled, canUseDeviceAuth, authenticate } from "../security/lockerLock";
 
 // Change this to the address people can write to for help or data requests.
 const SUPPORT_EMAIL = "rssindhu48@gmail.com";
@@ -60,6 +62,8 @@ export default function ProfileScreen() {
 
   const [documents, setDocuments] = useState([]);
   const [docsLoading, setDocsLoading] = useState(true);
+  const [lockEnabled, setLockEnabledState] = useState(false);
+  const [unlocked, setUnlocked] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [pendingFile, setPendingFile] = useState(null);
   const [pendingName, setPendingName] = useState("");
@@ -71,6 +75,8 @@ export default function ProfileScreen() {
   const [deletePassword, setDeletePassword] = useState("");
   const [deleting, setDeleting] = useState(false);
   const { ref: kbRef, overlap, onLayout: onKbLayout } = useKeyboardOverlap();
+  const insets = useSafeAreaInsets();
+  const cardBottomPad = 20 + (overlap > 0 ? 0 : insets.bottom);
   const [previewImage, setPreviewImage] = useState(null); // doc being shown full-screen
 
   const loadProfile = useCallback(async () => {
@@ -92,6 +98,43 @@ export default function ProfileScreen() {
     loadProfile();
     loadDocuments();
   }, [loadProfile, loadDocuments]);
+
+  // Remember whether the locker lock is on, and re-lock whenever the app is left.
+  useEffect(() => {
+    isLockEnabled().then(setLockEnabledState);
+    const sub = AppState.addEventListener("change", (state) => {
+      if (state !== "active") setUnlocked(false);
+    });
+    return () => sub.remove();
+  }, []);
+
+  async function unlockLocker() {
+    const ok = await authenticate("Unlock your Document Locker");
+    if (ok) setUnlocked(true);
+  }
+
+  async function toggleLock(value) {
+    if (value) {
+      if (!(await canUseDeviceAuth())) {
+        Alert.alert(
+          "Set up a screen lock first",
+          "To protect your documents, please set a PIN, pattern, password or fingerprint in your phone's Settings, then try again."
+        );
+        return;
+      }
+      const ok = await authenticate("Confirm to lock your Document Locker");
+      if (!ok) return;
+      await setLockEnabled(true);
+      setLockEnabledState(true);
+      setUnlocked(true);
+    } else {
+      // Turning the lock off also needs the fingerprint / PIN.
+      const ok = await authenticate("Confirm to turn off the Document Locker lock");
+      if (!ok) return;
+      await setLockEnabled(false);
+      setLockEnabledState(false);
+    }
+  }
 
   function openEdit() {
     setDraft(profile);
@@ -274,13 +317,27 @@ export default function ProfileScreen() {
               <Ionicons name="folder-open-outline" size={18} color={colors.text} style={{ marginRight: 6 }} />
               <Text style={styles.cardTitle}>Document Locker</Text>
             </View>
-            <TouchableOpacity style={styles.addDocBtn} onPress={() => setMenuVisible("add")}>
-              <Ionicons name="add" size={16} color={colors.onPrimary} />
-              <Text style={styles.addDocBtnText}>Add</Text>
-            </TouchableOpacity>
+            {!(lockEnabled && !unlocked) && (
+              <TouchableOpacity style={styles.addDocBtn} onPress={() => setMenuVisible("add")}>
+                <Ionicons name="add" size={16} color={colors.onPrimary} />
+                <Text style={styles.addDocBtnText}>Add</Text>
+              </TouchableOpacity>
+            )}
           </View>
 
-          {docsLoading ? (
+          {lockEnabled && !unlocked ? (
+            <TouchableOpacity
+              style={styles.lockedBox}
+              onPress={unlockLocker}
+              activeOpacity={0.8}
+              accessibilityRole="button"
+              accessibilityLabel="Unlock Document Locker"
+            >
+              <Ionicons name="lock-closed" size={24} color={colors.primary} />
+              <Text style={styles.lockedTitle}>Document Locker is locked</Text>
+              <Text style={styles.lockedHint}>Tap to unlock with your fingerprint, face or phone PIN</Text>
+            </TouchableOpacity>
+          ) : docsLoading ? (
             <ActivityIndicator style={{ marginTop: 10 }} color={colors.primary} />
           ) : documents.length === 0 ? (
             <Text style={styles.lockerHint}>
@@ -336,6 +393,12 @@ export default function ProfileScreen() {
               />
               <Text style={[styles.menuItemText, { flex: 1 }]}>{mode === "dark" ? "Dark Mode" : "Light Mode"}</Text>
               <Switch value={mode === "dark"} onValueChange={toggleTheme} trackColor={{ true: colors.primary }} />
+            </View>
+            <View style={styles.menuDivider} />
+            <View style={styles.menuItem}>
+              <Ionicons name="lock-closed-outline" size={18} color={colors.text} style={{ marginRight: 10 }} />
+              <Text style={[styles.menuItemText, { flex: 1 }]}>Lock Document Locker</Text>
+              <Switch value={lockEnabled} onValueChange={toggleLock} trackColor={{ true: colors.primary }} />
             </View>
             <View style={styles.menuDivider} />
             <TouchableOpacity
@@ -436,7 +499,7 @@ export default function ProfileScreen() {
           collapsable={false}
           style={[styles.modalBackdrop, { paddingBottom: overlap }]}
         >
-          <View style={styles.modalCard}>
+          <View style={[styles.modalCard, { paddingBottom: cardBottomPad }]}>
             <Text style={styles.modalTitle}>Delete account?</Text>
             <Text style={styles.aboutText}>
               This permanently deletes your profile, reminders and saved document files from this
@@ -597,9 +660,22 @@ export default function ProfileScreen() {
       </Modal>
 
       {/* Edit Profile -- its own modal, not inline on the page */}
-      <Modal visible={editVisible} transparent animationType="slide" onRequestClose={() => setEditVisible(false)}>
-        <View style={styles.modalBackdrop}>
-          <View style={styles.modalCard}>
+      <Modal
+        visible={editVisible}
+        transparent
+        animationType="slide"
+        statusBarTranslucent
+        navigationBarTranslucent
+        onRequestClose={() => setEditVisible(false)}
+      >
+        <View
+          ref={kbRef}
+          onLayout={onKbLayout}
+          collapsable={false}
+          style={[styles.modalBackdrop, { paddingBottom: overlap }]}
+        >
+          <View style={[styles.modalCard, { paddingBottom: cardBottomPad, maxHeight: "94%" }]}>
+            <ScrollView keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
             <Text style={styles.modalTitle}>Edit Profile</Text>
 
             <Text style={styles.fieldLabel}>Name</Text>
@@ -642,14 +718,27 @@ export default function ProfileScreen() {
                 <Text style={styles.saveBtnText}>{saving ? "Saving..." : "Save"}</Text>
               </TouchableOpacity>
             </View>
+            </ScrollView>
           </View>
         </View>
       </Modal>
 
       {/* Name the file before uploading */}
-      <Modal visible={!!pendingFile} transparent animationType="slide" onRequestClose={() => setPendingFile(null)}>
-        <View style={styles.modalBackdrop}>
-          <View style={styles.modalCard}>
+      <Modal
+        visible={!!pendingFile}
+        transparent
+        animationType="slide"
+        statusBarTranslucent
+        navigationBarTranslucent
+        onRequestClose={() => setPendingFile(null)}
+      >
+        <View
+          ref={kbRef}
+          onLayout={onKbLayout}
+          collapsable={false}
+          style={[styles.modalBackdrop, { paddingBottom: overlap }]}
+        >
+          <View style={[styles.modalCard, { paddingBottom: cardBottomPad }]}>
             <Text style={styles.modalTitle}>Name this document</Text>
             <TextInput
               style={styles.input}
@@ -672,9 +761,21 @@ export default function ProfileScreen() {
       </Modal>
 
       {/* Rename an existing document */}
-      <Modal visible={!!renameTarget} transparent animationType="slide" onRequestClose={() => setRenameTarget(null)}>
-        <View style={styles.modalBackdrop}>
-          <View style={styles.modalCard}>
+      <Modal
+        visible={!!renameTarget}
+        transparent
+        animationType="slide"
+        statusBarTranslucent
+        navigationBarTranslucent
+        onRequestClose={() => setRenameTarget(null)}
+      >
+        <View
+          ref={kbRef}
+          onLayout={onKbLayout}
+          collapsable={false}
+          style={[styles.modalBackdrop, { paddingBottom: overlap }]}
+        >
+          <View style={[styles.modalCard, { paddingBottom: cardBottomPad }]}>
             <Text style={styles.modalTitle}>Rename document</Text>
             <TextInput style={styles.input} value={renameValue} onChangeText={setRenameValue} autoFocus placeholderTextColor={colors.textMuted} />
             <View style={styles.modalActions}>
@@ -722,6 +823,15 @@ function getStyles(c) {
     },
     addDocBtnText: { color: c.onPrimary, fontWeight: "700", fontSize: 12, marginLeft: 2 },
     lockerHint: { fontSize: 12, color: c.textMuted, lineHeight: 17, marginTop: 4 },
+    lockedBox: {
+      alignItems: "center",
+      paddingVertical: 22,
+      marginTop: 10,
+      borderRadius: 12,
+      backgroundColor: c.primarySoft,
+    },
+    lockedTitle: { fontSize: 15, fontWeight: "700", color: c.text, marginTop: 8 },
+    lockedHint: { fontSize: 12, color: c.textSecondary, marginTop: 4, textAlign: "center", paddingHorizontal: 16 },
     detailRow: { paddingVertical: 8, borderTopWidth: 1, borderTopColor: c.borderSoft },
     detailLabel: { fontSize: 12, color: c.textMuted, fontWeight: "600", marginBottom: 2 },
     detailValue: { fontSize: 15, color: c.text },

@@ -366,3 +366,21 @@ export async function deleteAllUserData(uid) {
   }
   await deleteDoc(doc(db, "profiles", uid)).catch(() => {});
 }
+
+// ---- Reports (bad AI answers / incorrect service info) ----
+// Saved to the "reports" collection so you can review them in the Firebase
+// console. Only the signed-in user can create a report; only the admin can read.
+
+export async function addReport(uid, { type, reason, question, answer, serviceId, serviceName }) {
+  const clip = (value, max) => String(value || "").slice(0, max);
+  await addDoc(collection(db, "reports"), {
+    uid,
+    type: clip(type, 20),
+    reason: clip(reason, 80),
+    question: clip(question, 1000),
+    answer: clip(answer, 3000),
+    serviceId: clip(serviceId, 100),
+    serviceName: clip(serviceName, 200),
+    createdAt: Date.now(),
+  });
+}
