@@ -2,9 +2,11 @@ rules_version = '2';
 
 // IndiaAssist AI -- Firestore security rules.
 //
-// BEFORE PUBLISHING: replace the email below with YOUR admin email (the same
-// one in SEED_ADMIN_EMAIL and the admin dashboard allow-list). Then paste this
-// whole file in Firebase Console > Firestore Database > Rules > Publish.
+// Admin email is already set below (rssindhu48@gmail.com). If you ever change
+// the admin account, update it here too, in the admin dashboard's
+// VITE_ADMIN_EMAILS, and in the app's SEED_ADMIN_EMAIL.
+// To publish: paste this whole file in Firebase Console > Firestore Database >
+// Rules > Publish.
 //
 // What these rules do:
 //  - Anyone signed in can READ the service catalog and journeys.
@@ -12,6 +14,7 @@ rules_version = '2';
 //  - Each user can read and write ONLY their own profile, reminders and
 //    document records. Nobody can read anyone else's data.
 //  - Signed-in users can submit reports; only the admin can read them.
+//  - Signed-in users can send "please add this service" requests; admin reads them.
 //  - Everything else is denied.
 
 service cloud.firestore {
@@ -23,7 +26,7 @@ service cloud.firestore {
 
     function isAdmin() {
       return signedIn()
-        && request.auth.token.email == "your-admin-email@example.com";
+        && request.auth.token.email == "rssindhu48@gmail.com";
     }
 
     match /services/{serviceId} {
@@ -42,6 +45,26 @@ service cloud.firestore {
       match /{subcollection}/{docId} {
         allow read, write: if signedIn() && request.auth.uid == userId;
       }
+    }
+
+    // Catalog version: the app reads this ONE document to know whether to
+    // download the service catalog again. Only the admin changes it.
+    match /meta/{docId} {
+      allow read: if signedIn();
+      allow write: if isAdmin();
+    }
+
+    // "Please add this service" requests from users. Anyone signed in can send one
+    // as themselves; only the admin can read, update or delete them.
+    match /requests/{requestId} {
+      allow create: if signedIn()
+        && request.resource.data.uid == request.auth.uid
+        && request.resource.data.keys().hasOnly(["uid", "query", "createdAt"])
+        && request.resource.data.query is string
+        && request.resource.data.query.size() >= 3
+        && request.resource.data.query.size() <= 200
+        && request.resource.data.createdAt is number;
+      allow read, update, delete: if isAdmin();
     }
 
     // Reports from users ("report this answer" / "report incorrect information").

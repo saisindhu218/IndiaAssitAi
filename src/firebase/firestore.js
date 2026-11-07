@@ -23,26 +23,44 @@ import { SAMPLE_JOURNEYS } from "../data/sampleJourneys";
 
 const USE_LOCAL_FALLBACK = true; // flips to false once you've seeded Firestore
 
-// ---- Catalog loading with offline cache ----
-// Services and journeys are downloaded ONCE, kept in memory and saved on the
-// phone. Order of preference:
-//   1. in-memory copy (instant)
-//   2. saved copy younger than CACHE_TTL_MS (no network at all)
-//   3. fresh download from Firestore (then saved)
-//   4. an older saved copy (works offline)
-//   5. the catalog bundled inside the app
-// This keeps the app fast on slow networks and saves Firestore read quota.
+// ---- Catalog loading: version check + offline cache ----
+// Services and journeys are downloaded ONCE and saved on the phone.
+// A tiny document, meta/catalog, holds a version number that the admin
+// dashboard changes every time something is published. On each app start we
+// read just that one document:
+//   - same version as the saved copy  -> use the saved copy (no download at all)
+//   - different version               -> download the catalog again (new content!)
+//   - can't reach Firestore (offline) -> use whatever is saved on the phone
+//   - no version document yet         -> fall back to a 6-hour timer
+// Last resort for a first launch with no network: the catalog bundled in the app.
+// Result: about 1 read per app start instead of ~184, and edits reach phones
+// within minutes.
 
-const CACHE_TTL_MS = 6 * 60 * 60 * 1000; // 6 hours
+const CACHE_TTL_MS = 6 * 60 * 60 * 1000; // only used when there is no version document
 const NETWORK_TIMEOUT_MS = 8000;
 const memory = {};
 const inflight = {};
+let versionPromise = null; // one version check per app session
 
 function withTimeout(promise, ms) {
   return Promise.race([
     promise,
     new Promise((_, reject) => setTimeout(() => reject(new Error("Network timeout")), ms)),
   ]);
+}
+
+// -> { status: "ok", version } | { status: "missing" } | { status: "error" }
+function getRemoteVersion() {
+  if (!versionPromise) {
+    versionPromise = withTimeout(getDoc(doc(db, "meta", "catalog")), 5000)
+      .then((snap) =>
+        snap.exists() && typeof snap.data().version === "number"
+          ? { status: "ok", version: snap.data().version }
+          : { status: "missing" }
+      )
+      .catch(() => ({ status: "error" }));
+  }
+  return versionPromise;
 }
 
 async function loadCollection(name, fallback) {
@@ -58,11 +76,18 @@ async function loadCollection(name, fallback) {
     } catch (e) {
       cached = null;
     }
+    const hasCache = !!(cached && cached.data && cached.data.length);
 
-    const isFresh = cached && Date.now() - cached.savedAt < CACHE_TTL_MS && cached.data?.length;
-    if (isFresh) {
-      memory[name] = cached.data;
-      return cached.data;
+    const remote = await getRemoteVersion();
+
+    if (hasCache) {
+      const upToDate = remote.status === "ok" && cached.version === remote.version;
+      const timerFresh = remote.status === "missing" && Date.now() - cached.savedAt < CACHE_TTL_MS;
+      const offline = remote.status === "error";
+      if (upToDate || timerFresh || offline) {
+        memory[name] = cached.data;
+        return cached.data;
+      }
     }
 
     try {
@@ -70,14 +95,17 @@ async function loadCollection(name, fallback) {
       if (!snap.empty) {
         const data = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
         memory[name] = data;
-        AsyncStorage.setItem(cacheKey, JSON.stringify({ savedAt: Date.now(), data })).catch(() => {});
+        AsyncStorage.setItem(
+          cacheKey,
+          JSON.stringify({ savedAt: Date.now(), version: remote.status === "ok" ? remote.version : null, data })
+        ).catch(() => {});
         return data;
       }
     } catch (e) {
       console.warn(`Could not load ${name} from Firestore:`, e.message);
     }
 
-    if (cached?.data?.length) {
+    if (hasCache) {
       memory[name] = cached.data;
       return cached.data;
     }
@@ -99,6 +127,7 @@ async function loadCollection(name, fallback) {
 export async function clearCatalogCache() {
   delete memory.services;
   delete memory.journeys;
+  versionPromise = null;
   await AsyncStorage.multiRemove([
     "indiaassist:cache:services:v1",
     "indiaassist:cache:journeys:v1",
@@ -383,4 +412,14 @@ export async function addReport(uid, { type, reason, question, answer, serviceId
     serviceName: clip(serviceName, 200),
     createdAt: Date.now(),
   });
+}
+
+// ---- Service requests ("I couldn't find this service") ----
+// Saved to the "requests" collection. The admin dashboard ranks them so the
+// most-wanted missing services get added first.
+
+export async function addRequest(uid, queryText) {
+  const text = String(queryText || "").trim().slice(0, 200);
+  if (!uid || text.length < 3) throw new Error("Please type what you were looking for.");
+  await addDoc(collection(db, "requests"), { uid, query: text, createdAt: Date.now() });
 }

@@ -56,6 +56,10 @@ async function seed() {
     console.log(`  ✓ ${id}`);
   }
 
+  // Tell phones the catalog changed so they download it again.
+  await setDoc(doc(db, "meta", "catalog"), { version: Date.now(), updatedAt: Date.now() });
+  console.log("  ✓ catalog version bumped");
+
   console.log("Done.");
   process.exit(0);
 }

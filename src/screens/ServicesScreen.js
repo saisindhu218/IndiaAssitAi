@@ -3,6 +3,7 @@ import { View, Text, FlatList, TouchableOpacity, TextInput, StyleSheet, Activity
 import { Ionicons } from "@expo/vector-icons";
 import { getCategories, searchServices } from "../firebase/firestore";
 import StateFilterBar from "../components/StateFilterBar";
+import RequestServiceBox from "../components/RequestServiceBox";
 import { useTheme } from "../theme/ThemeContext";
 
 export default function ServicesScreen({ navigation }) {
@@ -69,6 +70,8 @@ export default function ServicesScreen({ navigation }) {
           ))}
         </View>
       )}
+
+      {query.trim().length >= 3 && results.length === 0 && <RequestServiceBox query={query} />}
 
       <View style={{ marginHorizontal: -20 }}>
         <StateFilterBar />

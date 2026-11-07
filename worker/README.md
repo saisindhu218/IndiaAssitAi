@@ -1,57 +1,88 @@
-# IndiaAssist AI -- AI proxy (Cloudflare Worker)
+# IndiaAssist AI -- free Cloudflare Worker
 
-Keeps your Groq API key on a server instead of inside the app, only lets
-signed-in users of YOUR app use it, and limits how often each user can ask.
-Free on Cloudflare's free plan (100,000 requests/day).
+One small server (free Cloudflare plan) that does four jobs:
 
-## One-time setup (about 10 minutes)
+| Job | Who can use it |
+|---|---|
+| AI chat for the mobile app (keeps your Groq key off the phone) | any signed-in app user, 20 requests/minute each |
+| **Draft with AI** for the admin dashboard | admin only |
+| Fetch **official government pages** for drafts | admin only, official sites only |
+| **Change watcher**: re-checks official pages and flags changes | admin only |
 
-1. Create a free account at https://dash.cloudflare.com/sign-up
-2. Open a terminal in this `worker` folder:
+Everything here is free: Cloudflare Workers + KV (free plan) and Groq's free AI models.
+
+## One-time setup (about 15 minutes)
+
+1. Free account: https://dash.cloudflare.com/sign-up
+2. In a terminal:
    ```
    cd worker
    npx wrangler login
    ```
-   (a browser window opens -- approve it)
-3. Open `wrangler.toml` and replace `your-firebase-project-id` with your Firebase
-   project id (same as `EXPO_PUBLIC_FIREBASE_PROJECT_ID` in your `.env`).
-4. Store your Groq key as a secret. Use a NEW key (the old one was shared in
-   chat, so create another at https://console.groq.com/keys and delete the old):
+3. Create the small storage the change watcher uses:
+   ```
+   npx wrangler kv namespace create WATCH
+   ```
+   (If your Wrangler says "unknown command", use `npx wrangler kv:namespace create WATCH`.)
+   It prints an `id`. Paste it into `wrangler.toml` where it says `PASTE_KV_NAMESPACE_ID_HERE`.
+4. In `wrangler.toml` set:
+   - `FIREBASE_PROJECT_ID` -- your Firebase project id
+   - `ADMIN_EMAIL` -- already set to your admin email; must match the one in `firestore.rules`
+   - `EXTRA_ALLOWED_HOSTS` -- optional extra official sites (comma separated)
+5. Store a **new** Groq key as a secret (skip if you already did this):
    ```
    npx wrangler secret put GROQ_API_KEY
    ```
-   Paste the key when asked.
-5. Deploy:
+6. Deploy:
    ```
    npx wrangler deploy
    ```
-   It prints an address like `https://indiaassist-ai-proxy.<your-name>.workers.dev`.
+   It prints your address, like `https://indiaassist-ai-proxy.<your-name>.workers.dev`. The 2-minute
+   schedule for the watcher is registered automatically by this command.
 
-## Connect the app
+## Connect the app and the dashboard
 
-In the app's `.env`:
-```
-EXPO_PUBLIC_AI_PROXY_URL=https://indiaassist-ai-proxy.<your-name>.workers.dev
-EXPO_PUBLIC_GROQ_API_KEY=
-```
-(Leave the Groq key empty so it is not bundled into the app.) If you build with
-EAS, add `EXPO_PUBLIC_AI_PROXY_URL` to your EAS environment variables too and do
-NOT add the Groq key there.
+- Mobile app `.env`: `EXPO_PUBLIC_AI_PROXY_URL=<your worker address>` (leave `EXPO_PUBLIC_GROQ_API_KEY=` empty)
+- Admin dashboard `.env`: `VITE_AI_PROXY_URL=<the same address>`
 
-Restart with `npm run start:clear`, log in, and ask the assistant something.
+Then restart both (`npm run start:clear` for the app, `npm run dev` for the dashboard).
 
-## What it protects against
+## Using it
 
-- People who aren't signed in to your app cannot use it (checked against Firebase).
-- One user cannot send more than 20 requests per minute.
-- Only your three allowed AI models and a small set of fields are forwarded, and
-  reply length is capped.
+- **Draft with AI** (dashboard): enter a service name + 1-3 official page addresses -> a draft opens in the
+  editor with the sources listed. You verify, tick the box, and save. Nothing publishes by itself.
+- **Changes** (dashboard): click "Sync watch list from my services" once, and again after you add services.
+  The worker checks ONE page every 2 minutes (so ~180 pages are all re-checked about every 6 hours). If the
+  text of a page changes, it shows what the page said before and now. Page counters and "last updated"
+  lines are ignored. You read the official page, update the service, and dismiss the flag.
+- **Requests** (dashboard): shows what app users searched for but couldn't find.
 
-## Notes
+## Free-plan limits this is designed around
 
-- The per-user limit is "best effort" (each worker instance counts separately).
-  That is enough for a friends-and-family launch. For a large public launch, add
-  Cloudflare's Rate Limiting rules or a Durable Object.
-- To change the allowed AI models later (Groq retires models from time to time),
-  edit `ALLOWED_MODELS` in `index.js` and run `npx wrangler deploy` again.
-- To see errors: `npx wrangler tail`.
+- 10 ms of CPU per run: pages are converted to text in your browser (drafts) or with a tiny cheap step
+  (watcher), and only one page is checked per run.
+- 100,000 requests/day: chat + admin + the 720 watcher runs per day fit easily at friends-and-family scale.
+- KV: 1,000 writes/day -- the watcher writes only when a page is first seen or changes.
+- Groq free models have per-minute limits; drafts use about 14,000 characters of source text to stay inside them.
+
+## What it can't do
+
+- Read PDFs or pages that need JavaScript to show their content -- paste the text into "Draft with AI" instead.
+- Judge whether a change matters. It only tells you a page changed; you decide.
+- Check sites outside `.gov.in`, `.nic.in`, `.ac.in`, `.edu.in`, `.org.in` unless you add them to `EXTRA_ALLOWED_HOSTS`.
+
+## Safety
+
+- Every request needs a valid Firebase login; admin routes also need your exact admin email.
+- The page fetcher only talks to official hosts over HTTPS, re-checks every redirect, and refuses
+  IP addresses and odd ports.
+- The AI is told to use only the supplied pages, and the dashboard makes you tick "I checked this draft
+  against the official sources" before saving.
+
+## Troubleshooting
+
+- `npx wrangler tail` shows live logs.
+- "Admin only" (403): `ADMIN_EMAIL` doesn't match the email you log into the dashboard with.
+- "Change watching is not set up": the KV id in `wrangler.toml` is missing or wrong -- redo step 3 and deploy again.
+- Drafting says the AI is busy: that's Groq's free per-minute limit; wait a minute.
+- To change allowed AI models later, edit `ALLOWED_MODELS` in `index.js` and deploy again.

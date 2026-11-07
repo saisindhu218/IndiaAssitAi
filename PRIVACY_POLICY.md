@@ -9,6 +9,7 @@ IndiaAssist AI ("the app") helps people understand Indian government services. I
 - **Profile (optional):** name, age, state, occupation, whether you are a senior citizen.
 - **Reminders:** the title, due date and note you enter.
 - **Document names:** the names/types of documents you add to the Document Locker.
+- **Service requests and reports (optional):** if you tap "Request this service" or "Report this answer / incorrect information", we store what you typed (or the AI answer you reported) with your account id, so we can improve the app.
 
 ## What stays on your phone
 The document files you add to the Document Locker are stored **only on your device**. They are not uploaded to our servers. They are lost if you uninstall the app or clear its data.

@@ -10,6 +10,7 @@ import {
 } from "react-native";
 import { searchServices } from "../firebase/firestore";
 import ChatBox from "../components/ChatBox";
+import RequestServiceBox from "../components/RequestServiceBox";
 import { Ionicons } from "@expo/vector-icons";
 import { useTheme } from "../theme/ThemeContext";
 
@@ -69,6 +70,8 @@ export default function HomeScreen({ navigation }) {
             />
           </View>
         )}
+
+        {query.trim().length >= 3 && results.length === 0 && <RequestServiceBox query={query} />}
 
         <TouchableOpacity style={styles.card} onPress={() => navigation.navigate("Journey")}>
           <View style={[styles.cardIconWrap, { backgroundColor: colors.primarySoft }]}>

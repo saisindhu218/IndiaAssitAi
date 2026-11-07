@@ -3,8 +3,24 @@ main = "index.js"
 compatibility_date = "2025-06-01"
 
 [vars]
-# Your Firebase project id (same as EXPO_PUBLIC_FIREBASE_PROJECT_ID in .env)
+# Your Firebase project id (same as EXPO_PUBLIC_FIREBASE_PROJECT_ID in the app's .env)
 FIREBASE_PROJECT_ID = "your-firebase-project-id"
+# The ONE email allowed to use admin features (draft / fetch / watch).
+ADMIN_EMAIL = "rssindhu48@gmail.com"
+# Optional: extra official hosts beyond .gov.in/.nic.in/.ac.in/.edu.in/.org.in,
+# comma separated, e.g. "npci.org.in,irctc.co.in"
+EXTRA_ALLOWED_HOSTS = "irctc.co.in,epfindia.gov.in"
+
+# Stores which pages are watched and what they said last time (free plan: 1 GB).
+# Create it once with:   npx wrangler kv namespace create WATCH
+# then paste the id it prints below.
+[[kv_namespaces]]
+binding = "WATCH"
+id = "PASTE_KV_NAMESPACE_ID_HERE"
+
+[triggers]
+# Every 2 minutes: check ONE watched page (stays inside the free 10 ms CPU limit).
+crons = ["*/2 * * * *"]
 
 # The Groq key is NOT stored here. Add it as a secret with:
 #   npx wrangler secret put GROQ_API_KEY
