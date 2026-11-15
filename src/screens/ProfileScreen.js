@@ -28,7 +28,13 @@ import {
   deleteUserDocument,
   deleteAllUserData,
 } from "../firebase/firestore";
-import { uploadUserDocument, deleteUserDocumentFile, openUserDocument } from "../storage/documentStorage";
+import {
+  uploadUserDocument,
+  deleteUserDocumentFile,
+  openUserDocument,
+  resolveDocumentUri,
+  MISSING_FILE_MESSAGE,
+} from "../storage/documentStorage";
 import { useTheme } from "../theme/ThemeContext";
 import useKeyboardOverlap from "../hooks/useKeyboardOverlap";
 import { cancelAllReminderNotifications } from "../notifications";
@@ -256,7 +262,7 @@ export default function ProfileScreen() {
 
   async function handleShareDocument(item) {
     try {
-      await openUserDocument(item.url);
+      await openUserDocument(item.storagePath || item.url);
     } catch (e) {
       Alert.alert("Couldn't open", e.message);
     }
@@ -623,7 +629,15 @@ export default function ProfileScreen() {
             </TouchableOpacity>
           </View>
           {previewImage && (
-            <Image source={{ uri: previewImage.url }} style={styles.previewImage} resizeMode="contain" />
+            <Image
+              source={{ uri: resolveDocumentUri(previewImage.storagePath || previewImage.url) }}
+              style={styles.previewImage}
+              resizeMode="contain"
+              onError={() => {
+                setPreviewImage(null);
+                Alert.alert("Couldn't open", MISSING_FILE_MESSAGE);
+              }}
+            />
           )}
           <View style={styles.previewActions}>
             <TouchableOpacity
