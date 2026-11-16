@@ -81,6 +81,56 @@ export function resolveDocumentUri(stored) {
   return FileSystem.documentDirectory + relative.replace(/^\/+/, "");
 }
 
+// Last-resort copy for files the normal copy refuses to read (some pickers give
+// addresses the file system won't open directly): read the bytes and write them.
+async function copyViaFetch(fromUri, toUri) {
+  const response = await fetch(fromUri);
+  const blob = await response.blob();
+  const base64 = await new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onerror = () => reject(new Error("Could not read the file."));
+    reader.onloadend = () => {
+      const result = String(reader.result || "");
+      resolve(result.slice(result.indexOf(",") + 1));
+    };
+    reader.readAsDataURL(blob);
+  });
+  await FileSystem.writeAsStringAsync(toUri, base64, { encoding: FileSystem.EncodingType.Base64 });
+}
+
+/**
+ * Immediately copies a freshly picked file into this app's own temporary
+ * folder, BEFORE the person types a name. Picker files can live in places the
+ * app isn't allowed to read later (this caused "Location ... isn't readable"
+ * errors in Expo Go), so we grab a copy while we still have access.
+ * Returns the address of the temporary copy.
+ */
+export async function stagePickedFile(sourceUri, fileName, fileType) {
+  const folder = `${FileSystem.cacheDirectory}pending/`;
+  await FileSystem.makeDirectoryAsync(folder, { intermediates: true }).catch(() => {});
+  const extension = pickExtension(fileName, sourceUri, fileType);
+  const staged = `${folder}${Date.now()}.${extension}`;
+  try {
+    await FileSystem.copyAsync({ from: sourceUri, to: staged });
+  } catch (firstError) {
+    try {
+      await copyViaFetch(sourceUri, staged);
+    } catch (secondError) {
+      throw new Error(
+        "Couldn't read that file. Try picking it again, or pick a different file. (" + firstError.message + ")"
+      );
+    }
+  }
+  return staged;
+}
+
+/** Deletes a temporary copy made by stagePickedFile (ignores anything else). */
+export async function discardStagedFile(uri) {
+  if (uri && uri.includes("/pending/")) {
+    await FileSystem.deleteAsync(uri, { idempotent: true }).catch(() => {});
+  }
+}
+
 /**
  * Copy a picked file (from expo-image-picker or expo-document-picker) into
  * this app's persistent local storage. Returns the relative path, which is

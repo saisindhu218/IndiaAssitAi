@@ -33,6 +33,8 @@ import {
   deleteUserDocumentFile,
   openUserDocument,
   resolveDocumentUri,
+  stagePickedFile,
+  discardStagedFile,
   MISSING_FILE_MESSAGE,
 } from "../storage/documentStorage";
 import { useTheme } from "../theme/ThemeContext";
@@ -170,20 +172,32 @@ export default function ProfileScreen() {
     });
     if (result.canceled) return;
     const asset = result.assets[0];
-    setPendingFile({ uri: asset.uri, fileType: "image" });
-    setPendingName(asset.fileName || `Photo ${new Date().toLocaleDateString()}`);
+    try {
+      const staged = await stagePickedFile(asset.uri, asset.fileName, "image");
+      setPendingFile({ uri: staged, fileType: "image" });
+      setPendingName(asset.fileName || `Photo ${new Date().toLocaleDateString()}`);
+    } catch (e) {
+      Alert.alert("Couldn't add photo", e.message);
+    }
   }
 
   async function pickDocument() {
     setMenuVisible(false);
     const result = await DocumentPicker.getDocumentAsync({
       type: ["application/pdf", "image/*"],
-      copyToCacheDirectory: true,
+      // false = the picker gives us the file's own address; we copy it straight away ourselves
+      copyToCacheDirectory: false,
     });
     if (result.canceled) return;
     const asset = result.assets[0];
-    setPendingFile({ uri: asset.uri, fileType: asset.mimeType?.includes("pdf") ? "pdf" : "image" });
-    setPendingName(asset.name || "Document");
+    const fileType = asset.mimeType?.includes("pdf") ? "pdf" : "image";
+    try {
+      const staged = await stagePickedFile(asset.uri, asset.name, fileType);
+      setPendingFile({ uri: staged, fileType });
+      setPendingName(asset.name || "Document");
+    } catch (e) {
+      Alert.alert("Couldn't add document", e.message);
+    }
   }
 
   async function confirmUpload() {
@@ -197,6 +211,7 @@ export default function ProfileScreen() {
         storagePath,
         fileType: pendingFile.fileType,
       });
+      await discardStagedFile(pendingFile.uri);
       setPendingFile(null);
       setPendingName("");
       await loadDocuments();
