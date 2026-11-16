@@ -165,7 +165,7 @@ export default function ProfileScreen() {
   async function pickPhoto() {
     setMenuVisible(false);
     const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      mediaTypes: ["images"],
       quality: 0.8,
     });
     if (result.canceled) return;
@@ -190,7 +190,7 @@ export default function ProfileScreen() {
     if (!user || !pendingFile || !pendingName.trim()) return;
     setUploading(true);
     try {
-      const { url, storagePath } = await uploadUserDocument(user.uid, pendingFile.uri, pendingName.trim());
+      const { url, storagePath } = await uploadUserDocument(user.uid, pendingFile.uri, pendingName.trim(), pendingFile.fileType);
       await addUserDocument(user.uid, {
         name: pendingName.trim(),
         url,
@@ -262,7 +262,7 @@ export default function ProfileScreen() {
 
   async function handleShareDocument(item) {
     try {
-      await openUserDocument(item.storagePath || item.url);
+      await openUserDocument(item.storagePath || item.url, item.name, item.fileType);
     } catch (e) {
       Alert.alert("Couldn't open", e.message);
     }

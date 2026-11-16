@@ -30,6 +30,38 @@ const MIME_TYPES = {
   pdf: "application/pdf",
 };
 
+// Work out a file extension: from the name, else from the picked file's address,
+// else from the kind of file the picker told us it was.
+function pickExtension(fileName, fileUri, fileType) {
+  const fromText = (text) => {
+    const clean = String(text || "").split("?")[0];
+    const dot = clean.lastIndexOf(".");
+    const ext = dot > -1 ? clean.slice(dot + 1).toLowerCase() : "";
+    return MIME_TYPES[ext] ? ext : "";
+  };
+  return fromText(fileName) || fromText(fileUri) || (fileType === "pdf" ? "pdf" : "jpg");
+}
+
+// For files saved without an extension (older uploads): recognise the type
+// from the first bytes of the file.
+async function sniffExtension(uri) {
+  try {
+    const head = await FileSystem.readAsStringAsync(uri, {
+      encoding: FileSystem.EncodingType.Base64,
+      position: 0,
+      length: 16,
+    });
+    if (head.startsWith("iVBORw0K")) return "png";
+    if (head.startsWith("/9j/")) return "jpg";
+    if (head.startsWith("JVBER")) return "pdf";
+    if (head.startsWith("R0lGOD")) return "gif";
+    if (head.startsWith("UklGR")) return "webp";
+  } catch (e) {
+    // fall through
+  }
+  return "";
+}
+
 function documentsDir(uid) {
   return `${FileSystem.documentDirectory}documents/${uid}/`;
 }
@@ -54,12 +86,14 @@ export function resolveDocumentUri(stored) {
  * this app's persistent local storage. Returns the relative path, which is
  * saved in Firestore and reopened later with resolveDocumentUri().
  */
-export async function uploadUserDocument(uid, fileUri, fileName) {
+export async function uploadUserDocument(uid, fileUri, fileName, fileType) {
   const dir = documentsDir(uid);
   await FileSystem.makeDirectoryAsync(dir, { intermediates: true }).catch(() => {});
 
-  const safeName = fileName.replace(/[^a-zA-Z0-9._-]/g, "_");
-  const storedName = `${Date.now()}_${safeName}`;
+  const extension = pickExtension(fileName, fileUri, fileType);
+  const base = fileName.replace(/\.[a-zA-Z0-9]{2,5}$/, ""); // avoid "name.jpg.jpg"
+  const safeBase = base.replace(/[^a-zA-Z0-9._-]/g, "_") || "document";
+  const storedName = `${Date.now()}_${safeBase}.${extension}`; // always ends with a real extension
 
   await FileSystem.copyAsync({ from: fileUri, to: `${dir}${storedName}` });
 
@@ -83,10 +117,11 @@ export async function deleteUserDocumentFile(storagePath) {
  * this opens the native share sheet, which lets the user save it to Files/
  * Photos, print it, send it elsewhere, etc.
  *
- * The file is first copied to the cache folder because the share sheet can
- * always read that location, unlike the app's private documents folder.
+ * The file is first copied to the cache folder, named after the document
+ * ("My_first_book.jpg") and with the right extension, because the share sheet
+ * can always read that location and other apps need the extension to open it.
  */
-export async function openUserDocument(stored) {
+export async function openUserDocument(stored, displayName, fileTypeHint) {
   const available = await Sharing.isAvailableAsync();
   if (!available) {
     throw new Error("Sharing isn't available on this device.");
@@ -96,12 +131,24 @@ export async function openUserDocument(stored) {
   const info = uri ? await FileSystem.getInfoAsync(uri) : { exists: false };
   if (!info.exists) throw new Error(MISSING_FILE_MESSAGE);
 
-  const fileName = uri.split("/").pop() || "document";
-  const cacheUri = `${FileSystem.cacheDirectory}share_${fileName}`;
-  await FileSystem.deleteAsync(cacheUri, { idempotent: true }).catch(() => {});
+  const storedName = uri.split("/").pop() || "document";
+  const dot = storedName.lastIndexOf(".");
+  let extension = dot > -1 ? storedName.slice(dot + 1).toLowerCase() : "";
+  if (!MIME_TYPES[extension]) {
+    extension = (await sniffExtension(uri)) || (fileTypeHint === "pdf" ? "pdf" : "jpg");
+  }
+
+  const niceBase = String(displayName || "")
+    .replace(/\.[a-zA-Z0-9]{2,5}$/, "")
+    .replace(/[^a-zA-Z0-9._-]/g, "_")
+    .replace(/^_+|_+$/g, "");
+  const shareName = `${niceBase || "document"}.${extension}`;
+
+  const folder = `${FileSystem.cacheDirectory}share_${Date.now()}/`;
+  await FileSystem.makeDirectoryAsync(folder, { intermediates: true }).catch(() => {});
+  const cacheUri = `${folder}${shareName}`;
   await FileSystem.copyAsync({ from: uri, to: cacheUri });
 
-  const extension = fileName.includes(".") ? fileName.split(".").pop().toLowerCase() : "";
   try {
     await Sharing.shareAsync(cacheUri, {
       mimeType: MIME_TYPES[extension],
@@ -110,7 +157,7 @@ export async function openUserDocument(stored) {
   } finally {
     // tidy up the temporary copy a little later (the share sheet may still be reading it)
     setTimeout(() => {
-      FileSystem.deleteAsync(cacheUri, { idempotent: true }).catch(() => {});
+      FileSystem.deleteAsync(folder, { idempotent: true }).catch(() => {});
     }, 120000);
   }
 }
