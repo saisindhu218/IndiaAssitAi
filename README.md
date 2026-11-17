@@ -6,7 +6,7 @@ IndiaAssist AI is an AI-powered mobile application that simplifies access to gov
 
 The application follows a data-driven architecture where every government service is rendered dynamically from Firestore. Adding a new service requires only updating the database, eliminating the need to build new screens for each service.
 
-
+---
 
 ## Features
 
@@ -50,7 +50,7 @@ The application follows a data-driven architecture where every government servic
 - Personalized experience
 - Secure user data storage
 
-
+---
 
 ## Tech Stack
 
@@ -77,7 +77,7 @@ The application follows a data-driven architecture where every government servic
 
 - React Hooks
 
-
+---
 
 ## Project Structure
 
@@ -102,7 +102,7 @@ indiaassist-ai/
 └── README.md
 ```
 
-
+---
 
 ## Installation
 
@@ -130,6 +130,25 @@ Install Expo-compatible native modules
 npx expo install expo-image-picker expo-document-picker
 ```
 
+---
+
+## Environment Variables
+
+Create a `.env` file in the project root.
+
+```env
+EXPO_PUBLIC_FIREBASE_API_KEY=
+EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN=
+EXPO_PUBLIC_FIREBASE_PROJECT_ID=
+EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET=
+EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=
+EXPO_PUBLIC_FIREBASE_APP_ID=
+
+EXPO_PUBLIC_GROQ_API_KEY=
+EXPO_PUBLIC_GROQ_MODEL=
+```
+
+---
 
 ## Firebase Setup
 
@@ -141,6 +160,7 @@ Configure the following Firebase services:
 
 Enable Email/Password authentication before running the application.
 
+---
 
 ## Seed Sample Data
 
@@ -168,6 +188,19 @@ Run on Android
 npm run android
 ```
 
+Run on iOS
+
+```bash
+npm run ios
+```
+
+Run on Web
+
+```bash
+npm run web
+```
+
+---
 
 ## Architecture
 
@@ -191,6 +224,7 @@ Groq AI Assistant
 
 Each government service follows a common schema stored in Firestore. The UI, search functionality, and AI assistant consume this schema dynamically, making the application scalable without requiring additional screens.
 
+---
 
 ## Sample Services
 
@@ -202,6 +236,7 @@ The project includes sample implementations for:
 
 These services demonstrate the reusable architecture and can be extended by adding new Firestore documents.
 
+---
 
 ## Security
 
@@ -211,7 +246,7 @@ These services demonstrate the reusable architecture and can be extended by addi
 - Context-restricted AI responses
 - Official government reference links
 
-
+---
 
 ## Future Enhancements
 
@@ -223,6 +258,7 @@ These services demonstrate the reusable architecture and can be extended by addi
 - Advanced Search
 - AI-powered Personalized Recommendations
 
+---
 
 ## License
 
