@@ -32,12 +32,17 @@ import {
   uploadUserDocument,
   deleteUserDocumentFile,
   openUserDocument,
+  viewUserPdf,
+  NO_VIEWER_CODE,
   resolveDocumentUri,
   stagePickedFile,
   discardStagedFile,
   MISSING_FILE_MESSAGE,
 } from "../storage/documentStorage";
 import { useTheme } from "../theme/ThemeContext";
+import { useStateFilter } from "../context/StateFilterContext";
+import { normalizeState } from "../data/indianStates";
+import StatePicker from "../components/StatePicker";
 import useKeyboardOverlap from "../hooks/useKeyboardOverlap";
 import { cancelAllReminderNotifications } from "../notifications";
 import { isLockEnabled, setLockEnabled, canUseDeviceAuth, authenticate } from "../security/lockerLock";
@@ -60,6 +65,7 @@ export default function ProfileScreen() {
   const { colors, mode, toggleTheme } = useTheme();
   const styles = getStyles(colors);
   const user = auth.currentUser;
+  const { setSelectedState } = useStateFilter();
 
   const [profile, setProfile] = useState(EMPTY_PROFILE);
   const [draft, setDraft] = useState(EMPTY_PROFILE);
@@ -154,8 +160,18 @@ export default function ProfileScreen() {
     if (!user) return;
     setSaving(true);
     try {
-      await saveUserProfile(user.uid, draft);
-      setProfile(draft);
+      // The state must be a real state (pick it from the suggestions).
+      const check = normalizeState(draft.state);
+      if (!check.ok) {
+        Alert.alert("Choose your state", "Please pick your state from the suggestions so we can show the right fees and links.");
+        return;
+      }
+      const toSave = { ...draft, state: check.value };
+      await saveUserProfile(user.uid, toSave);
+      // A new state in the profile also becomes the Services filter. After that the
+      // filter can be changed on the Services page without touching the profile.
+      if (check.value && check.value !== profile.state) await setSelectedState(check.value);
+      setProfile(toSave);
       setEditVisible(false);
     } catch (e) {
       Alert.alert("Couldn't save", e.message);
@@ -283,15 +299,24 @@ export default function ProfileScreen() {
     }
   }
 
-  // Tapping a document now directly shows it -- images open full-screen in
-  // the app; PDFs still go through the share sheet since a real in-app PDF
-  // renderer would need a new native dependency (see chat for why that's
-  // deliberately not added right now).
-  function handleViewDocument(item) {
+  // Tapping a document shows it: images open full-screen inside the app, PDFs
+  // open in the phone's PDF viewer. (Share / save is in the ⋮ menu.)
+  async function handleViewDocument(item) {
     if (item.fileType === "image") {
       setPreviewImage(item);
-    } else {
-      handleShareDocument(item);
+      return;
+    }
+    try {
+      await viewUserPdf(item.storagePath || item.url, item.name);
+    } catch (e) {
+      if (e.code === NO_VIEWER_CODE) {
+        Alert.alert("Can't open PDF", e.message, [
+          { text: "Cancel", style: "cancel" },
+          { text: "Share / Save", onPress: () => handleShareDocument(item) },
+        ]);
+      } else {
+        Alert.alert("Couldn't open", e.message);
+      }
     }
   }
 
@@ -720,7 +745,7 @@ export default function ProfileScreen() {
             />
 
             <Text style={styles.fieldLabel}>State</Text>
-            <TextInput style={styles.input} value={draft.state} onChangeText={(v) => setDraft((p) => ({ ...p, state: v }))} placeholderTextColor={colors.textMuted} />
+            <StatePicker value={draft.state} onChange={(v) => setDraft((p) => ({ ...p, state: v }))} />
 
             <Text style={styles.fieldLabel}>Occupation</Text>
             <TextInput

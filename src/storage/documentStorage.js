@@ -13,8 +13,10 @@
 // (for example between Expo Go versions), and then the phone refuses to read
 // the file. Older entries saved as full addresses are converted automatically.
 
+import { Platform } from "react-native";
 import * as FileSystem from "expo-file-system/legacy";
 import * as Sharing from "expo-sharing";
+import * as IntentLauncher from "expo-intent-launcher";
 
 export const MISSING_FILE_MESSAGE =
   "This file isn't on this phone any more. Documents are kept only on the phone where you added them -- " +
@@ -162,21 +164,9 @@ export async function deleteUserDocumentFile(storagePath) {
   }
 }
 
-/**
- * "Download" a locally-stored document -- since it's already on the device,
- * this opens the native share sheet, which lets the user save it to Files/
- * Photos, print it, send it elsewhere, etc.
- *
- * The file is first copied to the cache folder, named after the document
- * ("My_first_book.jpg") and with the right extension, because the share sheet
- * can always read that location and other apps need the extension to open it.
- */
-export async function openUserDocument(stored, displayName, fileTypeHint) {
-  const available = await Sharing.isAvailableAsync();
-  if (!available) {
-    throw new Error("Sharing isn't available on this device.");
-  }
-
+// Makes a temporary, correctly-named copy of a stored document that other apps
+// (share sheet, PDF viewer) are allowed to read. Returns { cacheUri, folder, extension }.
+async function prepareExternalCopy(stored, displayName, fileTypeHint) {
   const uri = resolveDocumentUri(stored);
   const info = uri ? await FileSystem.getInfoAsync(uri) : { exists: false };
   if (!info.exists) throw new Error(MISSING_FILE_MESSAGE);
@@ -198,16 +188,65 @@ export async function openUserDocument(stored, displayName, fileTypeHint) {
   await FileSystem.makeDirectoryAsync(folder, { intermediates: true }).catch(() => {});
   const cacheUri = `${folder}${shareName}`;
   await FileSystem.copyAsync({ from: uri, to: cacheUri });
+  return { cacheUri, folder, extension };
+}
 
+function cleanUpLater(folder) {
+  // the other app may still be reading the copy, so wait a while
+  setTimeout(() => {
+    FileSystem.deleteAsync(folder, { idempotent: true }).catch(() => {});
+  }, 120000);
+}
+
+/**
+ * Share / save a stored document: opens the phone's share sheet, so it can be
+ * sent to WhatsApp, saved to Files, printed, etc.
+ */
+export async function openUserDocument(stored, displayName, fileTypeHint) {
+  const available = await Sharing.isAvailableAsync();
+  if (!available) {
+    throw new Error("Sharing isn't available on this device.");
+  }
+  const { cacheUri, folder, extension } = await prepareExternalCopy(stored, displayName, fileTypeHint);
   try {
     await Sharing.shareAsync(cacheUri, {
       mimeType: MIME_TYPES[extension],
       dialogTitle: "Share or save document",
     });
   } finally {
-    // tidy up the temporary copy a little later (the share sheet may still be reading it)
-    setTimeout(() => {
-      FileSystem.deleteAsync(folder, { idempotent: true }).catch(() => {});
-    }, 120000);
+    cleanUpLater(folder);
+  }
+}
+
+export const NO_VIEWER_CODE = "NO_PDF_VIEWER";
+
+/**
+ * Open a PDF to READ it, in the phone's own PDF viewer (Google Drive PDF
+ * Viewer, Adobe, the browser, ...). If the phone has no PDF viewer app, it
+ * throws an error with code NO_PDF_VIEWER so the screen can offer to share
+ * the file instead. (iOS has no direct equivalent here, so it uses the
+ * share sheet, which includes a preview.)
+ */
+export async function viewUserPdf(stored, displayName) {
+  if (Platform.OS !== "android") {
+    return openUserDocument(stored, displayName, "pdf");
+  }
+  const { cacheUri, folder } = await prepareExternalCopy(stored, displayName, "pdf");
+  try {
+    const contentUri = await FileSystem.getContentUriAsync(cacheUri);
+    await IntentLauncher.startActivityAsync("android.intent.action.VIEW", {
+      data: contentUri,
+      flags: 1, // FLAG_GRANT_READ_URI_PERMISSION: lets the viewer read this one file
+      type: "application/pdf",
+    });
+  } catch (e) {
+    const error = new Error(
+      "No PDF viewer app was found on this phone. You can install one (for example Google Drive or Adobe Acrobat), or share/save the file instead."
+    );
+    error.code = NO_VIEWER_CODE;
+    error.cause = e;
+    throw error;
+  } finally {
+    cleanUpLater(folder);
   }
 }

@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { View, ActivityIndicator } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { StatusBar } from "expo-status-bar";
+import { SafeAreaProvider } from "react-native-safe-area-context";
 import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "./src/firebase/config";
 import RootNavigator from "./src/navigation/RootNavigator";
@@ -10,6 +11,7 @@ import OnboardingScreen from "./src/screens/OnboardingScreen";
 import { StateFilterProvider } from "./src/context/StateFilterContext";
 import { ThemeProvider, useTheme } from "./src/theme/ThemeContext";
 import ErrorBoundary from "./src/components/ErrorBoundary";
+import ProfileStateSync from "./src/components/ProfileStateSync";
 
 function AppInner() {
   const { colors } = useTheme();
@@ -19,7 +21,7 @@ function AppInner() {
 
   useEffect(() => {
     AsyncStorage.getItem("indiaassist:onboarded:v1")
-      .then((value) => setOnboarded(value === "yes"))
+      .then((value) => setOnboarded((already) => already === true || value === "yes"))
       .catch(() => setOnboarded(true)); // never trap someone on this screen
   }, []);
 
@@ -32,6 +34,12 @@ function AppInner() {
     const unsubscribe = onAuthStateChanged(auth, (u) => {
       setUser(u);
       setInitializing(false);
+      // Someone who is already signed in doesn't need the welcome screens
+      // (and shouldn't get them after signing out).
+      if (u) {
+        setOnboarded(true);
+        AsyncStorage.setItem("indiaassist:onboarded:v1", "yes").catch(() => {});
+      }
     });
     return unsubscribe;
   }, []);
@@ -47,6 +55,7 @@ function AppInner() {
   return (
     <StateFilterProvider>
       <StatusBar style={colors.statusBar} />
+      {user && <ProfileStateSync uid={user.uid} />}
       {user ? (
         <RootNavigator />
       ) : onboarded ? (
@@ -61,9 +70,11 @@ function AppInner() {
 export default function App() {
   return (
     <ErrorBoundary>
-      <ThemeProvider>
-        <AppInner />
-      </ThemeProvider>
+      <SafeAreaProvider>
+        <ThemeProvider>
+          <AppInner />
+        </ThemeProvider>
+      </SafeAreaProvider>
     </ErrorBoundary>
   );
 }

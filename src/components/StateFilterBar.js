@@ -3,7 +3,9 @@ import { View, Text, TextInput, TouchableOpacity, FlatList, Modal, StyleSheet, A
 import { Ionicons } from "@expo/vector-icons";
 import { useStateFilter } from "../context/StateFilterContext";
 import { INDIAN_STATES } from "../data/indianStates";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useTheme } from "../theme/ThemeContext";
+import useKeyboardOverlap from "../hooks/useKeyboardOverlap";
 
 export default function StateFilterBar() {
   const { colors } = useTheme();
@@ -11,6 +13,8 @@ export default function StateFilterBar() {
   const { selectedState, setSelectedState, detecting, detectFromLocation } = useStateFilter();
   const [modalVisible, setModalVisible] = useState(false);
   const [search, setSearch] = useState("");
+  const insets = useSafeAreaInsets();
+  const { ref: kbRef, overlap, onLayout: onKbLayout } = useKeyboardOverlap();
 
   const filteredStates = useMemo(
     () => INDIAN_STATES.filter((s) => s.toLowerCase().includes(search.toLowerCase())),
@@ -43,9 +47,21 @@ export default function StateFilterBar() {
         <Ionicons name="chevron-down" size={14} color={colors.primary} />
       </TouchableOpacity>
 
-      <Modal visible={modalVisible} animationType="slide" transparent onRequestClose={() => setModalVisible(false)}>
-        <View style={styles.modalBackdrop}>
-          <View style={styles.modalCard}>
+      <Modal
+        visible={modalVisible}
+        animationType="slide"
+        transparent
+        statusBarTranslucent
+        navigationBarTranslucent
+        onRequestClose={() => setModalVisible(false)}
+      >
+        <View
+          ref={kbRef}
+          onLayout={onKbLayout}
+          collapsable={false}
+          style={[styles.modalBackdrop, { paddingBottom: overlap }]}
+        >
+          <View style={[styles.modalCard, { paddingBottom: 20 + (overlap > 0 ? 0 : insets.bottom) }]}>
             <View style={styles.modalHeader}>
               <Text style={styles.modalTitle}>Choose your state</Text>
               <TouchableOpacity onPress={() => setModalVisible(false)}>
@@ -74,6 +90,7 @@ export default function StateFilterBar() {
               data={filteredStates}
               keyExtractor={(item) => item}
               style={{ maxHeight: 360 }}
+              keyboardShouldPersistTaps="handled"
               renderItem={({ item }) => (
                 <TouchableOpacity style={styles.stateRow} onPress={() => handlePick(item)}>
                   <Text style={styles.stateRowText}>{item}</Text>
